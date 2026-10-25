@@ -1,0 +1,27 @@
+# Secrets - never commit
+.env
+.env.*
+!.env.example
+
+# Dependencies and build output
+node_modules/
+.next/
+out/
+dist/
+build/
+
+# Logs and OS files
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Editor and tool folders
+.vscode/
+.idea/
+.claude/
+
+# Local-only reference files (not pushed)
+RAG_n8n.json
+docs/*.pdf
+docs/*.png
