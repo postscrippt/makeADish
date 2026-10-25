@@ -30,3 +30,10 @@ docs/*.png
 # Class material kept outside the repo
 docs/*.pdf
 docs/*.png
+
+# Next.js / TypeScript
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+*.pem
+/coverage
