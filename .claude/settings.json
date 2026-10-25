@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | { read -r f; case \"$(basename \"$f\")\" in .env.example) exit 0;; .env|.env.*) echo 'Secrets files are user-managed; edit .env.local yourself.' >&2; exit 2;; esac; }"
+          }
+        ]
+      }
+    ]
+  }
+}

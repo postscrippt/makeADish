@@ -1,0 +1,24 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Status
+Planning / early development. README.md is the product spec; sections marked _(planned)_ are not built. Update README as things land.
+Planned stack: Next.js (TypeScript) on Vercel, Supabase (Postgres + pgvector — the only vector store), Gemini free tier behind one LLM wrapper. Must run at zero cost.
+UX target: a LINE Official Account chat with a rich menu (image-button grid in place of the keyboard): Scan, History, Menus, Ask. Each tile opens a Next.js page (LIFF later) at phone width; the chat stays plain text. The rich menu is configured in LINE, not in code, so build the pages first.
+
+## Hard rules
+- Allergy / spice / category filtering is a hard DB filter; the LLM can never override it. Allergen tags come from a keyword rule map first (`data/allergen-rules`), LLM tagger is only a second check. Recipes with unknown/missing allergen data are excluded.
+- Match % and "Almost there" (≤2 missing items) are computed in plain code from ingredient-id overlap, never by the LLM. Match on canonical ingredient ids only; no unit conversion.
+- Servings only scale displayed quantities; never affect matching.
+- All LLM calls go through the single wrapper in `lib/` (provider set by `LLM_PROVIDER`).
+- Agent retry loop capped at 3 tries.
+- Photos are discarded after scan, never stored. No personal data sent to the LLM provider.
+- `SUPABASE_SERVICE_KEY` is server-only; never import it in client code. Never commit `.env*` (only `.env.example`).
+- UI must run end to end on mock data with no keys (mock mode).
+
+## Team workflow
+- Folder ownership: Person A — `app/`, `components/`. Person B — `lib/`, `data/`, `api/` or `app/api/`. Stay in the area of the branch you're on; ask before crossing.
+- `docs/api-contract.md` is the source of truth for request/response shapes; changes need both people's approval.
+- Branches `a/<feature>` / `b/<feature>`, PRs into `dev`. `main` only gets merges from `dev`.
+- Mobile-first: check layouts at ~375px width.
