@@ -25,3 +25,7 @@ Thumbs.db
 RAG_n8n.json
 docs/*.pdf
 docs/*.png
+
+# Class material kept outside the repo
+docs/*.pdf
+docs/*.png
