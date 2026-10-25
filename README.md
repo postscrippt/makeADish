@@ -85,9 +85,27 @@ Other pages: **History** (cooked dishes, ratings, favorites), **Menus** (browse 
 ## Tech stack _(planned, change if the team decides otherwise)_
 
 - **App and API:** Next.js (TypeScript), mobile-first, styled like a LINE Mini App
-- **Database:** Supabase (Postgres + pgvector) for recipes, embeddings, profiles and history
-- **AI:** one LLM provider behind a single wrapper, so switching is a one-line change (free tier first, small paid credit as demo-day fallback)
+- **Database:** Supabase free tier (Postgres + pgvector) for recipes, embeddings, profiles and history. This is the only vector store; no separate vector service or reranker.
+- **AI:** one LLM provider behind a single wrapper, so switching is a one-line change. Start with the Gemini free API tier (vision, Thai text, embeddings); Groq or OpenRouter free models are fallbacks. A small paid credit is the demo-day fallback.
+- **Hosting:** Vercel free tier
 - **LINE integration:** web app first; LIFF wrapper and rich menu are stretch goals
+
+The whole project should run at zero cost. Free-tier limits change, so check rate limits on Day 1 and cache LLM results where possible.
+
+## Design decisions
+
+**Allergen policy.** Allergy filtering is the one hard safety rule.
+- Allergen tags come first from a keyword rule map (fish sauce, shrimp paste, oyster sauce, peanut and so on). The LLM tagger is a second check, never the only one.
+- A recipe with unknown or missing allergen data is excluded, never shown.
+- Hidden-allergen ingredients common in Thai cooking are listed in `data/allergen-rules` once added.
+
+**Identity.** The demo uses an anonymous ID stored in the browser. The profile and history tables carry a field that can later hold a LINE user ID.
+
+**Ingredient matching.** One canonical ingredient table (id, Thai name, English name, aliases) is the source of truth. The photo scan output and every recipe ingredient are mapped to those ids, so "หมู" and "หมูสับ" match correctly. Matching uses ids only, with no unit conversion. Quantities are stored as display text such as "2 tbsp".
+
+**Servings.** Each recipe stores a base serving count. The UI scales the displayed quantities by a multiplier. Servings never affect match logic.
+
+**Privacy.** Photos are not stored; they are discarded after the scan. No personal data is sent to the LLM provider.
 
 ## Getting started _(planned)_
 
@@ -122,7 +140,7 @@ The UI should run end to end on mock data with no keys, so frontend work never w
 ## Project structure _(planned)_
 
 ```
-docs/            API contract and manual test checklist (to be added)
+docs/            api-contract.md, schema.md (Person B, Day 1) and manual-test-checklist.md (Person A, Day 1). Class PDFs stay out of the repo.
 app/             Pages and routes (Person A)
 components/      UI components (Person A)
 api/ or app/api/ Endpoints: scan, recommend, recipe, history (Person B)
@@ -158,7 +176,7 @@ Rules:
 | 6 | Polish, error states, Thai copy | Test with real photos, fix tags, allergy tests |
 | 7 | Demo script, backup recording, deploy | Seed demo user, rehearse |
 
-If behind: cut Ask chat and LIFF first. Never cut the core path.
+If behind: cut Ask chat (Day 5) and LIFF first. Never cut the core path.
 
 ## Testing
 
@@ -166,7 +184,7 @@ Automated _(planned)_: match % logic, allergy filter, API contract.
 
 Manual checks that need a person (see `docs/manual-test-checklist.md` once added):
 
-- Scan about 10 real photos in varied lighting, including a blurry and a non-food one
+- Scan about 10 real photos in varied lighting, including a blurry and a non-food one. Target: at least 8 of 10 list the main ingredients correctly, and the non-food photo is rejected with a clear message
 - Test on a real phone at about 375px width
 - Confirm no result in either tab contains a saved allergen, across at least 5 allergens
 - Spot-check about 20 LLM-tagged recipes by hand
@@ -184,14 +202,17 @@ Manual checks that need a person (see `docs/manual-test-checklist.md` once added
 
 ## Data and safety notes
 
-- Recipes come from an open dataset, plus Thai dishes we write or check ourselves. Spice and allergen tags are LLM-generated and spot-checked by hand, so they may still contain errors. Do not treat this demo as medical or allergy advice.
+- Recipes come from an open dataset (name and license to be recorded here once chosen), plus Thai dishes we write or check ourselves. Spice and allergen tags are LLM-generated and spot-checked by hand, so they may still contain errors. Do not treat this demo as medical or allergy advice.
 - Do not send personal data to the LLM provider. Free tiers may use inputs to improve their models.
 - Free tier limits can change. Test early and cache where possible.
 
 ## Team
 
-_Add names and roles here._
+| Person | GitHub | Role |
+|---|---|---|
+| Person A | [@Boeingxd](https://github.com/Boeingxd) | App and UX |
+| Person B | [@postscrippt](https://github.com/postscrippt) | AI and Data |
 
 ## License
 
-_Choose a license before making the repo public._
+_Choose a license (MIT is the usual choice) before making the repo public. Check that the recipe dataset license allows redistribution._
