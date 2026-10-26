@@ -1,13 +1,19 @@
 // POST /api/line/webhook: receives events from the LINE Messaging API (docs/api-contract.md, docs/line-chat-flow.md).
 // Server-only. It reads the channel secret and access token, so nothing here may be imported by client code.
+import { after } from "next/server";
 import { createLineClient } from "@/lib/line/client";
 import { handleEvent, type Deps, type LineEvent } from "@/lib/line/handler";
 import { verifySignature } from "@/lib/line/signature";
 import { standInGetProfile, standInScan, standInSearch } from "@/lib/line/standins";
-import { allergens, ingredients } from "@/mocks/data";
+import { buildIndex } from "@/lib/ingredients";
+import { getLlm } from "@/lib/llm";
+import { scanPhoto } from "@/lib/scan";
+import { ingredients } from "@/data/ingredients";
+import { allergenOptions } from "@/data/options";
 import { LIFF_ID } from "@/app/liff";
 
 const APP_URL = process.env.APP_URL ?? "https://ai-menu-five.vercel.app";
+const index = buildIndex(ingredients);
 
 // Buttons in a chat need absolute links. Open pages through LIFF when it is set up, so "send to chat" works there.
 const pageUrl = (path: string) => (LIFF_ID ? `https://liff.line.me/${LIFF_ID}${path}` : `${APP_URL}${path}`);
@@ -32,20 +38,25 @@ export async function POST(request: Request) {
     return error(400, "bad_request", "Body is not JSON");
   }
 
-  // Stand-ins until Task 2: swap these three for the real scan, search and profile lookup.
+  // The real scan runs when an LLM key is set; without one the chat keeps working on the fixed stand-in.
+  // Search and profile are still stand-ins until the database layer lands.
+  const llm = getLlm(process.env);
   const deps: Deps = {
     client: createLineClient(token),
-    scan: standInScan,
+    scan: llm ? (photo) => scanPhoto(photo, { llm, index, entries: ingredients }) : standInScan,
     search: standInSearch,
     getProfile: standInGetProfile,
-    allergens,
-    knownIngredientIds: new Set(ingredients.map((x) => x.id)),
+    allergens: allergenOptions,
+    knownIngredientIds: new Set(ingredients.map((x) => x.slug)),
     url: pageUrl,
   };
 
-  const results = await Promise.allSettled(events.map((e) => handleEvent(e, deps)));
-  for (const r of results) {
-    if (r.status === "rejected") console.error("LINE event failed:", r.reason instanceof Error ? r.reason.message : "unknown error");
-  }
+  // Answer LINE at once and do the work afterwards: a real scan can take many seconds.
+  after(async () => {
+    const results = await Promise.allSettled(events.map((e) => handleEvent(e, deps)));
+    for (const r of results) {
+      if (r.status === "rejected") console.error("LINE event failed:", r.reason instanceof Error ? r.reason.message : "unknown error");
+    }
+  });
   return new Response(null, { status: 200 });
 }
