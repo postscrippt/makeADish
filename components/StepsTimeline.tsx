@@ -95,7 +95,7 @@ export default function StepsTimeline({ steps, onFinish }: { steps: string[]; on
             <li key={i} className="relative">
               <button type="button" onClick={() => go(i)} className="flex min-h-14 w-full items-center gap-3 text-left">
                 <span
-                  className={`z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${isDone ? "bg-brand text-white" : "bg-white text-muted ring-2 ring-edge ring-inset"}`}
+                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${isDone ? "bg-brand text-white" : "bg-white text-muted ring-2 ring-edge ring-inset"}`}
                 >
                   {isDone ? (
                     <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
@@ -115,7 +115,7 @@ export default function StepsTimeline({ steps, onFinish }: { steps: string[]; on
         })}
       </ol>
 
-      <div className="sticky bottom-0 -mx-4 mt-4 rounded-t-3xl bg-white p-4 shadow-card">
+      <div className="sticky bottom-0 z-10 -mx-4 mt-4 rounded-t-3xl bg-white p-4 shadow-card">
         <button type="button" onClick={next} className="btn-primary min-h-14 w-full text-lg">
           {last ? "เสร็จแล้ว ให้คะแนนเมนูนี้" : "ขั้นต่อไป"}
         </button>
