@@ -23,7 +23,7 @@ The TypeScript types live in `types/api.ts`. This page says what each endpoint d
   - Match percentage and "Almost there" (2 or fewer missing items) are computed in code from ingredient ids. The LLM does not compute them.
   - Servings are not part of the API. Recipes keep `base_servings` only for the "สำหรับ N ที่" label.
   - The agent retries at most 3 times.
-- **Photos** are processed in memory and discarded. Never stored or logged.
+- **Photos:** we never store photos. The server discards a photo right after scanning. A photo sent in the LINE chat stays only in the user's own chat history.
 
 ### Errors
 
