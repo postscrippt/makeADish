@@ -36,7 +36,7 @@ export default function HistoryPage() {
       <>
         <PageHeader title="ประวัติ" />
         {failed ? (
-          <p role="alert" className="p-4 text-red-700">โหลดประวัติไม่สำเร็จ กรุณาลองใหม่</p>
+          <p role="alert" className="p-4 text-red-700">โหลดประวัติไม่สำเร็จ ลองใหม่อีกครั้งนะ</p>
         ) : (
           <p role="status" className="p-4 text-sm text-zinc-500">กำลังโหลด…</p>
         )}

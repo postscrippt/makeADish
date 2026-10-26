@@ -30,7 +30,7 @@ About 4 minutes. One presenter drives the phone, the other narrates. Practice it
 
 ## If something breaks
 
-- **Scan fails or is slow:** "Let me skip the photo" → **ข้าม ไปเพิ่มวัตถุดิบเอง**, type the ingredients.
+- **Scan fails or is slow:** "Let me skip the photo" → **ไม่ถ่ายรูป พิมพ์วัตถุดิบเอง**, type the ingredients.
 - **Real endpoints down:** switch to the mock build (`NEXT_PUBLIC_USE_MOCKS=true` deploy) and keep going; the flow is identical.
 - **Network down:** play the backup video.
 

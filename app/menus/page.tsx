@@ -25,7 +25,7 @@ export default function MenusPage() {
       .catch(() => setFailed(true));
   }, []);
 
-  if (failed) return <Shell><p role="alert" className="p-4 text-red-700">โหลดเมนูไม่สำเร็จ กรุณาลองใหม่</p></Shell>;
+  if (failed) return <Shell><p role="alert" className="p-4 text-red-700">โหลดเมนูไม่สำเร็จ ลองใหม่อีกครั้งนะ</p></Shell>;
   if (!data) return <Shell><p role="status" className="p-4 text-sm text-zinc-500">กำลังโหลด…</p></Shell>;
 
   const q = query.trim().toLowerCase();

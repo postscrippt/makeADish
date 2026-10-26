@@ -37,7 +37,7 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
       .catch(() => setFailed(true));
   }, [id, fromSearch]);
 
-  if (failed) return <p role="alert" className="p-4 text-red-700">โหลดสูตรไม่สำเร็จ กรุณาลองใหม่</p>;
+  if (failed) return <p role="alert" className="p-4 text-red-700">โหลดสูตรไม่สำเร็จ ลองใหม่อีกครั้งนะ</p>;
   if (!data) return <p role="status" className="p-4 text-sm text-zinc-500">กำลังโหลด…</p>;
 
   const { recipe, have, allergic } = data;

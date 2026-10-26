@@ -54,7 +54,7 @@ export default function ResultsPage() {
 
         {state.kind === "error" && (
           <div className="flex flex-col items-center gap-4 py-16 text-center">
-            <p role="alert" className="text-red-700">หาเมนูไม่สำเร็จ กรุณาลองใหม่</p>
+            <p role="alert" className="text-red-700">หาเมนูไม่สำเร็จ ลองใหม่อีกครั้งนะ</p>
             <button type="button" onClick={run} className={linkButton}>ลองอีกครั้ง</button>
           </div>
         )}

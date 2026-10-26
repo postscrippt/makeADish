@@ -26,7 +26,7 @@ Tester: ______  Date: ______  Build: mock / real / deployed  Device: ______
 - [ ] Blurry photo shows the blurry message (mock: `/scan?mock=blurry`)
 - [ ] Non-food photo shows the no-food message (mock: `/scan?mock=nofood`)
 - [ ] Failure shows the error message, and "ลองสแกนอีกครั้ง" works (mock: `/scan?mock=error`)
-- [ ] "ข้าม ไปเพิ่มวัตถุดิบเอง" goes to Form
+- [ ] "ไม่ถ่ายรูป พิมพ์วัตถุดิบเอง" goes to Form
 - [ ] The photo is not saved anywhere after the scan (nothing in Network uploads except the scan call)
 
 ## Form
