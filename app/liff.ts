@@ -49,6 +49,12 @@ export async function shareToFriends(messages: ChatMessage[]): Promise<boolean> 
   return !!(await liff.shareTargetPicker(messages));
 }
 
+// LINE's signed ID token, so the server can link this profile to the chat user. Needs the "openid" scope on the LIFF app.
+export async function lineIdToken(): Promise<string | null> {
+  const liff = await getLiff();
+  return liff?.isInClient() ? liff.getIDToken() : null;
+}
+
 export async function closeToChat(): Promise<void> {
   const liff = await getLiff();
   if (liff?.isInClient()) liff.closeWindow();

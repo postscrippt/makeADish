@@ -15,6 +15,7 @@ export default function FormPage() {
   const [catalog, setCatalog] = useState<Ingredient[]>([]);
   const [options, setOptions] = useState<Options | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [syncFailed, setSyncFailed] = useState(false);
   const [tags, setTags] = useState<Ingredient[]>([]);
   const [query, setQuery] = useState("");
   const [adding, setAdding] = useState(false);
@@ -51,7 +52,8 @@ export default function FormPage() {
     const next = { ...profile!, allergies, spice };
     setProfile(next);
     setSheetOpen(false);
-    await saveProfile(next);
+    setSyncFailed(false);
+    await saveProfile(next).catch(() => setSyncFailed(true));
   }
 
   function submit() {
@@ -166,6 +168,11 @@ export default function FormPage() {
             {allergyNames.length > 0 ? "แก้ไข" : "ตั้งค่า"}
           </button>
         </section>
+        {syncFailed && (
+          <p role="alert" className="-mt-3 px-1 text-sm text-red-700">
+            บันทึกไปที่แชทไม่สำเร็จ แชทอาจยังไม่รู้ว่าคุณแพ้อะไร กด{allergyNames.length > 0 ? "แก้ไข" : "ตั้งค่า"}แล้วบันทึกอีกครั้ง
+          </p>
+        )}
       </main>
 
       <div className="sticky bottom-0 rounded-t-3xl bg-white p-4 shadow-card">
