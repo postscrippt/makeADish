@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "design/rich-menu/rich-menu.html"
+        ],
+        "createdAt": "2026-10-26T07:07:06.926Z",
+        "reason": "Claude: fixed 2500x843 render canvas; rendered labels sit centered with >=44px side inset (checked in rich-menu.png), tiles are tap areas not padded containers"
+      }
+    ]
+  }
+}
