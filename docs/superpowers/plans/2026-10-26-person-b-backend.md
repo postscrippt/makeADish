@@ -2,6 +2,8 @@
 
 > For Person B (and any agent helping). Agreed with Person A on 2026-10-26. Tasks are ordered; each ends in its own PR into `dev`.
 
+> **Priority (Person A, 2026-10-26): the LINE chat is the main thing of this project. Do Task 3 (the webhook) first.** Build it on fixed or mock scan and search results so the chat flow (Scan tile → camera → confirm card → results carousel → recipe page) works in real LINE as soon as the account is set up. Then do Tasks 1–2 and swap the real scan and search into the webhook. Note: `mocks/api.ts` is browser-only (it uses localStorage and `location`), so the webhook needs its own server-side stand-in. The match logic in `searchRecipes` there is the reference.
+
 **Goal:** replace the mock data with real Supabase and Gemini endpoints, and make the LINE chat work (camera → confirm card → results carousel), without changing what the pages see.
 
 **Start here:** merge Person A's open PRs into `dev` first, in this order: #42 (`a/ux-flow`), then #43 (`a/line-liff`). Then branch from `dev` (`b/<task>`).
