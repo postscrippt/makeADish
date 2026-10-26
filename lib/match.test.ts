@@ -58,4 +58,12 @@ test("spice level means up to this level; category null means any", () => {
 test("no ingredients entered gives nothing, not a crash", () => {
   const r = rankRecipes(catalog, { ...base, ingredientIds: [] });
   assert.equal(r.matches.length, 0);
+  assert.equal(r.almostThere.length, 0, "a dish with 2 ingredients must not show as almost-there at 0%");
+});
+
+test("a dish you hold none of is never suggested, however few ingredients it has", () => {
+  const tiny = [{ ...catalog[0], ingredients: [{ id: "x", th: "x", qty: "1" }, { id: "y", th: "y", qty: "1" }], allergens: [] }];
+  const r = rankRecipes(tiny, { ...base, ingredientIds: ["z"] });
+  assert.deepEqual([r.matches, r.almostThere], [[], []]);
+  assert.equal(rankRecipes(tiny, { ...base, ingredientIds: ["x"] }).almostThere.length, 1);
 });
