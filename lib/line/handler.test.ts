@@ -5,11 +5,11 @@ import { standInScan, standInSearch } from "./standins.ts";
 import { allergens, ingredients } from "../../mocks/data.ts";
 import { recipes } from "../../mocks/recipes.ts";
 import type { LineMessage } from "./client.ts";
-import type { ScanResult, SearchRequest } from "../../types/api.ts";
+import type { ScanResult, SearchRequest, SpiceLevel } from "../../types/api.ts";
 
 type Calls = { replies: { token: string; messages: LineMessage[] }[]; loading: string[]; content: string[]; searches: SearchRequest[] };
 
-function setup(over: Partial<Deps> = {}, profile = { allergies: [] as string[], spice: 1 as const }) {
+function setup(over: Partial<Deps> = {}, profile: { allergies: string[]; spice: SpiceLevel } = { allergies: [], spice: 1 }) {
   const calls: Calls = { replies: [], loading: [], content: [], searches: [] };
   const deps: Deps = {
     client: {
