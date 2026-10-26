@@ -11,7 +11,7 @@ import { cookPath, recipeCard } from "@/app/recipe/recipeCard";
 import { canSendToChat, canShare, closeToChat, inLineApp, liffUrl, sendToChat, shareToFriends } from "@/app/liff";
 
 type Rating = HistoryEntry["rating"];
-type Loaded = { recipe: Recipe | null; have: Set<string> | null; allergic: string[]; allergies: string[] };
+type Loaded = { recipe: Recipe | null; have: Set<string> | null; staples: Set<string>; allergic: string[]; allergies: string[] };
 
 export default function RecipeView({
   id, fromSearch, missingIds, haveIds, cook,
@@ -22,6 +22,7 @@ export default function RecipeView({
   const [rating, setRating] = useState<Rating | null>(null);
   const [cooking, setCooking] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveFailed, setSaveFailed] = useState(false);
   const ratingRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -43,7 +44,7 @@ export default function RecipeView({
           .filter((a) => profile.allergies.includes(a.id) && recipe?.allergens?.includes(a.id))
           .map((a) => a.th);
         setFav(favorites.some((f) => f.id === id));
-        setData({ recipe, have, allergic, allergies: profile.allergies });
+        setData({ recipe, have, staples: new Set(options.staples), allergic, allergies: profile.allergies });
       })
       .catch(() => setFailed(true));
   }, [id, fromSearch, haveKey]);
@@ -52,7 +53,7 @@ export default function RecipeView({
   if (failed) return <p role="alert" className="p-4 text-red-700">โหลดสูตรไม่สำเร็จ ลองใหม่อีกครั้งนะ</p>;
   if (!data) return <p role="status" className="p-4 text-sm text-muted">กำลังโหลด…</p>;
 
-  const { recipe, have, allergic, allergies } = data;
+  const { recipe, have, staples, allergic, allergies } = data;
   if (!recipe) {
     return (
       <div className="flex flex-col items-center gap-4 p-4 py-16 text-center">
@@ -62,18 +63,24 @@ export default function RecipeView({
     );
   }
 
-  // Ids from the link only count if they are in this recipe.
-  const missing = have ? recipe.ingredients.filter((x) => !have.has(x.id)) : recipe.ingredients.filter((x) => missingIds.includes(x.id));
+  // Ids from the link only count if they are in this recipe. Staples (salt, fish sauce…) are assumed in every kitchen.
+  const missing = (have ? recipe.ingredients.filter((x) => !have.has(x.id)) : recipe.ingredients.filter((x) => missingIds.includes(x.id)))
+    .filter((x) => !staples.has(x.id));
 
   function toggleFavorite() {
     setFav(!favorite);
-    setFavorite({ id: recipe!.id, th: recipe!.th }, !favorite);
+    setFavorite({ id: recipe!.id, th: recipe!.th }, !favorite).catch(() => setFav(favorite));
   }
 
   async function save() {
     if (!rating) return;
-    await logCooked({ recipeId: recipe!.id, th: recipe!.th, rating, cookedAt: new Date().toISOString() });
-    setSaved(true);
+    setSaveFailed(false);
+    try {
+      await logCooked({ recipeId: recipe!.id, th: recipe!.th, rating, cookedAt: new Date().toISOString() });
+      setSaved(true);
+    } catch {
+      setSaveFailed(true);
+    }
   }
 
   return (
@@ -175,6 +182,7 @@ export default function RecipeView({
             >
               บันทึก
             </button>
+            {saveFailed && <p role="alert" className="text-sm text-red-700">บันทึกไม่สำเร็จ ลองกดบันทึกอีกครั้ง</p>}
           </div>
         )}
       </section>
