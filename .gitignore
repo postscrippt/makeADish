@@ -19,7 +19,8 @@ Thumbs.db
 # Editor and tool folders
 .vscode/
 .idea/
-.claude/
+.claude/settings.local.json
+CLAUDE.local.md
 
 # Local-only reference files (not pushed)
 RAG_n8n.json
@@ -29,3 +30,10 @@ docs/*.png
 # Class material kept outside the repo
 docs/*.pdf
 docs/*.png
+
+# Next.js / TypeScript
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+*.pem
+/coverage

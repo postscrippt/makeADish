@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-line: #06c755;
+  --font-sans: var(--font-thai), system-ui, sans-serif;
+}
