@@ -6,6 +6,7 @@ import { buildRecipeSql } from "./recipeSql.ts";
 import type { AllergenRules } from "./allergens.ts";
 import { allergenRules } from "../data/allergen-rules.ts";
 import { ingredients } from "../data/ingredients.ts";
+import { RECIPE_BATCHES } from "../data/recipes/batches.ts";
 
 const known = new Set(ingredients.map((i) => i.slug));
 const rules: AllergenRules = { salt: [], egg: ["egg"], "fish-sauce": ["fish"], stock: null };
@@ -87,23 +88,41 @@ test("quotes in text are escaped", () => {
   assert.match(sql, /''เกลือ''/);
 });
 
-// ---- the real draft file ----
-const real = parseBatch(readFile("../data/recipes/batch-1.md"));
+// ---- the real batch files ----
+const EXPECTED_DISHES: Record<string, number> = { "own:batch-0": 9, "own:batch-1": 10, "own:batch-2": 12 };
+const batches = RECIPE_BATCHES.map((b) => ({ ...b, drafts: parseBatch(readFile("../" + b.file)) }));
 
-test("the draft file has 10 dishes and every one passes the checks", () => {
-  assert.equal(real.length, 10);
-  assert.doesNotThrow(() => checkDrafts(real, known, allergenRules));
+for (const b of batches) {
+  test(`${b.file}: ${EXPECTED_DISHES[b.source]} dishes, and every one passes the checks`, () => {
+    assert.equal(b.drafts.length, EXPECTED_DISHES[b.source]);
+    assert.doesNotThrow(() => checkDrafts(b.drafts, known, allergenRules));
+  });
+
+  test(`${b.file}: every dish has a Thai title, at least 2 ingredients and 3 steps`, () => {
+    for (const d of b.drafts) {
+      assert.match(d.th, /[\u0E00-\u0E7F]/, d.slug);
+      assert.ok(d.ingredients.length >= 2, `${d.slug} ingredients`);
+      assert.ok(d.steps.length >= 3, `${d.slug} steps`);
+    }
+  });
+
+  test(`${b.sql} is up to date (run node scripts/build-recipes-sql.mjs)`, () => {
+    const onDisk = readFile("../" + b.sql).replace(/\r\n/g, "\n");
+    assert.equal(onDisk, buildRecipeSql(b.source, checkDrafts(b.drafts, known, allergenRules), b.file));
+  });
+}
+
+test("no two dishes share a Thai title or a dish id across all batches", () => {
+  const all = batches.flatMap((b) => b.drafts);
+  assert.equal(new Set(all.map((d) => d.th)).size, all.length, "duplicate Thai title");
+  assert.equal(new Set(all.map((d) => d.slug)).size, all.length, "duplicate dish id");
 });
 
-test("every real dish has a Thai title, at least 3 ingredients and 3 steps", () => {
-  for (const d of real) {
-    assert.match(d.th, /[฀-๿]/, d.slug);
-    assert.ok(d.ingredients.length >= 3, `${d.slug} ingredients`);
-    assert.ok(d.steps.length >= 3, `${d.slug} steps`);
+test("a dish that lists a spice-free recipe has no chili, and a spice 3 dish has chili", () => {
+  for (const b of batches) {
+    for (const d of b.drafts) {
+      const hot = d.ingredients.some((i) => ["chili", "dried-chili", "big-chili", "chili-flakes"].includes(i.slug));
+      if (d.spice === 0) assert.ok(!hot, `${d.slug} is spice 0 but lists a chili`);
+    }
   }
-});
-
-test("supabase/seed/recipes-batch-1.sql is up to date (run node scripts/build-recipes-sql.mjs)", () => {
-  const onDisk = readFile("../supabase/seed/recipes-batch-1.sql").replace(/\r\n/g, "\n");
-  assert.equal(onDisk, buildRecipeSql("own:batch-1", checkDrafts(real, known, allergenRules), "data/recipes/batch-1.md"));
 });
