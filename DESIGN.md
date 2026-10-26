@@ -54,7 +54,10 @@ Font: **Prompt** (Thai + Latin, `next/font/google`, weights 400/500/600/700). It
 - **`Chip`**: unselected is white with an `edge` border and `muted` text. Selected is `butter` with `ink` text. Danger chips (allergies) turn red when selected.
 - **Tabs** (Results, History): a white pill track with `shadow-card`; the active tab is a `butter` pill.
 - **`RecipeCard`**: white card, `butter` match % pill, amber "ขาดอีก" line.
-- **`Stepper`**: round white buttons with a `brand` ring.
+- **`StepsTimeline`** (วิธีทำ): a 3px `edge` line through 48px circles. Done = `brand` circle with a white check; upcoming = white circle with an `edge` ring; the current step is a white `rounded-3xl` card with a `butter-soft` art area (72px `StepIcon`), the verb at 26px bold, the detail in `muted`, and pills. Heat pill: `mist`, three stroked flames (lit ones full, the rest at 25% opacity) plus ไฟอ่อน/กลาง/แรง. Time pill: `butter`, "⏱ N นาที · เริ่ม" → countdown. One sticky bottom button, min 56px.
+- **`StepIcon`**: one stroked icon per action kind (whisk, pan, pot, steam, knife, mortar, add, season, plate, generic).
+- **`PrefsSheet`**: bottom sheet (`rounded-t-3xl bg-white`) over a `bg-ink/40` backdrop. Escape or a backdrop tap closes it.
+- **Preferences line** (check screen): one white card; allergies in `red-700` semibold so the safety filter is always visible.
 - **Icons**: 24px stroked line icons (stroke 2, round caps) inside a `butter` circle. Same set in `app/page.tsx` and the rich menu.
 - **Logo**: `public/logo.svg` (white MDi mark, transparent background). Use it on teal only. Favicon: `app/icon.svg`.
 
@@ -66,4 +69,4 @@ Font: **Prompt** (Thai + Latin, `next/font/google`, weights 400/500/600/700). It
 - Don't add new colors. If something needs one, add a token here first.
 
 ## LINE rich menu
-`design/rich-menu/rich-menu.html` uses the same palette and icons: Scan on `butter` at left, three rows on `brand` with butter icon circles. Re-render it with the command in its README after any change.
+`design/rich-menu/rich-menu.html` uses the same palette and icons: Scan on `butter` at left, two rows (History, Menus) on `brand` with butter icon circles. Re-render it with the command in its README after any change.

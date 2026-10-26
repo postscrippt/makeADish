@@ -12,7 +12,7 @@ The product spec is summarized below. Market sizing and competitor material is k
 
 ## Product spec
 
-**Idea.** A cooking helper inside LINE. The main chat is a hub with a rich menu (Scan, History, Menus, Ask) plus a cooking assistant you can chat with. Tap Scan and a LINE Mini App opens. Take a photo of your ingredients, and the app lists what it sees so you can add or remove items. Then set spice level, food type and allergies. It shows recipes you can make now, and a second tab with recipes that are almost a match and need one or two more items. Pick one to see the steps, then mark it as cooked so it is saved in History.
+**Idea.** A cooking helper inside LINE. The main chat is a hub with a rich menu (Scan, History, Menus); replying to plain chat messages with the cooking assistant comes later. Tap Scan and a LINE Mini App opens. Take a photo of your ingredients, and the app asks one question: is this what you have? Fix the list, check your saved allergies and spice level, and tap find. It shows recipes you can make now, and a second tab with recipes that are almost a match and need one or two more items, with food-type filters. A recipe suggests allergy-safe swaps for anything missing, and walks you through the steps on a big, glanceable timeline. Finishing the last step asks for a rating and saves it to History.
 
 **Why a hub and a Mini App.** The chat stays clean, with no Flex cards or long menus. The photo, tag editing and sliders need a real screen, which a chat bubble cannot give. The chat is only for conversation.
 
@@ -21,7 +21,7 @@ The product spec is summarized below. Market sizing and competitor material is k
 **Inputs**
 - Photo of ingredients
 - Edited ingredient tags
-- Spice level, category, allergies and servings
+- Spice level and allergies (saved once); food type as a filter on Results
 - Free-text questions in the chat
 - Cook ratings
 
@@ -45,12 +45,11 @@ The product spec is summarized below. Market sizing and competitor material is k
 | Page | What it does |
 |---|---|
 | Scan | User takes or uploads a photo. Vision LLM returns an ingredient list. |
-| Form | Ingredient tags (+/-), spice level, category, allergies, servings. Pre-filled from the saved profile. |
-| Results | Agent: plan, search, filter, check, retry. Tab 1 "Matches" uses your ingredients. Tab 2 "Almost there" needs 1-2 more items (listed). |
-| Recipe | Steps, missing items, "I cooked this" and rating, which writes to History. |
+| Check (`/form`) | "ถูกต้องไหม?": ingredient chips (+/-) and one preferences line (allergies in red, spice) that opens a bottom sheet. Pre-filled from the saved profile. |
+| Results | Agent: plan, search, filter, check, retry. Tab 1 "Matches" uses your ingredients. Tab 2 "Almost there" needs 1-2 more items (listed). Food-type pills filter both tabs. |
+| Recipe | Missing items with allergy-safe swaps, ingredients, and วิธีทำ as a glanceable step timeline (icon, heat, timer, screen kept on). The last step opens the rating, which writes to History. |
 | History | Cooked dishes, ratings, favorites. |
 | Menus | Browse and search the full catalog. |
-| Ask (the chat) | Cooking assistant. Same agent, answers from the recipe DB and your history. |
 
 **Agent tools:** recipe vector DB (RAG), filter (spice / category / allergy), and user history (skip recent, boost liked).
 
@@ -63,12 +62,12 @@ The product spec is summarized below. Market sizing and competitor material is k
 ## The demo flow
 
 ```
-Scan photo -> ingredient tags (+/-) -> form (spice, category, allergies, servings)
+Scan photo -> check screen (fix ingredients; allergies and spice saved in the profile)
            -> results: [Matches] [Almost there] -> recipe steps
            -> "I cooked this" + rating -> History -> better suggestions next time
 ```
 
-Other pages: **History** (cooked dishes, ratings, favorites), **Menus** (browse and search the catalog), **Ask** (chat with the same agent).
+Other pages: **History** (cooked dishes, ratings, favorites), **Menus** (browse and search the catalog). The Ask chat page was cut: help now shows up as allergy-safe swaps on recipes, and chat replies in LINE come later.
 
 Presenter script: [docs/demo-script.md](docs/demo-script.md). How the UI fits together: [docs/how-the-app-works.md](docs/how-the-app-works.md). Colors, type and components: [DESIGN.md](DESIGN.md).
 
@@ -132,7 +131,7 @@ Rules for the LLM wrapper:
 
 **Ingredient matching.** One canonical ingredient table (id, Thai name, English name, aliases) is the source of truth. The photo scan output and every recipe ingredient are mapped to those ids, so "หมู" and "หมูสับ" match correctly. Matching uses ids only, with no unit conversion. Quantities are stored as display text such as "2 tbsp".
 
-**Servings.** Each recipe stores a base serving count. The UI scales the displayed quantities by a multiplier. Servings never affect match logic.
+**Servings.** Removed from the UI: recipes show their own amounts with "สำหรับ N ที่". `servings` stays in `types/api.ts` until Person B agrees to drop it.
 
 **Privacy.** Photos are not stored; they are discarded after the scan. No personal data is sent to the LLM provider.
 
@@ -208,15 +207,15 @@ Rules:
 | 2 | Scan and Form pages (mock data) | Clean and tag recipes, add Thai dishes, embed and load |
 | 3 | Results (two tabs) and Recipe pages | Vision endpoint, search endpoint with filters |
 | 4 | Connect pages to real endpoints | Agent loop, match %, Almost there. **Integration checkpoint** |
-| 5 | History and Menus, "I cooked this" and rating | Personalization, Ask chat |
+| 5 | History and Menus, "I cooked this" and rating | Personalization, swap suggestions (substitutes data) |
 | 6 | Polish, error states, Thai copy | Test with real photos, fix tags, allergy tests |
 | 7 | Demo script, backup recording, deploy | Seed demo user, rehearse |
 
-If behind: cut Ask chat (Day 5) and LIFF first. Never cut the core path.
+If behind: cut LIFF and chat replies in LINE first (the Ask page is already cut). Never cut the core path.
 
 ## Testing
 
-Automated: `npm test` (servings scaling today). Planned: match % logic, allergy filter, API contract.
+Automated: `npm test` (step parsing and the swap allergy filter today). Planned: match % logic, allergy filter, API contract.
 
 Manual checks that need a person (full checklist: [docs/manual-test-checklist.md](docs/manual-test-checklist.md)):
 

@@ -12,10 +12,10 @@ Tester: ______  Date: ______  Build: mock / real / deployed  Device: ______
 
 ## New user (clear site data first)
 
-- [ ] Home shows the 4 tiles: สแกนวัตถุดิบ, ประวัติ, เมนูทั้งหมด, ถามผู้ช่วย
+- [ ] Home shows the 3 tiles: สแกนวัตถุดิบ, ประวัติ, เมนูทั้งหมด
 - [ ] History shows the empty message and a button to start scanning
 - [ ] Results opened directly says no ingredients were chosen and links to Scan
-- [ ] Form starts with no allergies, เผ็ดน้อย, 2 ที่
+- [ ] The check screen (`/form`) shows "ยังไม่ได้ระบุอาหารที่แพ้ · เผ็ดน้อย" and "ตั้งค่า"
 
 ## Scan
 
@@ -29,14 +29,16 @@ Tester: ______  Date: ______  Build: mock / real / deployed  Device: ______
 - [ ] "หรือ พิมพ์วัตถุดิบเอง" goes to Form
 - [ ] The photo is not saved anywhere after the scan (nothing in Network uploads except the scan call)
 
-## Form
+## Check screen (`/form`)
 
-- [ ] Scanned ingredients appear as tags
-- [ ] × removes a tag
+- [ ] Header says "เจอวัตถุดิบ N อย่าง"; scanned ingredients appear as big chips
+- [ ] × removes a chip; "+ เพิ่ม" opens the search box
+- [ ] With nothing scanned: header "เพิ่มวัตถุดิบ", search box already open and focused
 - [ ] Typing Thai (ไก่), English (chicken) or an alias (หมูสับ) finds the ingredient; tapping adds it
 - [ ] Typing something unknown shows "ไม่พบวัตถุดิบนี้"
 - [ ] "หาเมนู" is disabled with no ingredients
-- [ ] Allergies, spice and servings are remembered on the next visit
+- [ ] "ตั้งค่า"/"แก้ไข" opens the sheet; Escape or tapping outside closes it; focus returns to the button
+- [ ] Saved allergies show in red on the line ("แพ้: …") and are remembered on the next visit
 
 ## Results
 
@@ -45,17 +47,24 @@ Tester: ______  Date: ______  Build: mock / real / deployed  Device: ______
 - [ ] Match % looks right for 3 recipes checked by hand
 - [ ] **Allergy safety:** for at least 5 different allergens, no recipe in either tab contains the saved allergen
 - [ ] No recipe is shown whose allergen data is unknown (mock: หมูทอดกระเทียม never appears)
-- [ ] Spicier-than-chosen and other-category recipes are not shown
-- [ ] Nothing found shows the empty message and "แก้เงื่อนไข" (mock: `/results?mock=empty`)
+- [ ] Spicier-than-chosen recipes are not shown
+- [ ] Food-type pills (ทั้งหมด · ผัด · ต้ม …) filter both tabs and update the counts
+- [ ] A pill with nothing in the current tab shows "ไม่มีเมนู…ในแท็บนี้" and "ดูทั้งหมด" restores the list
+- [ ] Nothing found shows the empty message and "แก้วัตถุดิบ" (mock: `/results?mock=empty`)
 - [ ] Failure shows the error and "ลองอีกครั้ง" works (mock: `/results?mock=error`)
 
 ## Recipe
 
-- [ ] Changing servings changes amounts (1/2 → 1 when doubling) but never the match
-- [ ] Missing ingredients are tagged ขาด and listed in "ต้องซื้อเพิ่ม"
+- [ ] Missing ingredients are tagged ขาด and listed in "ต้องซื้อเพิ่ม"; ingredients show "สำหรับ N ที่" and no servings control
+- [ ] "ใช้อะไรแทนได้?" on ซอสหอยนางรม shows ซีอิ๊วดำ + น้ำตาล; with a soy allergy it shows "ไม่มีตัวแทนที่ปลอดภัยสำหรับคุณ"
+- [ ] Error state: `/recipe/pad-kra-pao-moo?from=results&mock=error` → "ใช้อะไรแทนได้?" shows "โหลดไม่สำเร็จ" and retry
 - [ ] Opening from Menus (no search) shows no ขาด tags
 - [ ] ♡ / ♥ favorite toggles and is remembered
-- [ ] "ทำเมนูนี้แล้ว" → stars → "บันทึก" saves; the dish appears in History right away
+- [ ] วิธีทำ: the current step is a big card (icon, verb, detail); "ขั้นต่อไป" checks it off and opens the next; tapping any step jumps to it
+- [ ] ไข่ตุ๋น step 3 shows ไฟกลาง flames and "⏱ 15 นาที · เริ่ม"; the timer counts down, pauses on tap, and resets when you switch step
+- [ ] Last step's "เสร็จแล้ว ให้คะแนนเมนูนี้" → stars → "บันทึก" saves; the dish appears in History right away
+- [ ] Screen stays on during steps (real phone)
+- [ ] Timer vibrates at zero (Android)
 - [ ] A bad recipe link shows "ไม่พบสูตรอาหารนี้"
 
 ## History
@@ -69,13 +78,6 @@ Tester: ______  Date: ______  Build: mock / real / deployed  Device: ______
 - [ ] All recipes listed; search works in Thai (ไข่) and English (omelette)
 - [ ] Category chips filter the list
 - [ ] Dishes with a saved allergen are hidden, with a note saying which allergy
-
-## Ask
-
-- [ ] Starter questions send and get an answer with recipe links
-- [ ] "กำลังพิมพ์…" shows while waiting
-- [ ] A question about a dish you are allergic to says so instead of suggesting it
-- [ ] Failure shows "ตอบไม่สำเร็จ" and "ลองอีกครั้ง" works (mock: `/ask?mock=error`)
 
 ## Slow and offline
 

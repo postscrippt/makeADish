@@ -25,7 +25,7 @@
         "x": 1250,
         "y": 0,
         "width": 1250,
-        "height": 281
+        "height": 421
       },
       "action": {
         "type": "uri",
@@ -36,27 +36,14 @@
     {
       "bounds": {
         "x": 1250,
-        "y": 281,
+        "y": 421,
         "width": 1250,
-        "height": 281
+        "height": 422
       },
       "action": {
         "type": "uri",
         "label": "เมนูทั้งหมด",
         "uri": "https://ai-menu-five.vercel.app/menus"
-      }
-    },
-    {
-      "bounds": {
-        "x": 1250,
-        "y": 562,
-        "width": 1250,
-        "height": 281
-      },
-      "action": {
-        "type": "uri",
-        "label": "ถามผู้ช่วย",
-        "uri": "https://ai-menu-five.vercel.app/ask"
       }
     }
   ]

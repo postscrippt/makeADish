@@ -6,6 +6,8 @@ import type {
 } from "@/types/api";
 import { allergens, categories, ingredients } from "./data";
 import { recipes } from "./recipes";
+import { substitutes } from "./substitutes";
+import { safeSwaps, type SwapResult } from "@/app/recipe/swaps";
 
 const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS !== "false";
 const PROFILE_KEY = "aimenu.profile";
@@ -119,6 +121,15 @@ export async function setFavorite(recipe: Favorite, favorite: boolean): Promise<
   localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorite ? [recipe, ...rest] : rest));
 }
 
+// Swaps for one missing ingredient, with the user's allergies filtered out in code (never by the LLM).
+export async function getSubstitutes(ingredientId: string, allergies: string[]): Promise<SwapResult> {
+  if (!USE_MOCKS) notWired();
+  await wait(400);
+  if (devSwitch() === "error") throw new Error("mock substitutes error");
+  return safeSwaps(substitutes[ingredientId], allergies);
+}
+
+// Unused by the UI since the Ask page was removed; kept as reference for Person B.
 // shortcut: keyword lookup stands in for the agent; the real one answers from the recipe DB and history.
 export async function ask(history: ChatMessage[]): Promise<ChatMessage> {
   if (!USE_MOCKS) notWired();
