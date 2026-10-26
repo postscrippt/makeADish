@@ -4,10 +4,7 @@
 import type { ChatMessage } from "../liff.ts";
 import type { Recipe } from "../../types/api.ts";
 import { parseStep } from "./steps.ts";
-
-const C = { brand: "#09809d", brandDeep: "#066a82", ink: "#0b3a47", muted: "#4f6e78", amber: "#b45309", white: "#ffffff" };
-
-const text = (t: string, extra: Record<string, unknown> = {}) => ({ type: "text", text: t, wrap: true, color: C.ink, size: "sm", ...extra });
+import { C, text } from "../line/flex.ts";
 
 export function recipeCard(recipe: Recipe, missingIds: string[], startUrl: string): ChatMessage {
   const missing = new Set(missingIds);

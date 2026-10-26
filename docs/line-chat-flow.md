@@ -74,9 +74,23 @@ A webhook route under `app/api/` (server-only; channel secret and access token i
 5. **Use replies only.** Replies don't count toward the monthly quota; push messages do. The reply token is single-use, so send exactly one reply per event.
 6. **Ingredients the user confirmed** must reach the pages. Pass them in the link (ingredient ids only, never allergies) or store them under the LINE user id.
 
-Person A designs the confirm card and the results carousel JSON (same palette as `app/recipe/recipeCard.ts`) and hands them over.
+**The messages are ready in `app/line/cards.ts`** (Person A's design, unit-tested). Call them and send the result as the reply:
+- `scanPrompt(formUrl)` (step 2): text plus quick replies [ถ่ายรูป] (camera), [เลือกจากคลังภาพ] (camera roll), [พิมพ์เอง] → `/form`.
+- `confirmCard(ingredients, { allergyNames, spiceLabel }, editUrl, confirmData)` (step 4):
+  - a teal header "เจอวัตถุดิบ N อย่าง / ถูกต้องไหม?"
+  - ingredients one per line in two columns
+  - allergies in red, or "ยังไม่ได้ระบุอาหารที่แพ้"
+  - [ถูกต้อง หาเมนู] as a postback with your `confirmData`, and [แก้ไข] as a link
+- `resultsCarousel(result, recipeUrl, allUrl, editUrl)` (step 5):
+  - up to 10 dish cards, ทำได้เลย first, each with a match % pill and "ขาด: …" for almost-there dishes
+  - a last card [ดูทั้งหมด] linking to the results page
+  - when nothing matches, one card with [แก้วัตถุดิบ]
+  - pass in the **already hard-filtered** search result; the function only lays it out
+
+To preview one, print its `contents` as JSON and paste it into LINE's Flex Message Simulator.
 
 ## Built now (Person A, no server)
+- **`app/line/cards.ts`** + `app/line/flex.ts`: the chat messages for steps 2, 4 and 5 (above), and shared Flex building blocks in the DESIGN.md palette.
 - **`app/liff.ts`:**
   - loads the LIFF SDK only when `NEXT_PUBLIC_LIFF_ID` is set, and does nothing outside LINE
   - `canSendToChat`, `sendToChat`, `canShare`, `shareToFriends`, `closeToChat`, `liffUrl`
