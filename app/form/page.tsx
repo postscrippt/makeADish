@@ -6,6 +6,7 @@ import PageHeader from "@/components/PageHeader";
 import PrefsSheet, { spiceLabels } from "@/components/PrefsSheet";
 import { getIngredients, getOptions, getProfile, saveProfile } from "@/mocks/api";
 import { readDraft, writeDraft } from "@/app/draft";
+import { idsFromLink } from "@/app/linkIds";
 import type { Ingredient, Options, Profile, SpiceLevel } from "@/types/api";
 
 // The check screen: one question ("is this what you have?"). Preferences are a saved one-liner; food type lives on Results.
@@ -23,7 +24,9 @@ export default function FormPage() {
   // Load the catalog and pre-fill from the scan and the saved profile (browser-only data).
   useEffect(() => {
     Promise.all([getIngredients(), getOptions(), getProfile()]).then(([list, opts, prof]) => {
-      const scanned = readDraft("ingredients") ?? [];
+      // From the LINE chat ([แก้ไข] → /form?ids=a,b) the link wins over an older draft in this tab.
+      const fromLink = idsFromLink(new URLSearchParams(location.search).get("ids"), list);
+      const scanned = fromLink.length > 0 ? fromLink : (readDraft("ingredients") ?? []);
       setCatalog(list);
       setOptions(opts);
       setProfile(prof);

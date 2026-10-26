@@ -5,21 +5,36 @@ import Link from "next/link";
 import PageHeader from "@/components/PageHeader";
 import RecipeCard from "@/components/RecipeCard";
 import Chip from "@/components/Chip";
-import { getOptions, searchRecipes } from "@/mocks/api";
-import { readDraft } from "@/app/draft";
-import type { Option, SearchResult } from "@/types/api";
+import { getIngredients, getOptions, getProfile, searchRecipes } from "@/mocks/api";
+import { readDraft, writeDraft } from "@/app/draft";
+import { idsFromLink } from "@/app/linkIds";
+import type { Option, SearchRequest, SearchResult } from "@/types/api";
 
 type Tab = "matches" | "almostThere";
 type State = { kind: "loading" } | { kind: "noSearch" } | { kind: "error" } | { kind: "done"; result: SearchResult; categories: Option[] };
 
 const linkButton = "btn-primary";
 
+// Opened from the LINE chat ([ดูทั้งหมด] → /results?ids=a,b): search those ingredients with the saved profile.
+// Also stores the draft so recipe links (?from=results) and the check screen see the same ingredients.
+async function searchFromLink(): Promise<SearchRequest | null> {
+  const param = new URLSearchParams(location.search).get("ids");
+  if (param === null) return null;
+  const [list, profile] = await Promise.all([getIngredients(), getProfile()]);
+  const tags = idsFromLink(param, list);
+  if (tags.length === 0) return null;
+  const search: SearchRequest = { ingredientIds: tags.map((t) => t.id), spice: profile.spice, category: null, allergies: profile.allergies };
+  writeDraft("ingredients", tags);
+  writeDraft("search", search);
+  return search;
+}
+
 export default function ResultsPage() {
   const [state, setState] = useState<State>({ kind: "loading" });
   const [tab, setTab] = useState<Tab>("matches");
 
-  const run = useCallback(() => {
-    const search = readDraft("search");
+  const run = useCallback(async () => {
+    const search = (await searchFromLink()) ?? readDraft("search");
     if (!search) return setState({ kind: "noSearch" });
     setState({ kind: "loading" });
     Promise.all([searchRecipes(search), getOptions()])

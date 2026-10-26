@@ -14,8 +14,8 @@ type Rating = HistoryEntry["rating"];
 type Loaded = { recipe: Recipe | null; have: Set<string> | null; allergic: string[]; allergies: string[] };
 
 export default function RecipeView({
-  id, fromSearch, missingIds, cook,
-}: { id: string; fromSearch: boolean; missingIds: string[]; cook: boolean }) {
+  id, fromSearch, missingIds, haveIds, cook,
+}: { id: string; fromSearch: boolean; missingIds: string[]; haveIds: string[]; cook: boolean }) {
   const [data, setData] = useState<Loaded | null>(null);
   const [failed, setFailed] = useState(false);
   const [favorite, setFav] = useState(false);
@@ -28,13 +28,16 @@ export default function RecipeView({
     if (cooking) ratingRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
   }, [cooking]);
 
+  const haveKey = haveIds.join(","); // a string, so the effect doesn't rerun on every render
+
   useEffect(() => {
     Promise.all([getRecipe(id), getFavorites(), getProfile(), getOptions()])
       .then(([recipe, favorites, profile, options]) => {
         // Mark missing items when opened from Results (the search draft) or from a chat card (?missing=).
         // Menus and History have no pantry.
         const search = fromSearch ? readDraft("search") : null;
-        const have = search ? new Set(search.ingredientIds) : null;
+        // ?ids= (what the user has, from the chat carousel) works like the search draft.
+        const have = search ? new Set(search.ingredientIds) : haveKey ? new Set(haveKey.split(",")) : null;
         // A saved dish can contain an allergy added later (e.g. a favorite), so warn instead of hiding.
         const allergic = options.allergens
           .filter((a) => profile.allergies.includes(a.id) && recipe?.allergens?.includes(a.id))
@@ -43,7 +46,7 @@ export default function RecipeView({
         setData({ recipe, have, allergic, allergies: profile.allergies });
       })
       .catch(() => setFailed(true));
-  }, [id, fromSearch]);
+  }, [id, fromSearch, haveKey]);
 
 
   if (failed) return <p role="alert" className="p-4 text-red-700">โหลดสูตรไม่สำเร็จ ลองใหม่อีกครั้งนะ</p>;
