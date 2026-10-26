@@ -1,12 +1,23 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { handleProfileGet, handleProfilePut, readAnonId, validateProfile, type ProfileStore, type SavedProfile } from "./profile.ts";
+import { DEFAULT_PROFILE, handleProfileGet, handleProfilePut, lineProfileLookup, readAnonId, validateProfile, type ProfileStore, type SavedProfile } from "./profile.ts";
+import { LineVerifyError, type LineLogin } from "./line/idToken.ts";
 
 const ID = "3f2b8c1e-5a4d-4e6f-9b7a-1c2d3e4f5a6b";
 
 function fakeStore(initial: Record<string, SavedProfile> = {}, failWith?: string) {
   const rows = new Map(Object.entries(initial));
+  const links = new Map<string, string>(); // lineUserId -> anonId
   const store: ProfileStore = {
+    async linkLine(id, lineUserId) {
+      if (failWith) throw new Error(failWith);
+      links.set(lineUserId, id); // like the real store: the id moves to the newest user
+    },
+    async findByLineUserId(lineUserId) {
+      if (failWith) throw new Error(failWith);
+      const owner = links.get(lineUserId);
+      return owner ? rows.get(owner) ?? null : null;
+    },
     async getOrCreate(id, defaults) {
       if (failWith) throw new Error(failWith);
       if (!rows.has(id)) rows.set(id, defaults);
@@ -17,7 +28,7 @@ function fakeStore(initial: Record<string, SavedProfile> = {}, failWith?: string
       rows.set(id, p);
     },
   };
-  return { store, rows };
+  return { store, rows, links };
 }
 
 const req = (method: string, headers: Record<string, string> = {}, body?: unknown) =>
@@ -112,4 +123,70 @@ test("no database settings is 503; a database failure is 500 and never leaks its
 test("validateProfile accepts every allergen the app offers", () => {
   const all = ["shellfish", "fish", "peanut", "tree_nut", "egg", "milk", "soy", "wheat", "sesame"];
   assert.deepEqual(validateProfile({ allergies: all, spice: 0 }), { ok: true, profile: { allergies: [...all].sort(), spice: 0 } });
+});
+
+// ---- linking a profile to a LINE user ----
+const login: LineLogin = async (t) => (t === "good" ? "U-line-1" : null);
+const putWithToken = (token: string, body: unknown = { allergies: ["peanut"], spice: 2 }) => req("PUT", { ...as(), "x-line-id-token": token }, body);
+
+test("PUT with a valid LINE token saves the profile and links the verified LINE user id", async () => {
+  const { store, rows, links } = fakeStore();
+  assert.equal((await handleProfilePut(putWithToken("good"), store, login)).status, 204);
+  assert.deepEqual(rows.get(ID), { allergies: ["peanut"], spice: 2 });
+  assert.equal(links.get("U-line-1"), ID);
+});
+
+test("the chat then finds the saved allergies through the LINE user id", async () => {
+  const { store } = fakeStore();
+  await handleProfilePut(putWithToken("good"), store, login);
+  assert.deepEqual(await lineProfileLookup(store)("U-line-1"), { allergies: ["peanut"], spice: 2 });
+});
+
+test("an invalid LINE token is 401 and saves nothing, not even the profile", async () => {
+  const { store, rows, links } = fakeStore();
+  assert.equal((await handleProfilePut(putWithToken("forged"), store, login)).status, 401);
+  assert.equal(rows.size, 0);
+  assert.equal(links.size, 0);
+});
+
+test("a token with LINE login not configured is 503, never silently unlinked", async () => {
+  const { store, rows } = fakeStore();
+  assert.equal((await handleProfilePut(putWithToken("good"), store, null)).status, 503);
+  assert.equal(rows.size, 0);
+});
+
+test("a LINE outage while checking the token is 503 and saves nothing", async () => {
+  const { store, rows } = fakeStore();
+  const down: LineLogin = async () => {
+    throw new LineVerifyError("LINE verify answered HTTP 500");
+  };
+  assert.equal((await handleProfilePut(putWithToken("good"), store, down)).status, 503);
+  assert.equal(rows.size, 0);
+});
+
+test("without a token nothing is linked, and a sent LINE user id in the body is ignored", async () => {
+  const { store, links } = fakeStore();
+  const res = await handleProfilePut(req("PUT", as(), { allergies: [], spice: 1, lineUserId: "U-victim" }), store, login);
+  assert.equal(res.status, 204);
+  assert.equal(links.size, 0);
+});
+
+test("a second device taking over the same LINE account moves the link to the newest save", async () => {
+  const { store, links } = fakeStore();
+  const other = "11111111-1111-4111-8111-111111111111";
+  await handleProfilePut(putWithToken("good"), store, login);
+  await handleProfilePut(req("PUT", { "x-anon-id": other, "x-line-id-token": "good" }, { allergies: ["egg"], spice: 0 }), store, login);
+  assert.equal(links.get("U-line-1"), other);
+  assert.deepEqual(await lineProfileLookup(store)("U-line-1"), { allergies: ["egg"], spice: 0 });
+});
+
+test("chat lookup: an unlinked or unknown LINE user gets the defaults, with no allergies", async () => {
+  const { store } = fakeStore();
+  assert.deepEqual(await lineProfileLookup(store)("U-nobody"), DEFAULT_PROFILE);
+  assert.deepEqual(await lineProfileLookup(store)(undefined), DEFAULT_PROFILE);
+});
+
+test("chat lookup: a database failure is thrown, never turned into 'no allergies'", async () => {
+  const { store } = fakeStore({}, "db down");
+  await assert.rejects(lineProfileLookup(store)("U-line-1"), /db down/);
 });

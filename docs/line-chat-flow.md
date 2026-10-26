@@ -106,7 +106,8 @@ To preview one, print its `contents` as JSON and paste it into LINE's Flex Messa
 Built in `app/api/line/webhook/route.ts` with the logic in `lib/line/` (signature check, LINE API client, event handler) and `lib/match.ts` (hard filters and match % in code). It runs on **stand-ins** until Task 2 lands, all in `lib/line/standins.ts`:
 - **Scan** returns a fixed ingredient list (pork, egg, garlic, chili, holy basil) and ignores the photo.
 - **Search** ranks the mock recipes with the real rules.
-- **Profile** has no saved allergies for a LINE user, so nothing is filtered by allergy yet. The confirm card says "ยังไม่ได้ระบุอาหารที่แพ้" and links to the form. **Do not demo this to someone with a food allergy until the saved profile is linked to the LINE user id (Task 2).**
+- **Profile** is found through `users.line_user_id` once the person has saved their profile inside LINE with the `x-line-id-token` header (see the contract). Until then the chat has no allergies on file, and the old note below still applies to those people. If the database cannot be reached the chat sends no results instead of unfiltered ones. (Search is still the stand-in, so the filter takes effect when the real search lands.)
+- **Before linking:** a LINE user who never saved a profile in LINE has no saved allergies, so nothing is filtered by allergy. The confirm card says "ยังไม่ได้ระบุอาหารที่แพ้" and links to the form. **Do not demo this to someone with a food allergy until the saved profile is linked to the LINE user id (Task 2).**
 
 How the steps behave:
 - "สแกนวัตถุดิบ" gets the camera prompt. Any other text gets no reply for now.
