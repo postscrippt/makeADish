@@ -1,5 +1,5 @@
 // The one place pages get data from. NEXT_PUBLIC_USE_MOCKS=false calls Person B's endpoints (docs/api-contract.md);
-// otherwise everything runs on mock data with no keys. History, favorites and swaps stay local until their endpoints land.
+// otherwise everything runs on mock data with no keys. Swaps stay local until their endpoint lands.
 import type {
   ChatMessage, Favorite, HistoryEntry, Ingredient, Options, Profile, Recipe, RecipeMatch, RecipeSummary, ScanResult,
   SearchRequest, SearchResult,
@@ -134,21 +134,32 @@ export async function getRecipe(id: string): Promise<Recipe | null> {
   return recipes.find((r) => r.id === id && r.allergens !== null) ?? null;
 }
 
-// shortcut: history, favorites and swaps stay in this browser in both modes; switch when Person B's endpoints land.
+// In mock mode history and favorites live in this browser.
 export async function logCooked(entry: HistoryEntry): Promise<void> {
+  if (!USE_MOCKS) {
+    await api<HistoryEntry>("/api/history", json({ recipeId: entry.recipeId, rating: entry.rating }));
+    return;
+  }
   localStorage.setItem(HISTORY_KEY, JSON.stringify([entry, ...readList<HistoryEntry>(HISTORY_KEY)]));
 }
 
 export async function getHistory(): Promise<HistoryEntry[]> {
+  if (!USE_MOCKS) return api<HistoryEntry[]>("/api/history");
   return readList<HistoryEntry>(HISTORY_KEY);
 }
 
 export async function getFavorites(): Promise<Favorite[]> {
+  if (!USE_MOCKS) return api<Favorite[]>("/api/favorites");
   // Skips entries saved by an earlier build that stored bare ids.
   return readList<Favorite>(FAVORITES_KEY).filter((f) => typeof f === "object" && f !== null);
 }
 
 export async function setFavorite(recipe: Favorite, favorite: boolean): Promise<void> {
+  if (!USE_MOCKS) {
+    const req = json({ favorite });
+    await api<void>(`/api/favorites/${encodeURIComponent(recipe.id)}`, { ...req, method: "PUT" });
+    return;
+  }
   const rest = (await getFavorites()).filter((f) => f.id !== recipe.id);
   localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorite ? [recipe, ...rest] : rest));
 }
