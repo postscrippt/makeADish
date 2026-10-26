@@ -18,7 +18,7 @@ export const substitutes: Record<string, SwapOption[]> = {
   tofu: [o("ไข่", ["egg"], ["egg"]), o("เห็ด", ["mushroom"], [])],
   "morning-glory": [o("คะน้า", ["kale"], []), o("ผักกาดขาว", ["napa-cabbage"], [])],
   cabbage: [o("ผักกาดขาว", ["napa-cabbage"], []), o("หัวไชเท้า", ["daikon"], [])],
-  "coconut-milk": [o("นมสด", ["milk"], ["milk"]), o("น้ำซุป", ["stock"], null) /* store-bought stock varies (soy, wheat, milk): unknown, so always hidden */],
+  "coconut-milk": [o("นมสด", ["milk"], ["milk"]), o("นมอัลมอนด์", ["almond-milk"], ["tree_nut"]), o("น้ำซุป", ["stock"], null) /* store-bought stock varies (soy, wheat, milk): unknown, so always hidden */],
   lemongrass: [o("ผิวมะนาว", ["lime-zest"], [])],
   "kaffir-lime-leaf": [o("ผิวมะนาว", ["lime-zest"], [])],
   galangal: [o("ขิง", ["ginger"], [])],

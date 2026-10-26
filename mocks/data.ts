@@ -32,6 +32,7 @@ export const allergens: Option[] = [
   { id: "shellfish", th: "อาหารทะเลมีเปลือก" },
   { id: "fish", th: "ปลา / น้ำปลา" },
   { id: "peanut", th: "ถั่วลิสง" },
+  { id: "tree_nut", th: "ถั่วเปลือกแข็ง" },
   { id: "egg", th: "ไข่" },
   { id: "milk", th: "นม" },
   { id: "soy", th: "ถั่วเหลือง" },

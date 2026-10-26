@@ -7,6 +7,7 @@ import PageHeader from "@/components/PageHeader";
 import { scan } from "@/mocks/api";
 import { writeDraft } from "@/app/draft";
 import type { ScanResult } from "@/types/api";
+import { shrinkPhoto } from "@/app/scan/shrink";
 
 type Failure = Extract<ScanResult, { ok: false }>["reason"];
 
@@ -42,7 +43,8 @@ export default function ScanPage() {
     setScanning(true);
     setFailure(null);
     try {
-      const result = await scan(photo);
+      // Shrink first: the API takes at most 5 MB, and a smaller upload is faster on mobile data.
+      const result = await scan(await shrinkPhoto(photo));
       if (!result.ok) return setFailure(result.reason);
       writeDraft("ingredients", result.ingredients);
       router.push("/form"); // leaving the page drops the photo and its preview

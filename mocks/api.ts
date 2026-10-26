@@ -25,7 +25,7 @@ function notWired(): never {
   throw new Error("Real endpoints are not wired yet (issue #13). Set NEXT_PUBLIC_USE_MOCKS=true.");
 }
 
-export async function scan(photo: File): Promise<ScanResult> {
+export async function scan(photo: Blob): Promise<ScanResult> {
   if (!USE_MOCKS) notWired();
   void photo; // the mock ignores the photo; it is never stored
   await wait(1200);
