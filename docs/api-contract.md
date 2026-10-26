@@ -87,6 +87,7 @@ Reads a photo and returns the ingredients it sees.
 - **Request:** `Profile`
 - **Response `204`**, no body.
 - **Validation:** `spice` is 0 to 3, every allergy id must exist.
+- **Linking to LINE (optional header):** `x-line-id-token: <LIFF ID token>`. Send it when the page is open inside LINE (`liff.getIDToken()`). The server verifies the token with LINE and links the verified LINE user id to this user, so the chat applies the saved allergies. The client never sends a LINE user id itself. If the token is invalid or expired the answer is `401` and **nothing is saved**; if the server has no `LINE_LOGIN_CHANNEL_ID` or LINE cannot be reached it is `503` and nothing is saved. If the same LINE account saves from a new browser, the link moves to the newest save.
 
 ### `POST /api/recommend`
 
