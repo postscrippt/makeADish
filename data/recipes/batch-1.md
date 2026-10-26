@@ -275,8 +275,8 @@ Also add the alias เส้นจันท์ to `rice-noodle` (used in dish 3)
 - **Spice levels** are my guess: 0 none, 1 mild, 2 medium, 3 very hot. ส้มตำ and ลาบ depend on how many chilies the cook adds.
 - **Allergen tags are a first pass,** not the rule map from #21.
   - ซีอิ๊วขาว as `soy` and `wheat`, and ซอสหอยนางรม as `shellfish`, `soy` and `wheat`, copy the mock convention.
-  - กะทิ (coconut milk) is not tagged `tree_nut`. Decide whether it should be.
+  - กะทิ (coconut milk) is not tagged `tree_nut`. Decided: no, coconut is not usually treated as a tree nut for allergies.
   - Bought pastes and sauces vary by brand. Dish 9's `shellfish` tag assumes shrimp paste in the red curry paste.
 - **ลาบหมู:** the pork must be cooked through. I used the cooked version on purpose. Raw versions are not included.
 - **Thai wording:** I wrote the Thai steps myself. They need a native reader for tone and word choice, especially สะระแหน่ vs ใบสะระแหน่ and the cooking verbs.
-- **One kind of noodle:** `rice-noodle` covers both เส้นจันท์ (dish 3) and เส้นใหญ่ (dish 5). If you want them separate for matching, add `rice-noodle-wide`.
+- **One kind of noodle:** `rice-noodle` covers both เส้นจันท์ (dish 3) and เส้นใหญ่ (dish 5). Decided: keep one id, because it matches more dishes.
