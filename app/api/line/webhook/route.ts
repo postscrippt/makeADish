@@ -8,7 +8,9 @@ import { standInGetProfile, standInScan, standInSearch } from "@/lib/line/standi
 import { buildIndex } from "@/lib/ingredients";
 import { getDb } from "@/lib/db";
 import { getLlm } from "@/lib/llm";
+import { rankRecipes } from "@/lib/match";
 import { lineProfileLookup } from "@/lib/profile";
+import { createRecipeStore } from "@/lib/recipeStore";
 import { createProfileStore } from "@/lib/profileStore";
 import { scanPhoto } from "@/lib/scan";
 import { ingredients } from "@/data/ingredients";
@@ -48,7 +50,9 @@ export async function POST(request: Request) {
   const deps: Deps = {
     client: createLineClient(token),
     scan: llm ? (photo) => scanPhoto(photo, { llm, index, entries: ingredients }) : standInScan,
-    search: standInSearch,
+    // The real search when the database is configured. A database error is thrown, so the chat sends nothing
+    // rather than results that were not filtered.
+    search: db ? async (req) => rankRecipes(await createRecipeStore(db).all(), req) : standInSearch,
     // The saved profile of the person who linked their LINE account; defaults for anyone who has not.
     getProfile: db ? lineProfileLookup(createProfileStore(db)) : standInGetProfile,
     allergens: allergenOptions,

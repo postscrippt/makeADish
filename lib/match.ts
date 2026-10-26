@@ -16,6 +16,8 @@ export function rankRecipes(recipes: Recipe[], req: SearchRequest): SearchResult
       const matchPercent = Math.round(((ingredients.length - missing.length) / ingredients.length) * 100);
       return { recipe: { id, th, en, category, spice, minutes }, matchPercent, missing };
     })
+    // A dish you have nothing for is not a suggestion, even if it only has two ingredients.
+    .filter((m) => m.matchPercent > 0)
     .sort((a, b) => b.matchPercent - a.matchPercent);
 
   return {
