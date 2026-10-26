@@ -159,6 +159,34 @@ The cooking assistant. Same agent as `recommend`, answers from the recipe databa
 - **Response `200`:** one `ChatMessage` with `role: "assistant"`. `recipes`, if present, are dishes the answer refers to and are shown as links.
 - **Notes:** the same hard filters apply. If the only matching dishes contain the user's allergens, the answer says so and names no dish.
 
+### `POST /api/substitutes`
+
+Suggests safe swaps for one ingredient in a recipe.
+
+- **Headers:** `x-anon-id`
+- **Request:** `{ "ingredientId": "oyster-sauce" }`
+- **Response `200`:** `SwapResult` (see `app/recipe/swaps.ts`), one of:
+  ```json
+  { "kind": "ok", "options": [ { "label": "ซีอิ๊วขาว", "ingredientIds": ["soy-sauce"], "allergens": ["soy"] } ] }
+  ```
+  ```json
+  { "kind": "unsafe" }
+  ```
+  ```json
+  { "kind": "none" }
+  ```
+  - `ok`: at least one swap is safe for this user.
+  - `unsafe`: swaps exist but all contain one of the user's allergens.
+  - `none`: no swap is known for this ingredient.
+- **Notes:** the allergy filter runs on the server against the saved profile. An option with any untagged (unknown) ingredient counts as unknown and is hidden, the same rule as recipes.
+
+### `POST /api/line/webhook`
+
+Receives events from the LINE Messaging API. It is not called by the app.
+
+- **Behavior:** verify the `x-line-signature` header against the channel secret and reject the request if it does not match. Then reply to the message or postback. The server only replies to events and does not push messages.
+- **Details:** see `docs/line-chat-flow.md`.
+
 ## Where this differs from the database
 
 Differences found when comparing `types/api.ts` with `docs/schema.md`:
