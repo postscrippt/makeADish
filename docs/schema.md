@@ -7,12 +7,13 @@ Postgres on the Supabase free tier, with pgvector. The SQL lives in `supabase/mi
 | Table | Purpose |
 |---|---|
 | `allergens` | Fixed list of allergens, id is a slug (`peanut`, `shellfish`, ...) |
-| `ingredients` | Canonical ingredient list: Thai name, English name, `aliases` array |
+| `ingredients` | Canonical ingredient list: Thai name, English name, `aliases` array, `allergen_status` (`unknown` or `tagged`, added in `0003`) |
 | `ingredient_allergens` | Which allergens an ingredient contains. The rule-based tagging source |
 | `recipes` | Recipe text, steps (jsonb), spice level 0-3, base servings, `cook_minutes` (added in `0002`), embedding, `allergen_status` |
 | `recipe_ingredients` | Links a recipe to canonical ingredient ids, with quantity as display text |
 | `recipe_allergens` | Allergens per recipe, derived from its ingredients plus manual or LLM additions |
-| `users` | Anonymous UUID now, nullable `line_user_id` for later. Saved allergies, spice level, servings |
+| `users` | Anonymous UUID now, nullable `line_user_id` for later. Saved allergies and spice level |
+| `substitutes` | Swap options for a missing ingredient (added in `0003`): one row per option, with the option's ingredient slugs |
 | `history` | Cooked dishes: rating (1-5), timestamp |
 | `favorites` | A user's favorite recipes (added in `0002`), independent of cooking |
 
@@ -20,7 +21,8 @@ Postgres on the Supabase free tier, with pgvector. The SQL lives in `supabase/mi
 
 - **Ingredient matching uses ids only.** Scan output and recipe ingredients both map to `ingredients.id`. Aliases (for example หมู and หมูสับ) live in `ingredients.aliases`. No unit conversion; `quantity_text` is display text such as "2 tbsp".
 - **Unknown allergen data is excluded.** `recipes.allergen_status` is `unknown`, `tagged` or `verified`. Search must only return `tagged` or `verified` recipes, and must exclude any recipe with a row in `recipe_allergens` for one of the user's allergies.
-- **Servings** are stored as `base_servings`. The UI scales displayed quantities; matching ignores servings.
+- **Servings** are stored as `base_servings` and shown as written ("สำหรับ N ที่"). There is no scaling, and users have no saved servings.
+- **Swaps** use the same unknown rule as recipes. An option's allergens are the union of `ingredient_allergens` for its ingredients. If any of those ingredients has `allergen_status = 'unknown'`, the option is unknown and is never shown.
 - **Spice level** is 0-3 on both recipes and the user profile.
 - **Embeddings** are `vector(768)`. If the embedding model changes size, change the column and re-embed.
 
@@ -31,7 +33,7 @@ Row level security is on for every table with no policies, so the public anon ke
 ## Setup
 
 1. Create a free project at supabase.com.
-2. Open the SQL editor and run the files in `supabase/migrations/` in order: `0001_init.sql`, then `0002_cook_minutes_favorites.sql`.
+2. Open the SQL editor and run the files in `supabase/migrations/` in order: `0001_init.sql`, `0002_cook_minutes_favorites.sql`, then `0003_drop_servings_add_substitutes.sql`.
 3. Copy the project URL and keys into `.env.local` (see `.env.example` once added).
 
 ## Allergen filter shape
