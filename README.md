@@ -127,15 +127,16 @@ Copy `.env.example` to `.env.local` and fill in your own values. **Never commit 
 
 | Variable | Purpose |
 |---|---|
+| `NEXT_PUBLIC_USE_MOCKS` | `true` runs the UI on mock data with no keys |
 | `LLM_API_KEY` | Vision, agent, tagging and embeddings |
 | `LLM_PROVIDER` | Which provider the wrapper should use |
 | `SUPABASE_URL` | Database URL |
 | `SUPABASE_ANON_KEY` | Public client key |
 | `SUPABASE_SERVICE_KEY` | Server-only key. Never expose to the browser. |
 
-### Mock mode _(planned)_
+### Mock mode
 
-The UI should run end to end on mock data with no keys, so frontend work never waits on backend work.
+The UI runs end to end on mock data with no keys, so frontend work never waits on backend work. `NEXT_PUBLIC_USE_MOCKS=true` (the default in `.env.example`) makes every page read from `mocks/api.ts`. See `docs/how-the-app-works.md`.
 
 ## Project structure _(planned)_
 
