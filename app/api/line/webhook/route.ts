@@ -6,7 +6,10 @@ import { handleEvent, type Deps, type LineEvent } from "@/lib/line/handler";
 import { verifySignature } from "@/lib/line/signature";
 import { standInGetProfile, standInScan, standInSearch } from "@/lib/line/standins";
 import { buildIndex } from "@/lib/ingredients";
+import { getDb } from "@/lib/db";
 import { getLlm } from "@/lib/llm";
+import { lineProfileLookup } from "@/lib/profile";
+import { createProfileStore } from "@/lib/profileStore";
 import { scanPhoto } from "@/lib/scan";
 import { ingredients } from "@/data/ingredients";
 import { allergenOptions } from "@/data/options";
@@ -41,11 +44,13 @@ export async function POST(request: Request) {
   // The real scan runs when an LLM key is set; without one the chat keeps working on the fixed stand-in.
   // Search and profile are still stand-ins until the database layer lands.
   const llm = getLlm(process.env);
+  const db = getDb();
   const deps: Deps = {
     client: createLineClient(token),
     scan: llm ? (photo) => scanPhoto(photo, { llm, index, entries: ingredients }) : standInScan,
     search: standInSearch,
-    getProfile: standInGetProfile,
+    // The saved profile of the person who linked their LINE account; defaults for anyone who has not.
+    getProfile: db ? lineProfileLookup(createProfileStore(db)) : standInGetProfile,
     allergens: allergenOptions,
     knownIngredientIds: new Set(ingredients.map((x) => x.slug)),
     url: pageUrl,
