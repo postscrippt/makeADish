@@ -1,7 +1,7 @@
 {
   "size": {
     "width": 2500,
-    "height": 843
+    "height": 1686
   },
   "selected": true,
   "name": "MakeADish main",
@@ -12,7 +12,7 @@
         "x": 0,
         "y": 0,
         "width": 1250,
-        "height": 843
+        "height": 1686
       },
       "action": {
         "type": "message",
@@ -25,7 +25,7 @@
         "x": 1250,
         "y": 0,
         "width": 1250,
-        "height": 421
+        "height": 843
       },
       "action": {
         "type": "uri",
@@ -36,9 +36,9 @@
     {
       "bounds": {
         "x": 1250,
-        "y": 421,
+        "y": 843,
         "width": 1250,
-        "height": 422
+        "height": 843
       },
       "action": {
         "type": "uri",
