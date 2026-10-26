@@ -67,3 +67,44 @@ test("a dish you hold none of is never suggested, however few ingredients it has
   assert.deepEqual([r.matches, r.almostThere], [[], []]);
   assert.equal(rankRecipes(tiny, { ...base, ingredientIds: ["x"] }).almostThere.length, 1);
 });
+
+// ---- pantry staples ----
+test("staples are never missing and do not count toward the percentage", () => {
+  const dish = recipe("with-staples", { ids: ["egg", "pork", "salt", "fish-sauce", "cooking-oil", "sugar"] });
+  const r = rankRecipes([dish], { ...base, ingredientIds: ["egg", "pork"] });
+  assert.equal(r.matches.length, 1, "has every non-staple ingredient");
+  assert.equal(r.matches[0].matchPercent, 100);
+  assert.deepEqual(r.matches[0].missing, []);
+});
+
+test("a missing non-staple still counts, out of the non-staple ingredients only", () => {
+  const dish = recipe("half", { ids: ["egg", "pork", "salt", "fish-sauce", "sugar"] });
+  const r = rankRecipes([dish], { ...base, ingredientIds: ["egg"] });
+  assert.equal(r.almostThere[0].matchPercent, 50);
+  assert.deepEqual(r.almostThere[0].missing.map((m) => m.id), ["pork"]);
+});
+
+test("holding only staples is not holding the dish, and a dish of only staples is never suggested", () => {
+  const dish = recipe("needs-egg", { ids: ["egg", "salt"] });
+  assert.deepEqual(rankRecipes([dish], { ...base, ingredientIds: ["salt", "fish-sauce"] }), { matches: [], almostThere: [], tries: 1 });
+  const onlyStaples = recipe("only-staples", { ids: ["salt", "sugar"] });
+  assert.deepEqual(rankRecipes([onlyStaples], { ...base, ingredientIds: ["salt"] }).matches, []);
+});
+
+test("a dish with many staples now shows with few typed ingredients", () => {
+  const dish = recipe("khai-jiao", { ids: ["egg", "pork", "fish-sauce", "cooking-oil", "pepper", "salt", "oyster-sauce", "soy-sauce"] });
+  const r = rankRecipes([dish], { ...base, ingredientIds: ["egg", "pork"] });
+  assert.equal(r.matches.length, 1);
+});
+
+test("staples never weaken the allergy filter: fish sauce is a staple, but a fish allergy still removes the dish", () => {
+  const dish = recipe("fishy", { ids: ["egg", "fish-sauce"], allergens: ["fish"] });
+  assert.equal(rankRecipes([dish], { ...base, allergies: ["fish"] }).matches.length, 0);
+  assert.equal(rankRecipes([dish], { ...base, allergies: [] }).matches.length, 1);
+});
+
+test("a custom staples list can be passed, and an empty one restores the strict rule", () => {
+  const dish = recipe("strict", { ids: ["egg", "pork", "salt"] });
+  const strict = rankRecipes([dish], { ...base, ingredientIds: ["egg", "pork"] }, []);
+  assert.equal(strict.almostThere.length, 1, "salt is missing when nothing is a staple");
+});
