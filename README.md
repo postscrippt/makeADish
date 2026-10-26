@@ -2,7 +2,7 @@
 
 A Thai-first cooking helper that lives in LINE. Take a photo of what is in your kitchen, confirm the ingredients, set your allergies and spice level, and get recipes you can cook now, plus ones that are "almost there" and need one or two more items.
 
-> **Status: planning / early development.** This README describes the planned demo. Sections marked _(planned)_ are not built yet. Update this file as things land.
+> **Status: UI complete on mock data; backend in progress.** Every page runs end to end with no keys (mock mode). Sections marked _(planned)_ are not built yet. Update this file as things land.
 
 ## Why this exists
 
@@ -109,7 +109,7 @@ The whole project should run at zero cost. Free-tier limits change, so check rat
 
 **Privacy.** Photos are not stored; they are discarded after the scan. No personal data is sent to the LLM provider.
 
-## Getting started _(planned)_
+## Getting started
 
 Prerequisites: Node.js 20+ (22 recommended), npm, git.
 
@@ -121,7 +121,11 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Then open http://localhost:3000 on your phone-sized browser window.
+Then open http://localhost:3000 on your phone-sized browser window. Run `npm test` for the automated tests.
+
+### Deploy (Vercel, free tier)
+
+Import the GitHub repo at vercel.com/new (framework: Next.js, no build settings to change). Add the environment variables from `.env.example`; for a mock-only demo, `NEXT_PUBLIC_USE_MOCKS=true` is enough. `SUPABASE_SERVICE_KEY` must not get a `NEXT_PUBLIC_` prefix.
 
 ### Environment variables
 
