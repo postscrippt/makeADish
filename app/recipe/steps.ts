@@ -17,7 +17,7 @@ const VERBS: [string, StepIcon][] = (
     ["ใส่", "add"], ["เท", "add"], ["เติม", "add"], ["ราด", "add"], ["โรย", "add"],
     ["ตัก", "plate"], ["เสิร์ฟ", "plate"],
     ["นำ", "add"], ["ตำ", "mortar"], ["บุบ", "mortar"], ["หุง", "pot"], ["อบ", "pot"], ["แช่", "pot"],
-    ["ย่าง", "pan"], ["ปิ้ง", "pan"], ["คั่ว", "pan"],
+    ["ย่าง", "pan"], ["ปิ้ง", "pan"], ["คั่ว", "pan"], ["ดัน", "pan"], ["ลดไฟ", "pot"], ["ปั้น", "add"],
   ] as [string, StepIcon][]
 ).sort((a, b) => b[0].length - a[0].length);
 
@@ -36,6 +36,7 @@ function heatOf(text: string): Heat | null {
   if (text.includes("ไฟอ่อน")) return 1;
   if (text.includes("ไฟกลาง")) return 2;
   if (text.includes("ไฟแรง") || text.includes("ร้อนจัด")) return 3;
+  if (text.includes("ลดไฟ")) return 1; // "turn the heat down" with no level given
   return null;
 }
 
