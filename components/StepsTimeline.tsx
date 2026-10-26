@@ -11,7 +11,8 @@ const CHECK = "M5 12l5 5 9-10";
 
 // วิธีทำ as a vertical timeline: done steps shrink, the current one opens into a big glanceable card.
 // Built for a phone propped on the counter: big text, one big button, screen kept awake.
-export default function StepsTimeline({ steps, onFinish }: { steps: string[]; onFinish: () => void }) {
+// jumpTo: scroll straight to the first step on load (opened via a chat card's "เริ่มทำ").
+export default function StepsTimeline({ steps, onFinish, jumpTo = false }: { steps: string[]; onFinish: () => void; jumpTo?: boolean }) {
   const parsed = steps.map((s, i) => parseStep(s, i));
   const [current, setCurrent] = useState(0);
   const [done, setDone] = useState<Set<number>>(new Set());
@@ -19,7 +20,11 @@ export default function StepsTimeline({ steps, onFinish }: { steps: string[]; on
   const follow = useRef(false);
   const last = current === steps.length - 1;
 
-  // Follow the current step after the user moves, never on page load.
+  useEffect(() => {
+    if (jumpTo) cardRef.current?.scrollIntoView({ block: "center" });
+  }, [jumpTo]);
+
+  // Follow the current step after the user moves, never on page load (unless jumpTo).
   useEffect(() => {
     if (!follow.current) return;
     follow.current = false;

@@ -6,6 +6,12 @@ import type { Recipe } from "../../types/api.ts";
 import { parseStep } from "./steps.ts";
 import { C, text } from "../line/flex.ts";
 
+// Where the card's "เริ่มทำ" lands: straight to the steps, still knowing what to buy.
+// Only ingredient ids go in the link; allergies never do (they come from the opener's own profile).
+export function cookPath(id: string, missingIds: string[]): string {
+  return `/recipe/${id}?cook=1${missingIds.length > 0 ? `&missing=${missingIds.map(encodeURIComponent).join(",")}` : ""}`;
+}
+
 export function recipeCard(recipe: Recipe, missingIds: string[], startUrl: string): ChatMessage {
   const missing = new Set(missingIds);
   const meta = `${recipe.minutes} นาที · สำหรับ ${recipe.baseServings} ที่${recipe.spice > 0 ? ` · ${"🌶".repeat(recipe.spice)}` : ""}`;

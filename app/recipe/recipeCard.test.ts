@@ -1,7 +1,7 @@
 // Run: node --test app/recipe/recipeCard.test.ts
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { recipeCard } from "./recipeCard.ts";
+import { cookPath, recipeCard } from "./recipeCard.ts";
 import { parseStep } from "./steps.ts";
 import { recipes } from "../../mocks/recipes.ts";
 
@@ -46,4 +46,9 @@ test("every mock recipe fits LINE's limits", () => {
     const json = JSON.stringify(recipeCard(r, r.ingredients.map((x) => x.id), url));
     assert.ok(json.length < 30_000, r.id); // LINE bubble limit is 30 KB
   }
+});
+
+test("cookPath opens the steps and carries what's missing (ingredient ids only)", () => {
+  assert.equal(cookPath("khai-tun", []), "/recipe/khai-tun?cook=1");
+  assert.equal(cookPath("pad-kra-pao-moo", ["oyster-sauce", "holy-basil"]), "/recipe/pad-kra-pao-moo?cook=1&missing=oyster-sauce,holy-basil");
 });

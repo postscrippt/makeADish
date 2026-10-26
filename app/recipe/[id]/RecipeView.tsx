@@ -7,13 +7,15 @@ import { getFavorites, getOptions, getProfile, getRecipe, getSubstitutes, logCoo
 import { readDraft } from "@/app/draft";
 import type { HistoryEntry, Recipe, RecipeIngredient } from "@/types/api";
 import type { SwapResult } from "@/app/recipe/swaps";
-import { recipeCard } from "@/app/recipe/recipeCard";
+import { cookPath, recipeCard } from "@/app/recipe/recipeCard";
 import { canSendToChat, canShare, closeToChat, inLineApp, liffUrl, sendToChat, shareToFriends } from "@/app/liff";
 
 type Rating = HistoryEntry["rating"];
 type Loaded = { recipe: Recipe | null; have: Set<string> | null; allergic: string[]; allergies: string[] };
 
-export default function RecipeView({ id, fromSearch }: { id: string; fromSearch: boolean }) {
+export default function RecipeView({
+  id, fromSearch, missingIds, cook,
+}: { id: string; fromSearch: boolean; missingIds: string[]; cook: boolean }) {
   const [data, setData] = useState<Loaded | null>(null);
   const [failed, setFailed] = useState(false);
   const [favorite, setFav] = useState(false);
@@ -29,7 +31,8 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
   useEffect(() => {
     Promise.all([getRecipe(id), getFavorites(), getProfile(), getOptions()])
       .then(([recipe, favorites, profile, options]) => {
-        // Only mark missing items when opened from Results; Menus and History have no pantry.
+        // Mark missing items when opened from Results (the search draft) or from a chat card (?missing=).
+        // Menus and History have no pantry.
         const search = fromSearch ? readDraft("search") : null;
         const have = search ? new Set(search.ingredientIds) : null;
         // A saved dish can contain an allergy added later (e.g. a favorite), so warn instead of hiding.
@@ -41,6 +44,7 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
       })
       .catch(() => setFailed(true));
   }, [id, fromSearch]);
+
 
   if (failed) return <p role="alert" className="p-4 text-red-700">โหลดสูตรไม่สำเร็จ ลองใหม่อีกครั้งนะ</p>;
   if (!data) return <p role="status" className="p-4 text-sm text-muted">กำลังโหลด…</p>;
@@ -55,7 +59,8 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
     );
   }
 
-  const missing = have ? recipe.ingredients.filter((x) => !have.has(x.id)) : [];
+  // Ids from the link only count if they are in this recipe.
+  const missing = have ? recipe.ingredients.filter((x) => !have.has(x.id)) : recipe.ingredients.filter((x) => missingIds.includes(x.id));
 
   function toggleFavorite() {
     setFav(!favorite);
@@ -129,7 +134,7 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
         </ul>
       </section>
 
-      <StepsTimeline steps={recipe.steps} onFinish={() => setCooking(true)} />
+      <StepsTimeline steps={recipe.steps} onFinish={() => setCooking(true)} jumpTo={cook} />
 
       {(cooking || saved) && (
       <section ref={ratingRef} className="rounded-3xl bg-white p-4 shadow-card">
@@ -226,7 +231,7 @@ function ChatActions({ recipe, missingIds }: { recipe: Recipe; missingIds: strin
   }, []);
 
   if (!can.send && !can.share) return null;
-  const card = () => [recipeCard(recipe, missingIds, liffUrl(`/recipe/${recipe.id}`))];
+  const card = () => [recipeCard(recipe, missingIds, liffUrl(cookPath(recipe.id, missingIds)))];
 
   async function run(action: () => Promise<unknown>, done: string) {
     try {

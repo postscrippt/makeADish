@@ -94,6 +94,7 @@ To preview one, print its `contents` as JSON and paste it into LINE's Flex Messa
 - **`app/liff.ts`:**
   - loads the LIFF SDK only when `NEXT_PUBLIC_LIFF_ID` is set, and does nothing outside LINE
   - `canSendToChat`, `sendToChat`, `canShare`, `shareToFriends`, `closeToChat`, `liffUrl`
+- **The card's [เริ่มทำ]** opens `/recipe/{id}?cook=1&missing=…`. The page scrolls straight to step 1 and shows "ต้องซื้อเพิ่ม" with swap buttons. Only ingredient ids are in the link; allergies come from the opener's own profile.
 - **`app/recipe/recipeCard.ts`:**
   - the recipe as a Flex card: brand header, ingredients with missing ones in amber as "ต้องซื้อ", numbered step verbs, and [เริ่มทำ] linking to the LIFF recipe URL
   - only URI buttons, because cards sent from LIFF may not have other actions
