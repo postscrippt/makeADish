@@ -26,6 +26,16 @@ Postgres on the Supabase free tier, with pgvector. The SQL lives in `supabase/mi
 - **Spice level** is 0-3 on both recipes and the user profile.
 - **Embeddings** are `vector(768)`. If the embedding model changes size, change the column and re-embed.
 
+## Allergen tagging
+
+The rules are in `data/allergen-rules.ts`, one entry per ingredient in `data/ingredients.ts`:
+- a list of allergens means tagged (an empty list means no allergens),
+- `null` means unknown: contents depend on the brand or recipe.
+
+A recipe's allergens are the union of its ingredients' allergens (`lib/allergens.ts`). One unknown ingredient makes the whole recipe unknown (`allergen_status = 'unknown'`), and unknown recipes are never shown. A recipe must list **every** ingredient that carries an allergen, including pastes and sauces used in the steps; the rules cannot see what the ingredient list leaves out. An LLM tagger, if used, is only a second check and can add allergens but never remove them.
+
+To change a rule: edit `data/allergen-rules.ts`, run `node scripts/build-allergen-sql.mjs`, and run the new `supabase/seed/ingredient-allergens.sql` in the Supabase SQL editor (after `supabase/seed/ingredients.sql`).
+
 ## Access
 
 Row level security is on for every table with no policies, so the public anon key reads nothing. The server uses the service key (`SUPABASE_SERVICE_KEY`) and never exposes it to the browser.
