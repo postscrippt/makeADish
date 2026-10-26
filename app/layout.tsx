@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Prompt } from "next/font/google";
 import "./globals.css";
+import LiffBoot from "@/components/LiffBoot";
 
 // Prompt: Thai + Latin geometric face that pairs with the deck's Poppins look.
 const prompt = Prompt({
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <div className="mx-auto min-h-dvh w-full max-w-[430px] bg-mist shadow-card">
           {children}
         </div>
+        <LiffBoot />
       </body>
     </html>
   );
