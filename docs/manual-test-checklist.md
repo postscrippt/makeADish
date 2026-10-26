@@ -26,7 +26,7 @@ Tester: ______  Date: ______  Build: mock / real / deployed  Device: ______
 - [ ] Blurry photo shows the blurry message (mock: `/scan?mock=blurry`)
 - [ ] Non-food photo shows the no-food message (mock: `/scan?mock=nofood`)
 - [ ] Failure shows the error message, and "ลองสแกนอีกครั้ง" works (mock: `/scan?mock=error`)
-- [ ] "ไม่ถ่ายรูป พิมพ์วัตถุดิบเอง" goes to Form
+- [ ] "หรือ พิมพ์วัตถุดิบเอง" goes to Form
 - [ ] The photo is not saved anywhere after the scan (nothing in Network uploads except the scan call)
 
 ## Form
@@ -41,7 +41,7 @@ Tester: ______  Date: ______  Build: mock / real / deployed  Device: ______
 ## Results
 
 - [ ] Loading spinner shows
-- [ ] "ทำได้เลย" lists recipes with nothing missing; "ขาดอีกนิด" lists recipes missing 1-2 items, with the items named
+- [ ] "ทำได้เลย" lists recipes with nothing missing; "ขาดวัตถุดิบอีกนิด" lists recipes missing 1-2 items, with the items named
 - [ ] Match % looks right for 3 recipes checked by hand
 - [ ] **Allergy safety:** for at least 5 different allergens, no recipe in either tab contains the saved allergen
 - [ ] No recipe is shown whose allergen data is unknown (mock: หมูทอดกระเทียม never appears)

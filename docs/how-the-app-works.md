@@ -10,7 +10,7 @@ Plain-language map of the UI. Updated as pages land.
   /scan ─────────► /form ─────────► /results ─────────► /recipe/[id]
   pick photo       edit tags        two tabs:            amounts × servings
   scan(photo)      spice, category, ทำได้เลย (0 missing)  missing items flagged
-                   allergies,       ขาดอีกนิด (1-2)       ♥ favorite, ★ rating
+                   allergies,       ขาดวัตถุดิบอีกนิด (1-2)       ♥ favorite, ★ rating
                    servings         searchRecipes()      → logCooked() → History
         │               │                │                      │
         ▼               ▼                ▼                      ▼
@@ -62,7 +62,7 @@ Plain-language map of the UI. Updated as pages land.
 
 1. Drop any recipe whose allergen data is unknown, or that contains something you're allergic to.
 2. Drop recipes spicier than you chose, or not in the chosen category.
-3. Match % = how many of the recipe's ingredients you have. 0 missing → ทำได้เลย, 1-2 missing → ขาดอีกนิด, more → hidden.
+3. Match % = how many of the recipe's ingredients you have. 0 missing → ทำได้เลย, 1-2 missing → ขาดวัตถุดิบอีกนิด, more → hidden.
 
 The real version (Person B) follows the same rules on the server.
 

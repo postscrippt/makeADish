@@ -20,7 +20,7 @@ About 4 minutes. One presenter drives the phone, the other narrates. Practice it
 | 0:35 | Spinner, then Form with tags | "It reads the ingredients. You can fix anything it got wrong." Remove one tag, add **ไก่** by typing. |
 | 1:00 | Point at the red allergy chips | "Allergies are a hard filter. The AI can never override them. Unknown allergen data means the recipe is never shown." |
 | 1:15 | Tap **หาเมนู** | "Match % is plain code from ingredient overlap, not the AI guessing." |
-| 1:30 | Show **ทำได้เลย**, then **ขาดอีกนิด** | "Can cook now, or missing just one or two things." |
+| 1:30 | Show **ทำได้เลย**, then **ขาดวัตถุดิบอีกนิด** | "Can cook now, or missing just one or two things." |
 | 1:50 | Open ผัดกะเพราหมู, change servings 1 → 2 | "Amounts scale; the match doesn't change. It tells you what to buy." |
 | 2:15 | Tap **ทำเมนูนี้แล้ว**, give 5 stars | "Cooking it saves to your history." |
 | 2:30 | Back, open **ประวัติ** | "History and favorites feed better suggestions next time." |
@@ -30,7 +30,7 @@ About 4 minutes. One presenter drives the phone, the other narrates. Practice it
 
 ## If something breaks
 
-- **Scan fails or is slow:** "Let me skip the photo" → **ไม่ถ่ายรูป พิมพ์วัตถุดิบเอง**, type the ingredients.
+- **Scan fails or is slow:** "Let me skip the photo" → **หรือ พิมพ์วัตถุดิบเอง**, type the ingredients.
 - **Real endpoints down:** switch to the mock build (`NEXT_PUBLIC_USE_MOCKS=true` deploy) and keep going; the flow is identical.
 - **Network down:** play the backup video.
 

@@ -104,10 +104,10 @@ export default function ScanPage() {
           {failure ? "ลองสแกนอีกครั้ง" : "สแกน"}
         </button>
 
-        <p className="text-center text-xs text-zinc-500">เราไม่เก็บรูปไว้ ลบทิ้งทันทีหลังสแกน</p>
+        <p className="text-center text-xs text-zinc-500">เราไม่เก็บรูปไว้ และจะลบทิ้งทันทีหลังสแกน</p>
 
         <Link href="/form" className="flex min-h-11 items-center justify-center text-sm text-zinc-600 underline">
-          ไม่ถ่ายรูป พิมพ์วัตถุดิบเอง
+          หรือ พิมพ์วัตถุดิบเอง
         </Link>
       </main>
     </>

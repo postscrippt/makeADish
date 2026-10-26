@@ -80,7 +80,7 @@ function Results({ result, tab, setTab }: { result: SearchResult; tab: Tab; setT
 
   const tabs: [Tab, string, number][] = [
     ["matches", "ทำได้เลย", matches.length],
-    ["almostThere", "ขาดอีกนิด", almostThere.length],
+    ["almostThere", "ขาดวัตถุดิบอีกนิด", almostThere.length],
   ];
   const list = tab === "matches" ? matches : almostThere;
 
@@ -107,7 +107,7 @@ function Results({ result, tab, setTab }: { result: SearchResult; tab: Tab; setT
 
       {list.length === 0 ? (
         <p className="py-12 text-center text-sm text-zinc-500">
-          {tab === "matches" ? "ยังไม่มีเมนูที่ใช้วัตถุดิบครบ ลองดูแท็บ “ขาดอีกนิด”" : "ไม่มีเมนูที่ขาดแค่ 1-2 อย่าง"}
+          {tab === "matches" ? "ยังไม่มีเมนูที่ใช้วัตถุดิบครบ ลองดูแท็บ “ขาดวัตถุดิบอีกนิด”" : "ไม่มีเมนูที่ขาดแค่ 1-2 อย่าง"}
         </p>
       ) : (
         <ul className="flex flex-col gap-3">
