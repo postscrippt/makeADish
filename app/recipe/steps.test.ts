@@ -32,3 +32,13 @@ test("timer minutes: ranges use the earliest check, hours convert, seconds get n
   assert.equal(parseStep("เคี่ยว 1 ชั่วโมง 30 นาที", 0).minutes, 90);
   assert.equal(parseStep("ผัดเร็ว ๆ 30 วินาที", 0).minutes, null);
 });
+
+test("verbs from recipe batch 1 (PR #48) get real icons", () => {
+  assert.equal(parseStep("ดันเส้นไปข้างหนึ่ง ตอกไข่ลงกระทะ", 3).icon, "pan");
+  assert.equal(parseStep("ปั้นหมูสับเป็นก้อนเล็ก ๆ ใส่ลงไป", 1).icon, "add");
+  const lower = parseStep("ลดไฟ ต้มประมาณ 30 นาทีจนหมูนุ่ม", 2);
+  assert.equal(lower.icon, "pot");
+  assert.equal(lower.heat, 1);
+  assert.equal(lower.minutes, 30);
+  assert.equal(parseStep("ลดไฟลงเป็นไฟกลาง", 0).heat, 2); // an explicit level wins
+});
