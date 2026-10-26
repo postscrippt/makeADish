@@ -17,7 +17,7 @@
       "action": {
         "type": "uri",
         "label": "สแกนวัตถุดิบ",
-        "uri": "https://ai-menu-five.vercel.app/scan"
+        "uri": "https://liff.line.me/2012226850-YpXIkuN3/scan"
       }
     },
     {
@@ -30,7 +30,7 @@
       "action": {
         "type": "uri",
         "label": "ประวัติ",
-        "uri": "https://ai-menu-five.vercel.app/history"
+        "uri": "https://liff.line.me/2012226850-YpXIkuN3/history"
       }
     },
     {
@@ -43,7 +43,7 @@
       "action": {
         "type": "uri",
         "label": "เมนูทั้งหมด",
-        "uri": "https://ai-menu-five.vercel.app/menus"
+        "uri": "https://liff.line.me/2012226850-YpXIkuN3/menus"
       }
     }
   ]
