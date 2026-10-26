@@ -1,33 +1,35 @@
 import Link from "next/link";
 
-const pages = [
-  { href: "/scan", label: "สแกนวัตถุดิบ" },
-  { href: "/form", label: "เลือกเงื่อนไข" },
-  { href: "/results", label: "ผลลัพธ์" },
-  { href: "/recipe/1", label: "สูตรอาหาร" },
-  { href: "/history", label: "ประวัติ" },
-  { href: "/menus", label: "เมนูทั้งหมด" },
+// Mirrors the LINE rich menu tiles; in LINE each tile opens one of these pages directly.
+const tiles = [
+  { href: "/scan", icon: "📷", label: "สแกนวัตถุดิบ", hint: "ถ่ายรูปของในครัว" },
+  { href: "/history", icon: "🕘", label: "ประวัติ", hint: "เมนูที่เคยทำ" },
+  { href: "/menus", icon: "📖", label: "เมนูทั้งหมด", hint: "ค้นหาสูตร" },
+  { href: "/ask", icon: "💬", label: "ถามผู้ช่วย", hint: "ถามเรื่องทำอาหาร" },
 ];
 
 export default function Home() {
   return (
-    <main className="p-4">
-      <h1 className="mb-1 text-2xl font-bold">AI Menu</h1>
-      <p className="mb-6 text-sm text-zinc-500">
-        Dev index. In LINE these open from the rich menu.
-      </p>
-      <ul className="space-y-2">
-        {pages.map(({ href, label }) => (
-          <li key={href}>
-            <Link
-              href={href}
-              className="block rounded-lg border border-zinc-200 px-4 py-3 active:bg-zinc-100"
-            >
-              {label}
-            </Link>
-          </li>
+    <main className="flex min-h-dvh flex-col">
+      <header className="bg-line px-5 pb-8 pt-10 text-zinc-900">
+        <h1 className="text-3xl font-bold">AI Menu</h1>
+        <p className="mt-1">มีอะไรในครัว ก็ทำได้</p>
+      </header>
+      <nav aria-label="เมนูหลัก" className="-mt-4 grid grid-cols-2 gap-3 px-4">
+        {tiles.map(({ href, icon, label, hint }) => (
+          <Link
+            key={href}
+            href={href}
+            className="flex aspect-square flex-col justify-between rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm active:bg-zinc-50"
+          >
+            <span aria-hidden className="text-4xl">{icon}</span>
+            <span>
+              <span className="block text-lg font-semibold">{label}</span>
+              <span className="block text-sm text-zinc-500">{hint}</span>
+            </span>
+          </Link>
         ))}
-      </ul>
+      </nav>
     </main>
   );
 }

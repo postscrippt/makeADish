@@ -2,7 +2,7 @@
 
 A Thai-first cooking helper that lives in LINE. Take a photo of what is in your kitchen, confirm the ingredients, set your allergies and spice level, and get recipes you can cook now, plus ones that are "almost there" and need one or two more items.
 
-> **Status: planning / early development.** This README describes the planned demo. Sections marked _(planned)_ are not built yet. Update this file as things land.
+> **Status: UI complete on mock data; backend in progress.** Every page runs end to end with no keys (mock mode). Live mock demo: https://ai-menu-five.vercel.app Sections marked _(planned)_ are not built yet. Update this file as things land.
 
 ## Why this exists
 
@@ -70,6 +70,8 @@ Scan photo -> ingredient tags (+/-) -> form (spice, category, allergies, serving
 
 Other pages: **History** (cooked dishes, ratings, favorites), **Menus** (browse and search the catalog), **Ask** (chat with the same agent).
 
+Presenter script: [docs/demo-script.md](docs/demo-script.md). How the UI fits together: [docs/how-the-app-works.md](docs/how-the-app-works.md).
+
 ## How it works
 
 | Part | Type | Notes |
@@ -107,7 +109,7 @@ The whole project should run at zero cost. Free-tier limits change, so check rat
 
 **Privacy.** Photos are not stored; they are discarded after the scan. No personal data is sent to the LLM provider.
 
-## Getting started _(planned)_
+## Getting started
 
 Prerequisites: Node.js 20+ (22 recommended), npm, git.
 
@@ -119,7 +121,11 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Then open http://localhost:3000 on your phone-sized browser window.
+Then open http://localhost:3000 on your phone-sized browser window. Run `npm test` for the automated tests.
+
+### Deploy (Vercel, free tier)
+
+Import the GitHub repo at vercel.com/new (framework: Next.js, no build settings to change). Add the environment variables from `.env.example`; for a mock-only demo, `NEXT_PUBLIC_USE_MOCKS=true` is enough. `SUPABASE_SERVICE_KEY` must not get a `NEXT_PUBLIC_` prefix.
 
 ### Environment variables
 
@@ -144,6 +150,8 @@ The UI runs end to end on mock data with no keys, so frontend work never waits o
 docs/            api-contract.md, schema.md (Person B, Day 1) and manual-test-checklist.md (Person A, Day 1). Class PDFs stay out of the repo.
 app/             Pages and routes (Person A)
 components/      UI components (Person A)
+mocks/           Mock data and the single data door, mocks/api.ts (Person A)
+types/           Shared request/response types (both)
 api/ or app/api/ Endpoints: scan, recommend, recipe, history (Person B)
 lib/             LLM wrapper, agent loop, match logic (Person B)
 data/            Recipe dataset, tagging scripts, embedding loader (Person B)
@@ -181,9 +189,9 @@ If behind: cut Ask chat (Day 5) and LIFF first. Never cut the core path.
 
 ## Testing
 
-Automated _(planned)_: match % logic, allergy filter, API contract.
+Automated: `npm test` (servings scaling today). Planned: match % logic, allergy filter, API contract.
 
-Manual checks that need a person (see `docs/manual-test-checklist.md` once added):
+Manual checks that need a person (full checklist: [docs/manual-test-checklist.md](docs/manual-test-checklist.md)):
 
 - Scan about 10 real photos in varied lighting, including a blurry and a non-food one. Target: at least 8 of 10 list the main ingredients correctly, and the non-food photo is rejected with a clear message
 - Test on a real phone at about 375px width

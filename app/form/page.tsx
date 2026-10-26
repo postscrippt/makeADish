@@ -155,7 +155,7 @@ export default function FormPage() {
         </section>
 
         <section className="flex items-center justify-between">
-          <h2 className="font-semibold">จำนวนที่ทาน</h2>
+          <h2 className="font-semibold">ทำกี่ที่</h2>
           <Stepper value={servings} onChange={setServings} unit="ที่" />
         </section>
       </main>

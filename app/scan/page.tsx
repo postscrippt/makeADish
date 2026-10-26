@@ -13,7 +13,7 @@ type Failure = Extract<ScanResult, { ok: false }>["reason"];
 const failureText: Record<Failure, string> = {
   no_food: "ไม่พบวัตถุดิบในรูปนี้ ลองถ่ายให้เห็นวัตถุดิบชัด ๆ อีกครั้ง",
   blurry: "รูปเบลอเกินไป ลองถือให้นิ่งแล้วถ่ายใหม่",
-  error: "สแกนไม่สำเร็จ กรุณาลองใหม่อีกครั้ง",
+  error: "สแกนไม่สำเร็จ ลองใหม่อีกครั้งนะ",
 };
 
 export default function ScanPage() {
@@ -104,10 +104,10 @@ export default function ScanPage() {
           {failure ? "ลองสแกนอีกครั้ง" : "สแกน"}
         </button>
 
-        <p className="text-center text-xs text-zinc-500">รูปจะถูกลบทันทีหลังสแกน ไม่มีการเก็บไว้</p>
+        <p className="text-center text-xs text-zinc-500">เราไม่เก็บรูปไว้ และจะลบทิ้งทันทีหลังสแกน</p>
 
-        <Link href="/form" className="text-center text-sm text-zinc-600 underline">
-          ข้าม ไปเพิ่มวัตถุดิบเอง
+        <Link href="/form" className="flex min-h-11 items-center justify-center text-sm text-zinc-600 underline">
+          หรือ พิมพ์วัตถุดิบเอง
         </Link>
       </main>
     </>

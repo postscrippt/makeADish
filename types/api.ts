@@ -55,3 +55,13 @@ export type SearchResult = {
 };
 
 export type HistoryEntry = { recipeId: string; th: string; rating: 1 | 2 | 3 | 4 | 5; cookedAt: string }; // cookedAt: ISO date
+
+export type RecipeSummary = RecipeMatch["recipe"];
+
+export type Favorite = Pick<Recipe, "id" | "th">;
+
+export type ChatMessage = {
+  role: "user" | "assistant";
+  text: string;
+  recipes?: Pick<Recipe, "id" | "th">[]; // dishes the answer refers to, shown as links
+};

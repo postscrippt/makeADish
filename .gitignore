@@ -37,3 +37,9 @@ docs/*.png
 next-env.d.ts
 *.pem
 /coverage
+
+# Playwright MCP screenshots and logs
+.playwright-mcp/
+
+# Demo backup recordings (large; keep out of git)
+*.mp4

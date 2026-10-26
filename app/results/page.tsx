@@ -54,7 +54,7 @@ export default function ResultsPage() {
 
         {state.kind === "error" && (
           <div className="flex flex-col items-center gap-4 py-16 text-center">
-            <p role="alert" className="text-red-700">หาเมนูไม่สำเร็จ กรุณาลองใหม่</p>
+            <p role="alert" className="text-red-700">หาเมนูไม่สำเร็จ ลองใหม่อีกครั้งนะ</p>
             <button type="button" onClick={run} className={linkButton}>ลองอีกครั้ง</button>
           </div>
         )}
@@ -80,7 +80,7 @@ function Results({ result, tab, setTab }: { result: SearchResult; tab: Tab; setT
 
   const tabs: [Tab, string, number][] = [
     ["matches", "ทำได้เลย", matches.length],
-    ["almostThere", "ขาดอีกนิด", almostThere.length],
+    ["almostThere", "ขาดวัตถุดิบอีกนิด", almostThere.length],
   ];
   const list = tab === "matches" ? matches : almostThere;
 
@@ -107,13 +107,13 @@ function Results({ result, tab, setTab }: { result: SearchResult; tab: Tab; setT
 
       {list.length === 0 ? (
         <p className="py-12 text-center text-sm text-zinc-500">
-          {tab === "matches" ? "ยังไม่มีเมนูที่ใช้วัตถุดิบครบ ลองดูแท็บ “ขาดอีกนิด”" : "ไม่มีเมนูที่ขาดแค่ 1-2 อย่าง"}
+          {tab === "matches" ? "ยังไม่มีเมนูที่ใช้วัตถุดิบครบ ลองดูแท็บ “ขาดวัตถุดิบอีกนิด”" : "ไม่มีเมนูที่ขาดแค่ 1-2 อย่าง"}
         </p>
       ) : (
         <ul className="flex flex-col gap-3">
           {list.map((m) => (
             <li key={m.recipe.id}>
-              <RecipeCard match={m} />
+              <RecipeCard recipe={m.recipe} match={m} />
             </li>
           ))}
         </ul>

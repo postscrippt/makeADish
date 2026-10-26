@@ -1,7 +1,8 @@
 // The one place pages get data from. Today it returns mock data; issue #13 swaps
 // the insides for Person B's real endpoints without touching any page.
 import type {
-  HistoryEntry, Ingredient, Options, Profile, Recipe, RecipeMatch, ScanResult, SearchRequest, SearchResult,
+  ChatMessage, Favorite, HistoryEntry, Ingredient, Options, Profile, Recipe, RecipeMatch, RecipeSummary, ScanResult,
+  SearchRequest, SearchResult,
 } from "@/types/api";
 import { allergens, categories, ingredients } from "./data";
 import { recipes } from "./recipes";
@@ -80,6 +81,15 @@ export async function searchRecipes(req: SearchRequest): Promise<SearchResult> {
   return { matches, almostThere, tries: matches.length + almostThere.length > 0 ? 1 : 3 };
 }
 
+// Full catalog for the Menus page. Allergy filtering stays a hard filter here too.
+export async function listRecipes(allergies: string[]): Promise<RecipeSummary[]> {
+  if (!USE_MOCKS) notWired();
+  await wait(300);
+  return recipes
+    .filter((r) => r.allergens !== null && !r.allergens.some((a) => allergies.includes(a)))
+    .map(({ id, th, en, category, spice, minutes }) => ({ id, th, en, category, spice, minutes }));
+}
+
 export async function getRecipe(id: string): Promise<Recipe | null> {
   if (!USE_MOCKS) notWired();
   await wait(300);
@@ -97,13 +107,48 @@ export async function getHistory(): Promise<HistoryEntry[]> {
   return readList<HistoryEntry>(HISTORY_KEY);
 }
 
-export async function getFavorites(): Promise<string[]> {
+export async function getFavorites(): Promise<Favorite[]> {
   if (!USE_MOCKS) notWired();
-  return readList<string>(FAVORITES_KEY);
+  // Skips entries saved by an earlier build that stored bare ids.
+  return readList<Favorite>(FAVORITES_KEY).filter((f) => typeof f === "object" && f !== null);
 }
 
-export async function setFavorite(recipeId: string, favorite: boolean): Promise<void> {
+export async function setFavorite(recipe: Favorite, favorite: boolean): Promise<void> {
   if (!USE_MOCKS) notWired();
-  const rest = readList<string>(FAVORITES_KEY).filter((id) => id !== recipeId);
-  localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorite ? [recipeId, ...rest] : rest));
+  const rest = (await getFavorites()).filter((f) => f.id !== recipe.id);
+  localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorite ? [recipe, ...rest] : rest));
+}
+
+// shortcut: keyword lookup stands in for the agent; the real one answers from the recipe DB and history.
+export async function ask(history: ChatMessage[]): Promise<ChatMessage> {
+  if (!USE_MOCKS) notWired();
+  await wait(900);
+  if (devSwitch() === "error") throw new Error("mock ask error");
+  const question = history[history.length - 1].text.toLowerCase();
+  const { allergies, spice } = await getProfile();
+  // Thai has no spaces between words, so match any 5-character piece of a name ("ต้มยำ" finds "ต้มยำกุ้ง").
+  const mentions = (name: string) => {
+    const n = name.toLowerCase();
+    if (n.length <= 5) return question.includes(n);
+    return Array.from({ length: n.length - 4 }, (_, i) => n.slice(i, i + 5)).some((piece) => question.includes(piece));
+  };
+  const related = recipes.filter(
+    (r) => r.allergens !== null && [r.th, r.en, ...r.ingredients.flatMap((x) => [x.th, x.id])].some(mentions),
+  );
+  const safe = related.filter((r) => !r.allergens!.some((a) => allergies.includes(a)));
+  const hits = safe.filter((r) => r.spice <= spice).slice(0, 3);
+  if (related.length > 0 && safe.length === 0) {
+    return { role: "assistant", text: "เมนูที่ตรงคำถามนี้มีส่วนผสมที่คุณแพ้ เลยไม่แนะนำนะ ลองถามเมนูอื่นดู" };
+  }
+  if (safe.length > 0 && hits.length === 0) {
+    return { role: "assistant", text: "เมนูที่ตรงคำถามนี้เผ็ดกว่าระดับที่คุณเลือกไว้ ปรับระดับความเผ็ดได้ที่หน้าเลือกเงื่อนไข" };
+  }
+  if (hits.length === 0) {
+    return { role: "assistant", text: "ยังไม่เจอเมนูที่ตรงคำถามนี้ ลองบอกชื่อวัตถุดิบหรือชื่อเมนู เช่น \"มีไข่กับหมู ทำอะไรดี\"" };
+  }
+  return {
+    role: "assistant",
+    text: `ลองเมนูเหล่านี้ดูนะ: ${hits.map((r) => `${r.th} (${r.minutes} นาที)`).join(", ")}`,
+    recipes: hits.map(({ id, th }) => ({ id, th })),
+  };
 }
