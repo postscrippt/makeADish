@@ -1,4 +1,4 @@
-# AI Menu
+# MakeADish
 
 A Thai-first cooking helper that lives in LINE. Take a photo of what is in your kitchen, confirm the ingredients, set your allergies and spice level, and get recipes you can cook now, plus ones that are "almost there" and need one or two more items.
 
@@ -6,7 +6,7 @@ A Thai-first cooking helper that lives in LINE. Take a photo of what is in your 
 
 ## Why this exists
 
-Most recipe tools start from a dish. AI Menu starts from your kitchen, works in Thai, and runs inside LINE so there is no app to install. It searches a real recipe database instead of letting an LLM invent recipes, and it never returns a dish that conflicts with a saved allergy.
+Most recipe tools start from a dish. MakeADish starts from your kitchen, works in Thai, and runs inside LINE so there is no app to install. It searches a real recipe database instead of letting an LLM invent recipes, and it never returns a dish that conflicts with a saved allergy.
 
 The product spec is summarized below. Market sizing and competitor material is kept by the team outside this repo.
 
@@ -70,7 +70,7 @@ Scan photo -> ingredient tags (+/-) -> form (spice, category, allergies, serving
 
 Other pages: **History** (cooked dishes, ratings, favorites), **Menus** (browse and search the catalog), **Ask** (chat with the same agent).
 
-Presenter script: [docs/demo-script.md](docs/demo-script.md). How the UI fits together: [docs/how-the-app-works.md](docs/how-the-app-works.md).
+Presenter script: [docs/demo-script.md](docs/demo-script.md). How the UI fits together: [docs/how-the-app-works.md](docs/how-the-app-works.md). Colors, type and components: [DESIGN.md](DESIGN.md).
 
 ## How it works
 
