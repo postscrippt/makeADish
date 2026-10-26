@@ -64,7 +64,9 @@ async function onImage(event: LineEvent, deps: Deps): Promise<LineMessage> {
   try {
     const photo = await deps.client.getContent(event.message!.id);
     scan = await deps.scan(photo); // the bytes go out of scope here; nothing keeps them
-  } catch {
+  } catch (e) {
+    // The user sees a friendly message, so log why. Never the photo or any token.
+    console.error("LINE image scan failed:", e instanceof Error ? e.message : "unknown error");
     return retryPrompt(REASON_TEXT.error, deps);
   }
   if (!scan.ok) return retryPrompt(REASON_TEXT[scan.reason], deps);
