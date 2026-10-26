@@ -38,13 +38,15 @@ To change a rule: edit `data/allergen-rules.ts`, run `node scripts/build-allerge
 
 ## Loading recipes
 
-`data/recipes/batch-N.md` is the source. `node scripts/build-recipes-sql.mjs` checks every dish and writes `supabase/seed/recipes-batch-1.sql`. The check stops the build if a dish uses an ingredient id that is not in the table, has a bad category or spice level, or if the allergens written in the file differ from what the ingredient rules derive. Run the SQL in the Supabase SQL editor after the migrations and both ingredient seed files.
+`data/recipes/batch-N.md` is the source, and the batches are listed in `data/recipes/batches.ts` (batch 0 is the original mock dishes, batch 1 the first draft, batch 2 simple dishes with few main ingredients). `node scripts/build-recipes-sql.mjs` checks every dish and writes `supabase/seed/recipes-batch-N.sql` for each batch. Each batch has its own `source` tag (`own:batch-0`, `own:batch-1`, `own:batch-2`), so running one batch never touches another's dishes. The check stops the build if a dish uses an ingredient id that is not in the table, has a bad category or spice level, or if the allergens written in the file differ from what the ingredient rules derive. Run the SQL in the Supabase SQL editor after the migrations and both ingredient seed files.
 
 The SQL finds each dish by `source` and Thai title and updates it in place, so re-running it keeps recipe ids and anything pointing at them (history, favorites). Dishes from batch 1 have `source = 'own:batch-1'`. To take the draft dishes out again: `delete from recipes where source = 'own:batch-1';` (this fails if someone already has one in history, which is intended).
 
 **Batch 1 is loaded for testing and has not been reviewed by a Thai speaker.** Do not treat it as final.
 
-After running, check: `select count(*) from recipes where source = 'own:batch-1';` should be 10, and `select count(*) from recipe_ingredients;` should match the number of ingredient rows in the file (the SQL silently skips an id that is missing from `ingredients`).
+After running all three batches, check (the SQL silently skips an ingredient id that is missing from `ingredients`, so the counts matter): `select count(*) from recipes;` should be 31, `select count(*) from recipe_ingredients;` should be 205, and `select count(*) from recipe_allergens;` should be 69. Per batch: batch 0 has 9 dishes, 39 ingredient rows and 17 allergen rows; batch 1 has 10, 80 and 30; batch 2 has 12, 86 and 22.
+
+Left out of batch 0 on purpose: หมูทอดกระเทียม. The mock has only pork and garlic and marks its allergens unknown; complete the marinade first, then add it back.
 
 ## Access
 
