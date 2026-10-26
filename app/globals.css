@@ -51,3 +51,8 @@
     background: var(--color-mist);
   }
 }
+
+/* While a LIFF link forwards to its page, show the plain backdrop instead of the home page (see app/layout.tsx). */
+.liff-forwarding body > * {
+  visibility: hidden;
+}
