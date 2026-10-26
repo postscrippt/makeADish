@@ -66,7 +66,7 @@ export const allergenRules: Record<string, AllergenId[] | null> = {
   "toasted-rice-powder": [],
   "curry-powder": null, // blends vary
   "sesame-oil": ["sesame"],
-  "cooking-oil": null, // judgment: Thai "น้ำมันพืช" is often soybean oil; decide whether refined oil counts
+  "cooking-oil": [], // decided by the owner: refined cooking oil is fine for people with a soy allergy
 
   // Staples and noodles
   rice: [], "sticky-rice": [],
