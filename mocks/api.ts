@@ -8,6 +8,7 @@ import { allergens, categories, ingredients } from "./data";
 import { recipes } from "./recipes";
 import { substitutes } from "./substitutes";
 import { safeSwaps, type SwapResult } from "@/app/recipe/swaps";
+import { lineIdToken } from "@/app/liff";
 
 const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS !== "false";
 const PROFILE_KEY = "aimenu.profile";
@@ -57,9 +58,19 @@ export async function getProfile(): Promise<Profile> {
   return fresh;
 }
 
+// Inside LINE the profile is also saved on the server and linked to the LINE user, so the chat filters the same allergies.
+// Throws when that save fails (401 bad/expired login, 503 not set up): the chat would not know the allergies.
 export async function saveProfile(profile: Profile): Promise<void> {
   if (!USE_MOCKS) notWired();
   localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+  const token = await lineIdToken();
+  if (!token) return;
+  const res = await fetch("/api/profile", {
+    method: "PUT",
+    headers: { "content-type": "application/json", "x-anon-id": profile.anonId, "x-line-id-token": token },
+    body: JSON.stringify(profile),
+  });
+  if (!res.ok) throw new Error(`profile not saved (${res.status})`);
 }
 
 // The real version runs the agent on the server; the hard filters and overlap math below mirror the README rules.
