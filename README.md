@@ -53,7 +53,7 @@ The product spec is summarized below. Market sizing and competitor material is k
 
 **Agent tools:** recipe vector DB (RAG), filter (spice / category / allergy), and user history (skip recent, boost liked).
 
-**Where the recipes come from.** A mix of an open recipe dataset, a small set of Thai dishes we write or check ourselves, and an AI tool to tag each recipe with spice level and allergens. Tags are spot-checked by hand.
+**Where the recipes come from.** Mainly a set of Thai dishes we write ourselves (about 60 to 100), checked by hand. An open dataset is only an optional supplement, and only if its license allows redistribution. An AI tool tags each recipe with spice level and allergens, on top of a keyword rule map. Tags are spot-checked by hand.
 
 **Positioning.** The open gap is Thai-first cooking from your fridge: photo scan, inside LINE, knows your allergies. There is no app to download, every rating improves the next suggestion, and the Thai recipe set is checked by hand.
 
@@ -237,7 +237,7 @@ Manual checks that need a person (full checklist: [docs/manual-test-checklist.md
 
 ## Data and safety notes
 
-- Recipes come from an open dataset (name and license to be recorded here once chosen), plus Thai dishes we write or check ourselves. Spice and allergen tags are LLM-generated and spot-checked by hand, so they may still contain errors. Do not treat this demo as medical or allergy advice.
+- Recipes are mainly Thai dishes we write ourselves. If an open dataset is added as a supplement, its name and license are recorded here. Spice and allergen tags are LLM-generated and spot-checked by hand, so they may still contain errors. Do not treat this demo as medical or allergy advice.
 - Do not send personal data to the LLM provider. Free tiers may use inputs to improve their models.
 - Free tier limits can change. Test early and cache where possible.
 
@@ -250,4 +250,4 @@ Manual checks that need a person (full checklist: [docs/manual-test-checklist.md
 
 ## License
 
-_Choose a license (MIT is the usual choice) before making the repo public. Check that the recipe dataset license allows redistribution._
+The code is released under the [MIT License](LICENSE). The recipe text in `data/` is written by the team. Any recipe imported from an outside dataset keeps that dataset's license, which must allow redistribution.
