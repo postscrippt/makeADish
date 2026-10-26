@@ -12,9 +12,9 @@ The product spec is summarized below. Market sizing and competitor material is k
 
 ## Product spec
 
-**Idea.** A cooking helper inside LINE. The main chat is a hub with a rich menu (Scan, History, Menus); replying to plain chat messages with the cooking assistant comes later. Tap Scan and a LINE Mini App opens. Take a photo of your ingredients, and the app asks one question: is this what you have? Fix the list, check your saved allergies and spice level, and tap find. It shows recipes you can make now, and a second tab with recipes that are almost a match and need one or two more items, with food-type filters. A recipe suggests allergy-safe swaps for anything missing, and walks you through the steps on a big, glanceable timeline. Finishing the last step asks for a rating and saves it to History.
+**Idea.** A cooking helper inside LINE. The main chat is a hub with a rich menu (Scan, History, Menus); replying to plain chat messages with the cooking assistant comes later. Tap Scan and the camera opens right in the chat (once the webhook is live; until then a LINE Mini App page opens). Send a photo of your ingredients, and it asks one question: is this what you have? Fix the list, check your saved allergies and spice level, and tap find. It shows recipes you can make now, and a second tab with recipes that are almost a match and need one or two more items, with food-type filters. A recipe suggests allergy-safe swaps for anything missing, and walks you through the steps on a big, glanceable timeline. Finishing the last step asks for a rating and saves it to History.
 
-**Why a hub and a Mini App.** The chat stays clean, with no Flex cards or long menus. The photo, tag editing and sliders need a real screen, which a chat bubble cannot give. The chat is only for conversation.
+**Chat and Mini App, each where it's best.** Quick steps live in the chat: the camera, a one-tap "is this right?" card and a swipeable results carousel, with no page loads. Steps that need a real screen open the Mini App: editing ingredients and allergies, filters, and cooking with the step timeline. The full split and its reasons are in `docs/line-chat-flow.md`.
 
 **Solution choice.** A single AI agent with RAG. It searches a real recipe database instead of making recipes up, and it checks its own results and retries when matches are poor. A plain LLM would invent recipes, and multiple agents would cost more than this task needs.
 
@@ -104,9 +104,9 @@ The whole project should run at zero cost. Free-tier limits change, so check rat
 
 **Ingredient matching.** One canonical ingredient table (id, Thai name, English name, aliases) is the source of truth. The photo scan output and every recipe ingredient are mapped to those ids, so "หมู" and "หมูสับ" match correctly. Matching uses ids only, with no unit conversion. Quantities are stored as display text such as "2 tbsp".
 
-**Servings.** Removed from the UI: recipes show their own amounts with "สำหรับ N ที่". `servings` stays in `types/api.ts` until Person B agrees to drop it.
+**Servings.** Removed: recipes show their own amounts with "สำหรับ N ที่" (`base_servings`). Nothing scales, and nothing about servings is stored per user.
 
-**Privacy.** Photos are not stored; they are discarded after the scan. No personal data is sent to the LLM provider.
+**Privacy.** We never store photos: the server discards each photo right after the scan. A photo sent in the LINE chat stays only in the user's own chat history. No personal data is sent to the LLM provider.
 
 ## Getting started
 

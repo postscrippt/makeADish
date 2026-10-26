@@ -57,7 +57,7 @@ What happens in the chat and what happens on a page: `docs/line-chat-flow.md`. W
 ## Where things are remembered
 
 - **Between pages (this tab only):** scanned ingredients and the last search, in `app/draft.ts`.
-- **Across visits:** the profile (anonymous id, allergies, spice; `servings` is still in the type but unused), cooked history and favorites in `localStorage`. Moves to the database later.
+- **Across visits:** the profile (anonymous id, allergies, spice), cooked history and favorites in `localStorage`. Moves to the database later.
 - **Never:** the photo. It lives in memory only for the preview and is dropped when you leave the Scan page.
 
 ## Trying error states

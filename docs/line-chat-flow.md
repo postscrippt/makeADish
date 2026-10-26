@@ -1,6 +1,6 @@
 # MakeADish in LINE: what happens in the chat, what happens on a page
 
-Status: proposal by Person A (2026-10-26). The chat parts (steps 2–5) need Person B's LINE webhook. The page parts and "send to chat" are built (`app/liff.ts`, `app/recipe/recipeCard.ts`).
+Status: agreed by Person A and Person B (2026-10-26). Person B's task list: `docs/superpowers/plans/2026-10-26-person-b-backend.md`. The chat parts (steps 2–5) need Person B's LINE webhook. The page parts and "send to chat" are built (`app/liff.ts`, `app/recipe/recipeCard.ts`).
 
 ## Why
 Today nothing of ours happens in the LINE chat. The rich menu is an image whose tap areas open our web pages, and every step is a page load away from the chat. The goal is the least friction: put each step where it costs the fewest taps and waits, and is easiest to read and fix.
@@ -57,9 +57,8 @@ CHAT                                               PAGE (LIFF)
 
 **วัตถุดิบ / วิธีทำ as a message:** วัตถุดิบ works well as a message (shopping list, keepsake). วิธีทำ works only as a preview. Cooking stays on the page, because a static card can't show the current step, run a timer or keep the screen on.
 
-## Proposed change to a hard rule (needs both people)
-Current: "Photos are discarded after scan, never stored."
-Proposed: "**We** never store photos: the server discards a photo right after scanning. A photo sent in the chat stays only in the user's own LINE chat history." The user chose the in-chat camera knowing this. README and CLAUDE.md change only once both people agree.
+## Photo rule (agreed by both, 2026-10-26)
+"**We** never store photos: the server discards a photo right after scanning. A photo sent in the chat stays only in the user's own LINE chat history." Now in README and CLAUDE.md.
 
 ## What Person B builds (chat side)
 A webhook route under `app/api/` (server-only; channel secret and access token in env, never in client code).
