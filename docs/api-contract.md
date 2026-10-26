@@ -4,7 +4,7 @@ Source of truth for request and response shapes between the app (Person A) and t
 
 The TypeScript types live in `types/api.ts`. This page says what each endpoint does and how it fails. If the two disagree, fix the one that is wrong in the same PR.
 
-> **Status: draft for approval.** Items marked **Decision** need a yes or no from both people before this is final. They are collected at the bottom.
+> **Status: decided by Person B, waiting for Person A's approval.** The decisions are listed at the bottom.
 
 ## Conventions
 
@@ -170,14 +170,16 @@ Differences found when comparing `types/api.ts` with `docs/schema.md`:
 | Categories | list in mock data | free text column, no table | Fix the category slugs in one shared list (`data/categories`), used by both sides. |
 | Profile spice | always 0 to 3 | nullable | Treat null as default `1` on read. |
 
-## Decisions needed
+## Decisions
 
-1. **Ids as strings in the API.** OK to keep ids as strings and convert in the endpoints? (Recommended: yes.)
-2. **`x-anon-id` header** as the way to identify a user. OK? (Recommended: yes for the demo.)
-3. **Add `cook_minutes` to `recipes`** via a new migration. OK?
-4. **Add a `favorites` table** instead of `history.is_favorite`. OK?
+Person B (postscrippt) delegated these and they were settled with the recommended answers. They are final once Person A approves the pull request.
+
+1. **Ids are strings in the API.** Ingredients use `slug`, recipes use the int id as a string. The endpoints convert.
+2. **`x-anon-id` header** identifies the user for the demo.
+3. **`cook_minutes` added to `recipes`** (migration `0002_cook_minutes_favorites.sql`).
+4. **`favorites` table** replaces `history.is_favorite` (same migration).
 5. **Search returns `200` with empty lists** when nothing matches, and `tries` shows how hard it tried.
 6. **Photo limit of 5 MB**, with the client downscaling first.
-7. **Final endpoint paths** as listed above. Person A uses these in `mocks/api.ts` for issue #13.
+7. **Endpoint paths** exactly as listed above. Person A uses these in `mocks/api.ts` for issue #13.
 
-When both people approve, update the status line at the top and make `types/api.ts` match.
+Still to do after approval: update the status line at the top, and make `types/api.ts` match (add `tree_nut` to the mock allergens too).
