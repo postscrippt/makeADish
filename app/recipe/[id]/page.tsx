@@ -4,8 +4,10 @@ import RecipeView from "./RecipeView";
 
 // cacheComponents is on: params and searchParams are runtime data, so they must be read inside <Suspense>.
 async function RecipeBody({ params, searchParams }: PageProps<"/recipe/[id]">) {
-  const [{ id }, { from }] = await Promise.all([params, searchParams]);
-  return <RecipeView id={id} fromSearch={from === "results"} />;
+  const [{ id }, { from, missing, cook }] = await Promise.all([params, searchParams]);
+  // From a chat recipe card: ?cook=1 jumps to the steps, ?missing=a,b marks what to buy.
+  const missingIds = typeof missing === "string" ? missing.split(",") : [];
+  return <RecipeView id={id} fromSearch={from === "results"} missingIds={missingIds} cook={cook === "1"} />;
 }
 
 export default function RecipePage({ params, searchParams }: PageProps<"/recipe/[id]">) {

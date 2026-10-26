@@ -16,7 +16,6 @@ export type Profile = {
   anonId: string;
   allergies: string[];
   spice: SpiceLevel;
-  servings: number;
 };
 
 export type SearchRequest = {
@@ -24,7 +23,6 @@ export type SearchRequest = {
   spice: SpiceLevel;
   category: string | null; // null = any
   allergies: string[]; // allergen ids, hard filter
-  servings: number; // display only, never affects matching
 };
 
 export type RecipeIngredient = { id: string; th: string; qty: string }; // qty is display text, e.g. "2 ช้อนโต๊ะ"

@@ -68,5 +68,8 @@ Font: **Prompt** (Thai + Latin, `next/font/google`, weights 400/500/600/700). It
 - Don't put text on `butter` in any color other than `ink`.
 - Don't add new colors. If something needs one, add a token here first.
 
+## LINE chat cards
+Flex cards (`app/line/cards.ts`: scan prompt, confirm card, results carousel; `app/recipe/recipeCard.ts`; shared pieces in `app/line/flex.ts`) use the same tokens as hex: a `brand` header with white text, `ink` body, `muted` secondary text, amber `#b45309` for "ต้องซื้อ", and a `brand-deep` primary button. One button per card. Cards sent from LIFF may only use link (URI) buttons.
+
 ## LINE rich menu
 `design/rich-menu/rich-menu.html` uses the same palette and icons: Scan on `butter` at left, two rows (History, Menus) on `brand` with butter icon circles. Re-render it with the command in its README after any change.

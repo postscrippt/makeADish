@@ -52,7 +52,7 @@ export async function getProfile(): Promise<Profile> {
   if (!USE_MOCKS) notWired();
   const saved = localStorage.getItem(PROFILE_KEY);
   if (saved) return JSON.parse(saved) as Profile;
-  const fresh: Profile = { anonId: crypto.randomUUID(), allergies: [], spice: 1, servings: 2 };
+  const fresh: Profile = { anonId: crypto.randomUUID(), allergies: [], spice: 1 };
   localStorage.setItem(PROFILE_KEY, JSON.stringify(fresh));
   return fresh;
 }

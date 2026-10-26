@@ -22,4 +22,6 @@ export const substitutes: Record<string, SwapOption[]> = {
   lemongrass: [o("ผิวมะนาว", ["lime-zest"], [])],
   "kaffir-lime-leaf": [o("ผิวมะนาว", ["lime-zest"], [])],
   galangal: [o("ขิง", ["ginger"], [])],
+  egg: [o("เต้าหู้อ่อน", ["silken-tofu"], ["soy"])],
+  rice: [o("เส้นก๋วยเตี๋ยว", ["rice-noodle"], []), o("ขนมปัง", ["bread"], ["wheat", "milk"])],
 };

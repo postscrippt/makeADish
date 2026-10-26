@@ -15,3 +15,9 @@ test("safeSwaps", () => {
   assert.deepEqual(safeSwaps([soy], ["soy"]), { kind: "unsafe" });
   assert.deepEqual(safeSwaps([unknown], []), { kind: "unsafe" });
 });
+
+test("every ingredient in the mock recipes has at least one swap", async () => {
+  const { recipes } = await import("../../mocks/recipes.ts");
+  const { substitutes } = await import("../../mocks/substitutes.ts");
+  for (const r of recipes) for (const x of r.ingredients) assert.ok((substitutes[x.id] ?? []).length > 0, x.id);
+});

@@ -16,8 +16,21 @@ const VERBS: [string, StepIcon][] = (
     ["โขลก", "mortar"],
     ["ใส่", "add"], ["เท", "add"], ["เติม", "add"], ["ราด", "add"], ["โรย", "add"],
     ["ตัก", "plate"], ["เสิร์ฟ", "plate"],
+    ["นำ", "add"], ["ตำ", "mortar"], ["บุบ", "mortar"], ["หุง", "pot"], ["อบ", "pot"], ["แช่", "pot"],
+    ["ย่าง", "pan"], ["ปิ้ง", "pan"], ["คั่ว", "pan"],
   ] as [string, StepIcon][]
 ).sort((a, b) => b[0].length - a[0].length);
+
+// Linking words that often open a step ("จากนั้นใส่…"); the verb comes after them.
+const FILLER = /^(จากนั้น|แล้ว|ต่อมา|สุดท้าย)\s*/;
+
+// Earliest time to check: "2-3 นาที" → 2, "1 ชั่วโมง 30 นาที" → 90. Seconds are too short for a timer.
+function minutesOf(text: string): number | null {
+  const h = text.match(/(\d+)\s*ชั่วโมง/);
+  const m = text.match(/(\d+)(?:\s*-\s*\d+)?\s*นาที/);
+  if (!h && !m) return null;
+  return (h ? Number(h[1]) * 60 : 0) + (m ? Number(m[1]) : 0);
+}
 
 function heatOf(text: string): Heat | null {
   if (text.includes("ไฟอ่อน")) return 1;
@@ -28,9 +41,9 @@ function heatOf(text: string): Heat | null {
 
 export function parseStep(text: string, index: number): ParsedStep {
   const heat = heatOf(text);
-  const m = text.match(/(\d+)\s*นาที/);
-  const minutes = m ? Number(m[1]) : null;
-  const hit = VERBS.find(([word]) => text.startsWith(word));
+  const minutes = minutesOf(text);
+  const core = text.replace(FILLER, "");
+  const hit = VERBS.find(([word]) => core.startsWith(word));
   if (!hit) return { verb: `ขั้นที่ ${index + 1}`, detail: text, icon: "generic", heat, minutes };
-  return { verb: hit[0], detail: text.slice(hit[0].length).trim(), icon: hit[1], heat, minutes };
+  return { verb: hit[0], detail: core.slice(hit[0].length).trim(), icon: hit[1], heat, minutes };
 }

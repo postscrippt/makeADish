@@ -55,8 +55,7 @@ export default function FormPage() {
     if (!profile || tags.length === 0) return;
     const { allergies, spice } = profile;
     writeDraft("ingredients", tags);
-    // servings unused; removal pending Person B (types/api.ts)
-    writeDraft("search", { ingredientIds: tags.map((t) => t.id), spice, category: null, allergies, servings: 2 });
+    writeDraft("search", { ingredientIds: tags.map((t) => t.id), spice, category: null, allergies });
     router.push("/results");
   }
 
