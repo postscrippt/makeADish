@@ -21,7 +21,7 @@ The TypeScript types live in `types/api.ts`. This page says what each endpoint d
   - A recipe with unknown allergen data is never returned by any endpoint.
   - A recipe containing one of the user's allergens is never returned.
   - Match percentage and "Almost there" (2 or fewer missing items) are computed in code from ingredient ids. The LLM does not compute them.
-  - Servings are display-only and never change matching.
+  - Servings are not part of the API. Recipes keep `base_servings` only for the "สำหรับ N ที่" label.
   - The agent retries at most 3 times.
 - **Photos** are processed in memory and discarded. Never stored or logged.
 
@@ -78,14 +78,14 @@ Reads a photo and returns the ingredients it sees.
 ### `GET /api/profile`
 
 - **Headers:** `x-anon-id`
-- **Response `200`:** `Profile`. A new user gets defaults (`allergies: []`, `spice: 1`, `servings: 2`) and the row is created.
+- **Response `200`:** `Profile`. A new user gets defaults (`allergies: []`, `spice: 1`) and the row is created.
 
 ### `PUT /api/profile`
 
 - **Headers:** `x-anon-id`
 - **Request:** `Profile`
 - **Response `204`**, no body.
-- **Validation:** `spice` is 0 to 3, `servings` is at least 1, every allergy id must exist.
+- **Validation:** `spice` is 0 to 3, every allergy id must exist.
 
 ### `POST /api/recommend`
 
@@ -94,7 +94,7 @@ Runs the search and agent loop.
 - **Headers:** `x-anon-id` (history is used to skip recent dishes and boost liked ones)
 - **Request:** `SearchRequest`
   ```json
-  { "ingredientIds": ["pork", "egg"], "spice": 2, "category": null, "allergies": ["shellfish"], "servings": 2 }
+  { "ingredientIds": ["pork", "egg"], "spice": 2, "category": null, "allergies": ["shellfish"] }
   ```
   `category: null` means any. `spice` means "up to this level": a recipe is kept if its spice level is at most `spice`.
 - **Response `200`:** `SearchResult`
