@@ -2,7 +2,7 @@
 
 A Thai-first cooking helper that lives in LINE. Take a photo of what is in your kitchen, confirm the ingredients, set your allergies and spice level, and get recipes you can cook now, plus ones that are "almost there" and need one or two more items.
 
-> **Status: UI complete on mock data; backend in progress.** Every page runs end to end with no keys (mock mode). Sections marked _(planned)_ are not built yet. Update this file as things land.
+> **Status: UI complete on mock data; backend in progress.** Every page runs end to end with no keys (mock mode). Live mock demo: https://ai-menu-five.vercel.app Sections marked _(planned)_ are not built yet. Update this file as things land.
 
 ## Why this exists
 
