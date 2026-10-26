@@ -105,7 +105,7 @@ Tested with `scripts/test-llm.mjs` (run `node --env-file=.env.local scripts/test
 | Embeddings | `gemini-embedding-001` | Pass, 768 dimensions, matches `vector(768)` |
 | Fallback | `gemini-3.8-flash` | Works, but was slow (35 s) and returned HTTP 503 under load |
 
-Limits (free tier, read from AI Studio): 15 requests per minute on the flash model. Daily limit, embedding limit and the free tier's data-use terms are not recorded yet.
+Limits (free tier, read from AI Studio): `gemini-3.5-flash-lite` allows 15 requests per minute and 250k tokens per minute. Daily limit, embedding limit and the free tier's data-use terms are not recorded yet.
 
 Rules for the LLM wrapper:
 - Retry on HTTP 429, 5xx and network errors, with a short backoff (about 2 s, then 5 s).
