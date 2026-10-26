@@ -36,6 +36,7 @@ HTTP status carries the class of problem, the body carries the detail:
 | Status | `code` | When |
 |---|---|---|
 | 400 | `bad_request` | Missing or invalid field |
+| 401 | `unauthorized` | `POST /api/line/webhook` only: the `x-line-signature` check failed |
 | 404 | `not_found` | Unknown recipe id |
 | 413 | `too_large` | Photo over the size limit |
 | 429 | `rate_limited` | The LLM free tier limit was hit and retries did not help |

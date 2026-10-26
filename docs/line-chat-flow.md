@@ -102,6 +102,23 @@ To preview one, print its `contents` as JSON and paste it into LINE's Flex Messa
   - [ส่งเข้าแชท] appears only when opened from a LINE chat, and [แชร์ให้เพื่อน] only when the share picker is available
   - after rating inside LINE, [กลับไปที่แชท] closes the page
 
+## Webhook status (Person B)
+Built in `app/api/line/webhook/route.ts` with the logic in `lib/line/` (signature check, LINE API client, event handler) and `lib/match.ts` (hard filters and match % in code). It runs on **stand-ins** until Task 2 lands, all in `lib/line/standins.ts`:
+- **Scan** returns a fixed ingredient list (pork, egg, garlic, chili, holy basil) and ignores the photo.
+- **Search** ranks the mock recipes with the real rules.
+- **Profile** has no saved allergies for a LINE user, so nothing is filtered by allergy yet. The confirm card says "ยังไม่ได้ระบุอาหารที่แพ้" and links to the form. **Do not demo this to someone with a food allergy until the saved profile is linked to the LINE user id (Task 2).**
+
+How the steps behave:
+- "สแกนวัตถุดิบ" gets the camera prompt. Any other text gets no reply for now.
+- A photo starts the loading animation (1:1 chats only), downloads the image, scans, then replies once with the confirm card. The photo bytes are not kept.
+- The [ถูกต้อง หาเมนู] postback carries ingredient ids only (`action=search&ids=a,b,c`, kept under 300 characters). Allergies always come from the saved profile, never from the message.
+- Exactly one reply per event. No push messages.
+- A bad `x-line-signature` gets 401. Event errors are logged by status only, never the token or message text.
+
+**Open point for Person A:** the [แก้ไข] and [ดูทั้งหมด] buttons link to `/form?ids=a,b,c` and `/results?ids=a,b,c`. The pages keep their draft in `sessionStorage`, so they ignore `ids` today. They should read it into the draft when it is present (ingredient ids only).
+
+Replace for the real thing (Task 2): `standInScan`, `standInSearch` and `standInGetProfile`, wired in the route.
+
 ## Setup (account owner)
 1. LINE Official Account with the **Messaging API** enabled (for the webhook and rich menu).
 2. A **LINE Login channel** with a **LIFF app**:
