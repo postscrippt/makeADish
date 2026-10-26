@@ -9,11 +9,12 @@ Postgres on the Supabase free tier, with pgvector. The SQL lives in `supabase/mi
 | `allergens` | Fixed list of allergens, id is a slug (`peanut`, `shellfish`, ...) |
 | `ingredients` | Canonical ingredient list: Thai name, English name, `aliases` array |
 | `ingredient_allergens` | Which allergens an ingredient contains. The rule-based tagging source |
-| `recipes` | Recipe text, steps (jsonb), spice level 0-3, base servings, embedding, `allergen_status` |
+| `recipes` | Recipe text, steps (jsonb), spice level 0-3, base servings, `cook_minutes` (added in `0002`), embedding, `allergen_status` |
 | `recipe_ingredients` | Links a recipe to canonical ingredient ids, with quantity as display text |
 | `recipe_allergens` | Allergens per recipe, derived from its ingredients plus manual or LLM additions |
 | `users` | Anonymous UUID now, nullable `line_user_id` for later. Saved allergies, spice level, servings |
-| `history` | Cooked dishes: rating (1-5), favorite flag, timestamp |
+| `history` | Cooked dishes: rating (1-5), timestamp |
+| `favorites` | A user's favorite recipes (added in `0002`), independent of cooking |
 
 ## Rules the schema enforces or supports
 
@@ -30,7 +31,7 @@ Row level security is on for every table with no policies, so the public anon ke
 ## Setup
 
 1. Create a free project at supabase.com.
-2. Open the SQL editor and run `supabase/migrations/0001_init.sql`.
+2. Open the SQL editor and run the files in `supabase/migrations/` in order: `0001_init.sql`, then `0002_cook_minutes_favorites.sql`.
 3. Copy the project URL and keys into `.env.local` (see `.env.example` once added).
 
 ## Allergen filter shape
