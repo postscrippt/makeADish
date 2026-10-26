@@ -60,7 +60,7 @@ export default function FormPage() {
     return (
       <>
         <PageHeader title="เลือกเงื่อนไข" />
-        <p role="status" className="p-4 text-sm text-zinc-500">กำลังโหลด…</p>
+        <p role="status" className="p-4 text-sm text-muted">กำลังโหลด…</p>
       </>
     );
   }
@@ -70,17 +70,17 @@ export default function FormPage() {
       <PageHeader title="เลือกเงื่อนไข" />
       <main className="flex flex-col gap-6 p-4 pb-24">
         <section>
-          <h2 className="mb-2 font-semibold">วัตถุดิบที่มี</h2>
-          {tags.length === 0 && <p className="mb-2 text-sm text-zinc-500">ยังไม่มีวัตถุดิบ พิมพ์ค้นหาด้านล่างเพื่อเพิ่ม</p>}
+          <h2 className="mb-2 text-lg font-semibold">วัตถุดิบที่มี</h2>
+          {tags.length === 0 && <p className="mb-2 text-sm text-muted">ยังไม่มีวัตถุดิบ พิมพ์ค้นหาด้านล่างเพื่อเพิ่ม</p>}
           <ul className="mb-3 flex flex-wrap gap-2">
             {tags.map((t) => (
-              <li key={t.id} className="flex items-center rounded-full bg-zinc-100 pl-3 text-sm">
+              <li key={t.id} className="flex items-center rounded-full bg-butter pl-3 text-sm font-medium">
                 {t.th}
                 <button
                   type="button"
                   aria-label={`ลบ ${t.th}`}
                   onClick={() => setTags(tags.filter((x) => x.id !== t.id))}
-                  className="flex h-9 w-9 items-center justify-center text-zinc-500"
+                  className="flex h-9 w-9 items-center justify-center text-ink/70"
                 >
                   ×
                 </button>
@@ -93,11 +93,11 @@ export default function FormPage() {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="+ เพิ่มวัตถุดิบ เช่น ไก่, กระเทียม"
             aria-label="ค้นหาวัตถุดิบเพื่อเพิ่ม"
-            className="min-h-11 w-full rounded-xl border border-zinc-300 px-3 text-base"
+            className="min-h-11 w-full rounded-full border-[1.5px] border-edge bg-white px-4 text-base"
           />
           {q && (
-            <ul className="mt-1 overflow-hidden rounded-xl border border-zinc-200">
-              {suggestions.length === 0 && <li className="px-3 py-2 text-sm text-zinc-500">ไม่พบวัตถุดิบนี้</li>}
+            <ul className="mt-1 overflow-hidden rounded-2xl border border-edge bg-white shadow-card">
+              {suggestions.length === 0 && <li className="px-3 py-2 text-sm text-muted">ไม่พบวัตถุดิบนี้</li>}
               {suggestions.map((s) => (
                 <li key={s.id}>
                   <button
@@ -106,10 +106,10 @@ export default function FormPage() {
                       setTags([...tags, s]);
                       setQuery("");
                     }}
-                    className="flex min-h-11 w-full items-center justify-between px-3 text-left active:bg-zinc-100"
+                    className="flex min-h-11 w-full items-center justify-between px-3 text-left active:bg-mist"
                   >
                     {s.th}
-                    <span className="text-xs text-zinc-400">{s.en}</span>
+                    <span className="text-xs text-muted">{s.en}</span>
                   </button>
                 </li>
               ))}
@@ -118,8 +118,8 @@ export default function FormPage() {
         </section>
 
         <section>
-          <h2 className="mb-1 font-semibold">แพ้อาหาร</h2>
-          <p className="mb-2 text-xs text-zinc-500">เมนูที่มีวัตถุดิบเหล่านี้จะไม่แสดงเลย</p>
+          <h2 className="mb-1 text-lg font-semibold">แพ้อาหาร</h2>
+          <p className="mb-2 text-xs text-muted">เมนูที่มีวัตถุดิบเหล่านี้จะไม่แสดงเลย</p>
           <div className="flex flex-wrap gap-2">
             {options.allergens.map((a) => (
               <Chip key={a.id} danger selected={allergies.includes(a.id)} onClick={() => toggleAllergy(a.id)}>
@@ -130,7 +130,7 @@ export default function FormPage() {
         </section>
 
         <section>
-          <h2 className="mb-2 font-semibold">ระดับความเผ็ด</h2>
+          <h2 className="mb-2 text-lg font-semibold">ระดับความเผ็ด</h2>
           <div className="flex flex-wrap gap-2">
             {spiceLabels.map((label, level) => (
               <Chip key={label} selected={spice === level} onClick={() => setSpice(level as SpiceLevel)}>
@@ -141,7 +141,7 @@ export default function FormPage() {
         </section>
 
         <section>
-          <h2 className="mb-2 font-semibold">ประเภทอาหาร</h2>
+          <h2 className="mb-2 text-lg font-semibold">ประเภทอาหาร</h2>
           <div className="flex flex-wrap gap-2">
             <Chip selected={category === null} onClick={() => setCategory(null)}>
               ทั้งหมด
@@ -155,17 +155,17 @@ export default function FormPage() {
         </section>
 
         <section className="flex items-center justify-between">
-          <h2 className="font-semibold">ทำกี่ที่</h2>
+          <h2 className="text-lg font-semibold">ทำกี่ที่</h2>
           <Stepper value={servings} onChange={setServings} unit="ที่" />
         </section>
       </main>
 
-      <div className="sticky bottom-0 border-t border-zinc-200 bg-white p-4">
+      <div className="sticky bottom-0 rounded-t-3xl bg-white p-4 shadow-card">
         <button
           type="button"
           onClick={submit}
           disabled={tags.length === 0}
-          className="min-h-12 w-full rounded-xl bg-line text-base font-semibold text-zinc-900 disabled:bg-zinc-200 disabled:text-zinc-400"
+          className="btn-primary w-full text-base"
         >
           หาเมนู
         </button>

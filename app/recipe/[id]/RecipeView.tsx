@@ -38,13 +38,13 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
   }, [id, fromSearch]);
 
   if (failed) return <p role="alert" className="p-4 text-red-700">โหลดสูตรไม่สำเร็จ ลองใหม่อีกครั้งนะ</p>;
-  if (!data) return <p role="status" className="p-4 text-sm text-zinc-500">กำลังโหลด…</p>;
+  if (!data) return <p role="status" className="p-4 text-sm text-muted">กำลังโหลด…</p>;
 
   const { recipe, have, allergic } = data;
   if (!recipe) {
     return (
       <div className="flex flex-col items-center gap-4 p-4 py-16 text-center">
-        <p className="text-zinc-600">ไม่พบสูตรอาหารนี้</p>
+        <p className="text-muted">ไม่พบสูตรอาหารนี้</p>
         <Link href="/" className="underline">กลับหน้าหลัก</Link>
       </div>
     );
@@ -68,8 +68,8 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
     <main className="flex flex-col gap-6 p-4 pb-10">
       <section className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold">{recipe.th}</h2>
-          <p className="text-sm text-zinc-500">
+          <h2 className="text-2xl font-bold text-ink">{recipe.th}</h2>
+          <p className="text-sm text-muted">
             {recipe.en} · {recipe.minutes} นาที
             {recipe.spice > 0 && <span aria-label={`ความเผ็ดระดับ ${recipe.spice}`}> · {"🌶".repeat(recipe.spice)}</span>}
           </p>
@@ -79,30 +79,30 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
           aria-pressed={favorite}
           aria-label="เมนูโปรด"
           onClick={toggleFavorite}
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-xl ${favorite ? "border-red-300 bg-red-50 text-red-500" : "border-zinc-300 text-zinc-400"}`}
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-xl ${favorite ? "border-red-300 bg-red-50 text-red-500" : "border-edge bg-white text-muted"}`}
         >
           {favorite ? "♥" : "♡"}
         </button>
       </section>
 
       {allergic.length > 0 && (
-        <p role="alert" className="rounded-xl border border-red-300 bg-red-50 p-3 text-sm font-medium text-red-700">
+        <p role="alert" className="rounded-2xl border border-red-300 bg-red-50 p-3 text-sm font-medium text-red-700">
           ⚠ เมนูนี้มี {allergic.join(", ")} ที่คุณแพ้
         </p>
       )}
 
       {missing.length > 0 && (
-        <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
+        <p className="rounded-2xl bg-amber-50 p-3 text-sm text-amber-800">
           ต้องซื้อเพิ่ม: {missing.map((m) => m.th).join(", ")}
         </p>
       )}
 
       <section>
         <div className="mb-2 flex items-center justify-between">
-          <h3 className="font-semibold">วัตถุดิบ</h3>
+          <h3 className="text-lg font-semibold">วัตถุดิบ</h3>
           <Stepper value={servings} onChange={setServings} unit="ที่" />
         </div>
-        <ul className="divide-y divide-zinc-100">
+        <ul className="divide-y divide-edge rounded-3xl bg-white px-4 shadow-card">
           {recipe.ingredients.map((x) => {
             const isMissing = missing.includes(x);
             return (
@@ -111,7 +111,7 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
                   {x.th}
                   {isMissing && <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">ขาด</span>}
                 </span>
-                <span className="text-zinc-600">{scaleQty(x.qty, factor)}</span>
+                <span className="text-muted">{scaleQty(x.qty, factor)}</span>
               </li>
             );
           })}
@@ -119,11 +119,11 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
       </section>
 
       <section>
-        <h3 className="mb-2 font-semibold">วิธีทำ</h3>
+        <h3 className="mb-2 text-lg font-semibold">วิธีทำ</h3>
         <ol className="flex flex-col gap-3">
           {recipe.steps.map((step, i) => (
             <li key={i} className="flex gap-3">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-line/20 text-sm font-semibold">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-butter text-sm font-semibold">
                 {i + 1}
               </span>
               <span className="pt-0.5">{step}</span>
@@ -132,7 +132,7 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
         </ol>
       </section>
 
-      <section className="rounded-2xl border border-zinc-200 p-4">
+      <section className="rounded-3xl bg-white p-4 shadow-card">
         {saved ? (
           <p role="status" className="text-center">
             บันทึกลงประวัติแล้ว ·{" "}
@@ -142,7 +142,7 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
           <button
             type="button"
             onClick={() => setCooking(true)}
-            className="min-h-12 w-full rounded-xl bg-line font-semibold text-zinc-900"
+            className="btn-primary w-full"
           >
             ทำเมนูนี้แล้ว
           </button>
@@ -158,7 +158,7 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
                   aria-checked={rating === n}
                   aria-label={`${n} ดาว`}
                   onClick={() => setRating(n)}
-                  className={`h-11 w-11 text-3xl ${rating && n <= rating ? "text-amber-400" : "text-zinc-300"}`}
+                  className={`h-11 w-11 text-3xl ${rating && n <= rating ? "text-amber-400" : "text-edge"}`}
                 >
                   ★
                 </button>
@@ -168,7 +168,7 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
               type="button"
               onClick={save}
               disabled={!rating}
-              className="min-h-12 w-full rounded-xl bg-line font-semibold text-zinc-900 disabled:bg-zinc-200 disabled:text-zinc-400"
+              className="btn-primary w-full"
             >
               บันทึก
             </button>

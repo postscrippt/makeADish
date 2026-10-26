@@ -11,7 +11,7 @@ import type { SearchResult } from "@/types/api";
 type Tab = "matches" | "almostThere";
 type State = { kind: "loading" } | { kind: "noSearch" } | { kind: "error" } | { kind: "done"; result: SearchResult };
 
-const linkButton = "flex min-h-12 items-center justify-center rounded-xl bg-line px-6 font-semibold text-zinc-900";
+const linkButton = "btn-primary";
 
 export default function ResultsPage() {
   const [state, setState] = useState<State>({ kind: "loading" });
@@ -39,15 +39,15 @@ export default function ResultsPage() {
       <PageHeader title="ผลลัพธ์" />
       <main className="p-4">
         {state.kind === "loading" && (
-          <div role="status" className="flex flex-col items-center gap-3 py-16 text-sm text-zinc-500">
-            <span className="h-8 w-8 animate-spin rounded-full border-4 border-line border-t-transparent" />
+          <div role="status" className="flex flex-col items-center gap-3 py-16 text-sm text-muted">
+            <span className="h-8 w-8 animate-spin rounded-full border-4 border-brand border-t-transparent" />
             กำลังหาเมนูที่ทำได้จากวัตถุดิบของคุณ…
           </div>
         )}
 
         {state.kind === "noSearch" && (
           <div className="flex flex-col items-center gap-4 py-16 text-center">
-            <p className="text-zinc-600">ยังไม่ได้เลือกวัตถุดิบ</p>
+            <p className="text-muted">ยังไม่ได้เลือกวัตถุดิบ</p>
             <Link href="/scan" className={linkButton}>เริ่มสแกนวัตถุดิบ</Link>
           </div>
         )}
@@ -72,7 +72,7 @@ function Results({ result, tab, setTab }: { result: SearchResult; tab: Tab; setT
     return (
       <div className="flex flex-col items-center gap-3 py-16 text-center">
         <p className="font-semibold">ไม่พบเมนูที่ตรงเงื่อนไข</p>
-        <p className="text-sm text-zinc-500">ค้นหาแล้ว {tries} รอบ ลองเพิ่มวัตถุดิบหรือเปลี่ยนเงื่อนไขดูนะ</p>
+        <p className="text-sm text-muted">ค้นหาแล้ว {tries} รอบ ลองเพิ่มวัตถุดิบหรือเปลี่ยนเงื่อนไขดูนะ</p>
         <Link href="/form" className={`${linkButton} mt-2`}>แก้เงื่อนไข</Link>
       </div>
     );
@@ -86,7 +86,7 @@ function Results({ result, tab, setTab }: { result: SearchResult; tab: Tab; setT
 
   return (
     <>
-      <div role="tablist" className="mb-4 grid grid-cols-2 rounded-xl bg-zinc-100 p-1">
+      <div role="tablist" className="mb-4 grid grid-cols-2 rounded-full bg-white p-1 shadow-card">
         {tabs.map(([id, label, count]) => (
           <button
             key={id}
@@ -94,7 +94,7 @@ function Results({ result, tab, setTab }: { result: SearchResult; tab: Tab; setT
             role="tab"
             aria-selected={tab === id}
             onClick={() => setTab(id)}
-            className={`min-h-10 rounded-lg text-sm font-medium ${tab === id ? "bg-white shadow-sm" : "text-zinc-500"}`}
+            className={`min-h-10 rounded-full text-sm font-medium ${tab === id ? "bg-butter text-ink" : "text-muted"}`}
           >
             {label} ({count})
           </button>
@@ -102,11 +102,11 @@ function Results({ result, tab, setTab }: { result: SearchResult; tab: Tab; setT
       </div>
 
       {tab === "almostThere" && list.length > 0 && (
-        <p className="mb-3 text-xs text-zinc-500">ซื้อเพิ่มอีก 1-2 อย่างก็ทำได้</p>
+        <p className="mb-3 text-xs text-muted">ซื้อเพิ่มอีก 1-2 อย่างก็ทำได้</p>
       )}
 
       {list.length === 0 ? (
-        <p className="py-12 text-center text-sm text-zinc-500">
+        <p className="py-12 text-center text-sm text-muted">
           {tab === "matches" ? "ยังไม่มีเมนูที่ใช้วัตถุดิบครบ ลองดูแท็บ “ขาดวัตถุดิบอีกนิด”" : "ไม่มีเมนูที่ขาดแค่ 1-2 อย่าง"}
         </p>
       ) : (
@@ -119,7 +119,7 @@ function Results({ result, tab, setTab }: { result: SearchResult; tab: Tab; setT
         </ul>
       )}
 
-      {tries > 1 && <p className="mt-4 text-center text-xs text-zinc-400">ค้นหาแล้ว {tries} รอบ</p>}
+      {tries > 1 && <p className="mt-4 text-center text-xs text-muted">ค้นหาแล้ว {tries} รอบ</p>}
     </>
   );
 }

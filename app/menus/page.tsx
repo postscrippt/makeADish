@@ -26,7 +26,7 @@ export default function MenusPage() {
   }, []);
 
   if (failed) return <Shell><p role="alert" className="p-4 text-red-700">โหลดเมนูไม่สำเร็จ ลองใหม่อีกครั้งนะ</p></Shell>;
-  if (!data) return <Shell><p role="status" className="p-4 text-sm text-zinc-500">กำลังโหลด…</p></Shell>;
+  if (!data) return <Shell><p role="status" className="p-4 text-sm text-muted">กำลังโหลด…</p></Shell>;
 
   const q = query.trim().toLowerCase();
   const categoryName = (id: string) => data.categories.find((c) => c.id === id)?.th ?? "";
@@ -43,7 +43,7 @@ export default function MenusPage() {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="ค้นหาเมนู เช่น กะเพรา, ต้มยำ"
           aria-label="ค้นหาเมนู"
-          className="min-h-11 w-full rounded-xl border border-zinc-300 px-3 text-base"
+          className="min-h-11 w-full rounded-full border-[1.5px] border-edge bg-white px-4 text-base"
         />
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
           <Chip selected={category === null} onClick={() => setCategory(null)}>ทั้งหมด</Chip>
@@ -54,11 +54,11 @@ export default function MenusPage() {
           ))}
         </div>
         {data.hiddenFor.length > 0 && (
-          <p className="text-xs text-zinc-500">ซ่อนเมนูที่มี {data.hiddenFor.join(", ")} ตามที่คุณแพ้</p>
+          <p className="text-xs text-muted">ซ่อนเมนูที่มี {data.hiddenFor.join(", ")} ตามที่คุณแพ้</p>
         )}
 
         {shown.length === 0 ? (
-          <p className="py-12 text-center text-sm text-zinc-500">ไม่พบเมนูที่ค้นหา</p>
+          <p className="py-12 text-center text-sm text-muted">ไม่พบเมนูที่ค้นหา</p>
         ) : (
           <ul className="flex flex-col gap-3">
             {shown.map((r) => (

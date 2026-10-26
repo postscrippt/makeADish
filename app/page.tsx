@@ -1,32 +1,66 @@
 import Link from "next/link";
+import Image from "next/image";
 
-// Mirrors the LINE rich menu tiles; in LINE each tile opens one of these pages directly.
-const tiles = [
-  { href: "/scan", icon: "📷", label: "สแกนวัตถุดิบ", hint: "ถ่ายรูปของในครัว" },
-  { href: "/history", icon: "🕘", label: "ประวัติ", hint: "เมนูที่เคยทำ" },
-  { href: "/menus", icon: "📖", label: "เมนูทั้งหมด", hint: "ค้นหาสูตร" },
-  { href: "/ask", icon: "💬", label: "ถามผู้ช่วย", hint: "ถามเรื่องทำอาหาร" },
+// Line icons (24px grid, stroked) so tiles match the rich menu image.
+const icons = {
+  scan: "M3 8.5A2.5 2.5 0 0 1 5.5 6h2l1.5-2h6l1.5 2h2A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5zM12 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z",
+  history: "M12 21a9 9 0 1 0-9-9M3 12l-1-2.5M3 12l2.5-1.5M12 7v5l3 2",
+  menus: "M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5zM13 4h5.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H13zM7 8h1M16 8h1",
+  ask: "M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 3.5V17A2.5 2.5 0 0 1 4 14.5zM8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01",
+};
+
+function Icon({ d, className }: { d: string; className: string }) {
+  return (
+    <svg aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d={d} />
+    </svg>
+  );
+}
+
+// Mirrors the LINE rich menu: Scan is the big tile, the other three are rows. In LINE each opens its page directly.
+const rows = [
+  { href: "/history", icon: icons.history, label: "ประวัติ", hint: "เมนูที่เคยทำและเมนูโปรด" },
+  { href: "/menus", icon: icons.menus, label: "เมนูทั้งหมด", hint: "ค้นหาสูตรอาหาร" },
+  { href: "/ask", icon: icons.ask, label: "ถามผู้ช่วย", hint: "ถามเรื่องทำอาหาร" },
 ];
 
 export default function Home() {
   return (
-    <main className="flex min-h-dvh flex-col">
-      <header className="bg-line px-5 pb-8 pt-10 text-zinc-900">
-        <h1 className="text-3xl font-bold">AI Menu</h1>
-        <p className="mt-1">มีอะไรในครัว ก็ทำได้</p>
+    <main className="flex min-h-dvh flex-col pb-8">
+      <header className="rounded-b-[2.5rem] bg-brand px-6 pb-20 pt-8 text-white">
+        <p className="flex items-center gap-2 text-xl font-semibold">
+          <Image src="/logo.svg" alt="" width={50} height={36} unoptimized priority />
+          MakeADish
+        </p>
+        <h1 className="mt-10 text-4xl font-bold leading-tight text-butter">
+          มีอะไรในครัว
+          <br />
+          ก็ทำได้
+        </h1>
+        <p className="mt-3 text-base">ถ่ายรูปวัตถุดิบ แล้วเราหาเมนูที่ทำได้ให้</p>
       </header>
-      <nav aria-label="เมนูหลัก" className="-mt-4 grid grid-cols-2 gap-3 px-4">
-        {tiles.map(({ href, icon, label, hint }) => (
-          <Link
-            key={href}
-            href={href}
-            className="flex aspect-square flex-col justify-between rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm active:bg-zinc-50"
-          >
-            <span aria-hidden className="text-4xl">{icon}</span>
-            <span>
-              <span className="block text-lg font-semibold">{label}</span>
-              <span className="block text-sm text-zinc-500">{hint}</span>
+
+      <nav aria-label="เมนูหลัก" className="-mt-12 flex flex-col gap-3 px-4">
+        <Link href="/scan" className="flex items-center gap-4 rounded-3xl bg-butter p-5 shadow-card active:bg-butter-soft">
+          <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white text-brand-deep">
+            <Icon d={icons.scan} className="h-8 w-8" />
+          </span>
+          <span className="flex-1">
+            <span className="block text-2xl font-bold text-ink">สแกนวัตถุดิบ</span>
+            <span className="block text-sm text-ink">ถ่ายรูปของในครัว แล้วหาเมนู</span>
+          </span>
+          <span aria-hidden className="text-3xl text-brand-deep">›</span>
+        </Link>
+        {rows.map(({ href, icon, label, hint }) => (
+          <Link key={href} href={href} className="flex items-center gap-4 rounded-3xl bg-white p-4 shadow-card active:bg-butter-soft">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-butter text-ink">
+              <Icon d={icon} className="h-6 w-6" />
             </span>
+            <span className="flex-1">
+              <span className="block text-lg font-semibold">{label}</span>
+              <span className="block text-sm text-muted">{hint}</span>
+            </span>
+            <span aria-hidden className="text-2xl text-muted">›</span>
           </Link>
         ))}
       </nav>
