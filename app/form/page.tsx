@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import PageHeader from "@/components/PageHeader";
 import Chip from "@/components/Chip";
+import Stepper from "@/components/Stepper";
 import { getIngredients, getOptions, getProfile, saveProfile } from "@/mocks/api";
 import { readDraft, writeDraft } from "@/app/draft";
 import type { Ingredient, Options, Profile, SpiceLevel } from "@/types/api";
@@ -155,25 +156,7 @@ export default function FormPage() {
 
         <section className="flex items-center justify-between">
           <h2 className="font-semibold">จำนวนที่ทาน</h2>
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              aria-label="ลดจำนวน"
-              onClick={() => setServings(Math.max(1, servings - 1))}
-              className="h-11 w-11 rounded-full border border-zinc-300 text-xl"
-            >
-              −
-            </button>
-            <span aria-live="polite" className="w-14 text-center">{servings} ที่</span>
-            <button
-              type="button"
-              aria-label="เพิ่มจำนวน"
-              onClick={() => setServings(Math.min(12, servings + 1))}
-              className="h-11 w-11 rounded-full border border-zinc-300 text-xl"
-            >
-              +
-            </button>
-          </div>
+          <Stepper value={servings} onChange={setServings} unit="ที่" />
         </section>
       </main>
 
