@@ -7,7 +7,7 @@ The menu at the bottom of the LINE chat. It's a compact menu (2500×843): a big 
   ```bash
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --hide-scrollbars --force-device-scale-factor=1 --window-size=2500,843 --virtual-time-budget=5000 --screenshot="$PWD/rich-menu.png" "file://$PWD/rich-menu.html"
   ```
-- `rich-menu.json` holds the tap areas and links, for the API route below. The links already use the LIFF app (`https://liff.line.me/2012226850-YpXIkuN3/scan`, `/history`, `/menus`), so pages open as the LIFF app and can send cards into the chat. When Person B's webhook is live, change the Scan area to `{ "type": "message", "label": "สแกนวัตถุดิบ", "text": "สแกนวัตถุดิบ" }` so the camera opens in the chat. See `docs/line-chat-flow.md`.
+- `rich-menu.json` holds the tap areas and links, for the API route below. The links already use the LIFF app (`https://liff.line.me/2012226850-YpXIkuN3/scan`, `/history`, `/menus`), so pages open as the LIFF app and can send cards into the chat. The Scan area sends the message "สแกนวัตถุดิบ", and the bot replies with camera buttons, so the photo is taken in the chat. **Upload this menu only after the webhook is switched on** (Use webhook = on); before that, tapping Scan gets no reply. See `docs/line-chat-flow.md`.
 
 | Tile | x, y | width × height | Opens |
 |---|---|---|---|

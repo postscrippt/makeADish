@@ -15,9 +15,9 @@
         "height": 843
       },
       "action": {
-        "type": "uri",
+        "type": "message",
         "label": "สแกนวัตถุดิบ",
-        "uri": "https://liff.line.me/2012226850-YpXIkuN3/scan"
+        "text": "สแกนวัตถุดิบ"
       }
     },
     {
