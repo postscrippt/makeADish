@@ -7,11 +7,15 @@ import { getFavorites, getOptions, getProfile, getRecipe, getSubstitutes, logCoo
 import { readDraft } from "@/app/draft";
 import type { HistoryEntry, Recipe, RecipeIngredient } from "@/types/api";
 import type { SwapResult } from "@/app/recipe/swaps";
+import { cookPath, recipeCard } from "@/app/recipe/recipeCard";
+import { canSendToChat, canShare, closeToChat, inLineApp, liffUrl, sendToChat, shareToFriends } from "@/app/liff";
 
 type Rating = HistoryEntry["rating"];
 type Loaded = { recipe: Recipe | null; have: Set<string> | null; allergic: string[]; allergies: string[] };
 
-export default function RecipeView({ id, fromSearch }: { id: string; fromSearch: boolean }) {
+export default function RecipeView({
+  id, fromSearch, missingIds, cook,
+}: { id: string; fromSearch: boolean; missingIds: string[]; cook: boolean }) {
   const [data, setData] = useState<Loaded | null>(null);
   const [failed, setFailed] = useState(false);
   const [favorite, setFav] = useState(false);
@@ -27,7 +31,8 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
   useEffect(() => {
     Promise.all([getRecipe(id), getFavorites(), getProfile(), getOptions()])
       .then(([recipe, favorites, profile, options]) => {
-        // Only mark missing items when opened from Results; Menus and History have no pantry.
+        // Mark missing items when opened from Results (the search draft) or from a chat card (?missing=).
+        // Menus and History have no pantry.
         const search = fromSearch ? readDraft("search") : null;
         const have = search ? new Set(search.ingredientIds) : null;
         // A saved dish can contain an allergy added later (e.g. a favorite), so warn instead of hiding.
@@ -39,6 +44,7 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
       })
       .catch(() => setFailed(true));
   }, [id, fromSearch]);
+
 
   if (failed) return <p role="alert" className="p-4 text-red-700">โหลดสูตรไม่สำเร็จ ลองใหม่อีกครั้งนะ</p>;
   if (!data) return <p role="status" className="p-4 text-sm text-muted">กำลังโหลด…</p>;
@@ -53,7 +59,8 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
     );
   }
 
-  const missing = have ? recipe.ingredients.filter((x) => !have.has(x.id)) : [];
+  // Ids from the link only count if they are in this recipe.
+  const missing = have ? recipe.ingredients.filter((x) => !have.has(x.id)) : recipe.ingredients.filter((x) => missingIds.includes(x.id));
 
   function toggleFavorite() {
     setFav(!favorite);
@@ -86,6 +93,8 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
           {favorite ? "♥" : "♡"}
         </button>
       </section>
+
+      <ChatActions recipe={recipe} missingIds={missing.map((m) => m.id)} />
 
       {allergic.length > 0 && (
         <p role="alert" className="rounded-2xl border border-red-300 bg-red-50 p-3 text-sm font-medium text-red-700">
@@ -125,15 +134,18 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
         </ul>
       </section>
 
-      <StepsTimeline steps={recipe.steps} onFinish={() => setCooking(true)} />
+      <StepsTimeline steps={recipe.steps} onFinish={() => setCooking(true)} jumpTo={cook} />
 
       {(cooking || saved) && (
       <section ref={ratingRef} className="rounded-3xl bg-white p-4 shadow-card">
         {saved ? (
+          <>
           <p role="status" className="text-center">
             บันทึกลงประวัติแล้ว ·{" "}
             <Link href="/history" className="underline">ดูประวัติ</Link>
           </p>
+          <BackToChat />
+          </>
         ) : (
           <div className="flex flex-col items-center gap-3">
             <p className="font-medium">อร่อยแค่ไหน?</p>
@@ -206,5 +218,57 @@ function MissingItem({ item, allergies }: { item: RecipeIngredient; allergies: s
         {typeof state === "object" && state.kind === "none" && <p className="text-muted">ยังไม่มีคำแนะนำสำหรับวัตถุดิบนี้</p>}
       </div>
     </li>
+  );
+}
+
+// Shown only inside LINE: post the recipe card into this chat, or share it with friends.
+function ChatActions({ recipe, missingIds }: { recipe: Recipe; missingIds: string[] }) {
+  const [can, setCan] = useState({ send: false, share: false });
+  const [status, setStatus] = useState("");
+
+  useEffect(() => {
+    Promise.all([canSendToChat(), canShare()]).then(([send, share]) => setCan({ send, share }));
+  }, []);
+
+  if (!can.send && !can.share) return null;
+  const card = () => [recipeCard(recipe, missingIds, liffUrl(cookPath(recipe.id, missingIds)))];
+
+  async function run(action: () => Promise<unknown>, done: string) {
+    try {
+      const sent = await action();
+      setStatus(sent === false ? "" : done);
+    } catch {
+      setStatus("ส่งไม่สำเร็จ ลองอีกครั้งนะ");
+    }
+  }
+
+  return (
+    <section className="-mt-3 flex flex-wrap items-center gap-2">
+      {can.send && (
+        <button type="button" onClick={() => run(() => sendToChat(card()), "ส่งสูตรเข้าแชทแล้ว")} className="btn-secondary min-h-11 px-4 text-sm">
+          ส่งเข้าแชท
+        </button>
+      )}
+      {can.share && (
+        <button type="button" onClick={() => run(() => shareToFriends(card()), "แชร์แล้ว")} className="btn-secondary min-h-11 px-4 text-sm">
+          แชร์ให้เพื่อน
+        </button>
+      )}
+      <span role="status" className="text-sm text-muted">{status}</span>
+    </section>
+  );
+}
+
+// After rating inside LINE: one tap back to the chat.
+function BackToChat() {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    inLineApp().then(setShow);
+  }, []);
+  if (!show) return null;
+  return (
+    <button type="button" onClick={closeToChat} className="btn-primary mt-3 w-full">
+      กลับไปที่แชท
+    </button>
   );
 }
