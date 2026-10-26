@@ -16,3 +16,19 @@ test("parseStep", () => {
 test("every mock step gets a real icon", () => {
   for (const r of recipes) r.steps.forEach((s, i) => assert.notEqual(parseStep(s, i).icon, "generic", s));
 });
+
+test("leading fillers are skipped and more verbs are known", () => {
+  assert.deepEqual(parseStep("แล้วตักขึ้นพักไว้", 3), { verb: "ตัก", detail: "ขึ้นพักไว้", icon: "plate", heat: null, minutes: null });
+  assert.equal(parseStep("จากนั้นนำหมูลงผัด", 1).icon, "add");
+  assert.equal(parseStep("ตำพริกกับกระเทียม", 0).icon, "mortar");
+  assert.equal(parseStep("หุงข้าวให้สุก", 0).icon, "pot");
+  assert.equal(parseStep("ย่างหมูให้เกรียม", 0).icon, "pan");
+});
+
+test("timer minutes: ranges use the earliest check, hours convert, seconds get no timer", () => {
+  assert.equal(parseStep("ต้มเส้น 2-3 นาที", 0).minutes, 2);
+  assert.equal(parseStep("ต้มเส้น 2 - 3 นาที", 0).minutes, 2);
+  assert.equal(parseStep("เคี่ยว 1 ชั่วโมง", 0).minutes, 60);
+  assert.equal(parseStep("เคี่ยว 1 ชั่วโมง 30 นาที", 0).minutes, 90);
+  assert.equal(parseStep("ผัดเร็ว ๆ 30 วินาที", 0).minutes, null);
+});

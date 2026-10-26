@@ -73,7 +73,8 @@ export default function StepsTimeline({ steps, onFinish, jumpTo = false }: { ste
                   <div className="flex h-28 items-center justify-center rounded-2xl bg-butter-soft">
                     <StepIcon icon={p.icon} className="h-[72px] w-[72px]" />
                   </div>
-                  <p className="mt-3 text-sm font-medium text-muted">ขั้นที่ {i + 1}</p>
+                  {/* Generic steps already use "ขั้นที่ N" as their big label. */}
+                  {p.icon !== "generic" && <p className="mt-3 text-sm font-medium text-muted">ขั้นที่ {i + 1}</p>}
                   <p className="text-[26px] leading-tight font-bold">{p.verb}</p>
                   {p.detail && <p className="mt-1 text-lg text-muted">{p.detail}</p>}
                   {(p.heat || p.minutes) && (
