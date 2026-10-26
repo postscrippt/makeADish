@@ -15,7 +15,7 @@ About 4 minutes. One presenter drives the phone, the other narrates. Practice it
 
 | Time | Do | Say |
 |---|---|---|
-| 0:00 | Show the LINE chat with the rich menu | "Most recipe apps start from a dish. AI Menu starts from your kitchen, inside LINE, which most Thai users already have open." |
+| 0:00 | Show the LINE chat with the rich menu | "Most recipe apps start from a dish. MakeADish starts from your kitchen, inside LINE, which most Thai users already have open." |
 | 0:20 | Tap **สแกนวัตถุดิบ**, take the photo | "Take one photo of what you have." |
 | 0:35 | Spinner, then Form with tags | "It reads the ingredients. You can fix anything it got wrong." Remove one tag, add **ไก่** by typing. |
 | 1:00 | Point at the red allergy chips | "Allergies are a hard filter. The AI can never override them. Unknown allergen data means the recipe is never shown." |
@@ -36,4 +36,4 @@ About 4 minutes. One presenter drives the phone, the other narrates. Practice it
 
 ## Backup recording
 
-Record the script above on the demo phone (iOS: Control Center → Screen Recording; Android: Quick Settings → Screen record). Save it to `Drive / AI Menu / demo-backup.mp4` and on the laptop's desktop. Don't commit it to the repo.
+Record the script above on the demo phone (iOS: Control Center → Screen Recording; Android: Quick Settings → Screen record). Save it to `Drive / MakeADish / demo-backup.mp4` and on the laptop's desktop. Don't commit it to the repo.

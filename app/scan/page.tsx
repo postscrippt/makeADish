@@ -53,18 +53,16 @@ export default function ScanPage() {
     }
   }
 
-  const button = "flex min-h-12 flex-1 cursor-pointer items-center justify-center rounded-xl text-base font-medium";
-
-  return (
+    return (
     <>
       <PageHeader title="สแกนวัตถุดิบ" />
       <main className="flex flex-col gap-4 p-4">
-        <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-zinc-300 bg-zinc-50">
+        <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-3xl border-2 border-dashed border-brand/40 bg-white">
           {photo && preview ? (
             // eslint-disable-next-line @next/next/no-img-element -- local blob preview, not an optimisable asset
             <img src={preview} alt="รูปวัตถุดิบที่เลือก" className="h-full w-full object-cover" />
           ) : (
-            <p className="px-6 text-center text-sm text-zinc-500">
+            <p className="px-6 text-center text-sm text-muted">
               ถ่ายรูปวัตถุดิบในครัวของคุณ
               <br />
               วางให้เห็นครบในรูปเดียว
@@ -72,24 +70,24 @@ export default function ScanPage() {
           )}
           {scanning && (
             <div role="status" className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/80">
-              <span className="h-8 w-8 animate-spin rounded-full border-4 border-line border-t-transparent" />
+              <span className="h-8 w-8 animate-spin rounded-full border-4 border-brand border-t-transparent" />
               <span className="text-sm">กำลังอ่านวัตถุดิบ…</span>
             </div>
           )}
         </div>
 
         {failure && (
-          <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
+          <p role="alert" className="rounded-2xl bg-red-50 p-3 text-sm text-red-700">
             {failureText[failure]}
           </p>
         )}
 
         <div className="flex gap-3">
-          <label className={`${button} border border-zinc-300`}>
+          <label className="btn-secondary flex-1 text-base">
             ถ่ายรูป
             <input type="file" accept="image/*" capture="environment" onChange={pick} disabled={scanning} className="sr-only" />
           </label>
-          <label className={`${button} border border-zinc-300`}>
+          <label className="btn-secondary flex-1 text-base">
             เลือกจากคลังภาพ
             <input type="file" accept="image/*" onChange={pick} disabled={scanning} className="sr-only" />
           </label>
@@ -99,14 +97,14 @@ export default function ScanPage() {
           type="button"
           onClick={runScan}
           disabled={!photo || scanning}
-          className="min-h-12 rounded-xl bg-line text-base font-semibold text-zinc-900 disabled:bg-zinc-200 disabled:text-zinc-400"
+          className="btn-primary text-base"
         >
           {failure ? "ลองสแกนอีกครั้ง" : "สแกน"}
         </button>
 
-        <p className="text-center text-xs text-zinc-500">เราไม่เก็บรูปไว้ และจะลบทิ้งทันทีหลังสแกน</p>
+        <p className="text-center text-xs text-muted">เราไม่เก็บรูปไว้ และจะลบทิ้งทันทีหลังสแกน</p>
 
-        <Link href="/form" className="flex min-h-11 items-center justify-center text-sm text-zinc-600 underline">
+        <Link href="/form" className="flex min-h-11 items-center justify-center text-sm text-muted underline">
           หรือ พิมพ์วัตถุดิบเอง
         </Link>
       </main>

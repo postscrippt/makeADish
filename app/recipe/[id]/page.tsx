@@ -12,7 +12,7 @@ export default function RecipePage({ params, searchParams }: PageProps<"/recipe/
   return (
     <>
       <PageHeader title="สูตรอาหาร" />
-      <Suspense fallback={<main className="p-4 text-zinc-400">กำลังโหลด…</main>}>
+      <Suspense fallback={<main className="p-4 text-muted">กำลังโหลด…</main>}>
         <RecipeBody params={params} searchParams={searchParams} />
       </Suspense>
     </>
