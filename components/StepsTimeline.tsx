@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import StepIcon from "@/components/StepIcon";
 import { parseStep, type Heat } from "@/app/recipe/steps";
+import { secondsLeft } from "@/app/recipe/timer";
 
 const heatLabels: Record<Heat, string> = { 1: "ไฟอ่อน", 2: "ไฟกลาง", 3: "ไฟแรง" };
 const FLAME = "M12 3c3 4 6 6 6 11a6 6 0 0 1-12 0c0-3 2-5 3-7 1 2 3 2 3-4z";
@@ -123,25 +124,37 @@ export default function StepsTimeline({ steps, onFinish }: { steps: string[]; on
   );
 }
 
-// Tap to start, tap to pause. Remounted per step (keyed by the parent), so switching steps resets it.
+// Tap to start, tap to pause. Remounted per step (only the current card renders it), so switching steps resets it.
+// Counts toward a fixed end time, so it stays right after the phone pauses the page in the background.
 function Timer({ minutes }: { minutes: number }) {
   const [left, setLeft] = useState(minutes * 60);
-  const [running, setRunning] = useState(false);
+  const [endAt, setEndAt] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!running) return;
-    const id = setInterval(() => {
-      setLeft((s) => {
-        if (s <= 1) {
-          setRunning(false);
-          navigator.vibrate?.(400);
-          return 0;
-        }
-        return s - 1;
-      });
-    }, 1000);
-    return () => clearInterval(id);
-  }, [running]);
+    if (endAt === null) return;
+    const tick = () => setLeft(secondsLeft(endAt, Date.now()));
+    const id = setInterval(tick, 1000);
+    document.addEventListener("visibilitychange", tick);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", tick);
+    };
+  }, [endAt]);
+
+  // Time's up: stop and buzz once.
+  useEffect(() => {
+    if (left > 0 || endAt === null) return;
+    setEndAt(null); // eslint-disable-line react-hooks/set-state-in-effect
+    navigator.vibrate?.(400);
+  }, [left, endAt]);
+
+  function toggle() {
+    if (endAt === null) setEndAt(Date.now() + left * 1000);
+    else {
+      setLeft(secondsLeft(endAt, Date.now()));
+      setEndAt(null);
+    }
+  }
 
   if (left === 0) {
     return (
@@ -150,10 +163,11 @@ function Timer({ minutes }: { minutes: number }) {
       </span>
     );
   }
+  const running = endAt !== null;
   const started = left < minutes * 60;
   const mmss = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
   return (
-    <button type="button" onClick={() => setRunning(!running)} className="flex min-h-11 items-center rounded-full bg-butter px-4 text-sm font-semibold">
+    <button type="button" onClick={toggle} className="flex min-h-11 items-center rounded-full bg-butter px-4 text-sm font-semibold">
       ⏱ {running ? mmss : started ? `${mmss} · ต่อ` : `${minutes} นาที · เริ่ม`}
     </button>
   );
