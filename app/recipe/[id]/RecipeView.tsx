@@ -1,38 +1,41 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import Stepper from "@/components/Stepper";
-import { getFavorites, getOptions, getProfile, getRecipe, logCooked, setFavorite } from "@/mocks/api";
+import StepsTimeline from "@/components/StepsTimeline";
+import { getFavorites, getOptions, getProfile, getRecipe, getSubstitutes, logCooked, setFavorite } from "@/mocks/api";
 import { readDraft } from "@/app/draft";
-import { scaleQty } from "@/app/recipe/scale";
-import type { HistoryEntry, Recipe } from "@/types/api";
+import type { HistoryEntry, Recipe, RecipeIngredient } from "@/types/api";
+import type { SwapResult } from "@/app/recipe/swaps";
 
 type Rating = HistoryEntry["rating"];
-type Loaded = { recipe: Recipe | null; have: Set<string> | null; allergic: string[] };
+type Loaded = { recipe: Recipe | null; have: Set<string> | null; allergic: string[]; allergies: string[] };
 
 export default function RecipeView({ id, fromSearch }: { id: string; fromSearch: boolean }) {
   const [data, setData] = useState<Loaded | null>(null);
   const [failed, setFailed] = useState(false);
-  const [servings, setServings] = useState(1);
   const [favorite, setFav] = useState(false);
   const [rating, setRating] = useState<Rating | null>(null);
   const [cooking, setCooking] = useState(false);
   const [saved, setSaved] = useState(false);
+  const ratingRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (cooking) ratingRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [cooking]);
 
   useEffect(() => {
     Promise.all([getRecipe(id), getFavorites(), getProfile(), getOptions()])
       .then(([recipe, favorites, profile, options]) => {
-        // Only mark missing items when opened from Results; Menus, History and Ask have no pantry.
+        // Only mark missing items when opened from Results; Menus and History have no pantry.
         const search = fromSearch ? readDraft("search") : null;
         const have = search ? new Set(search.ingredientIds) : null;
         // A saved dish can contain an allergy added later (e.g. a favorite), so warn instead of hiding.
         const allergic = options.allergens
           .filter((a) => profile.allergies.includes(a.id) && recipe?.allergens?.includes(a.id))
           .map((a) => a.th);
-        setServings(search?.servings ?? recipe?.baseServings ?? 1);
         setFav(favorites.some((f) => f.id === id));
-        setData({ recipe, have, allergic });
+        setData({ recipe, have, allergic, allergies: profile.allergies });
       })
       .catch(() => setFailed(true));
   }, [id, fromSearch]);
@@ -40,7 +43,7 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
   if (failed) return <p role="alert" className="p-4 text-red-700">โหลดสูตรไม่สำเร็จ ลองใหม่อีกครั้งนะ</p>;
   if (!data) return <p role="status" className="p-4 text-sm text-muted">กำลังโหลด…</p>;
 
-  const { recipe, have, allergic } = data;
+  const { recipe, have, allergic, allergies } = data;
   if (!recipe) {
     return (
       <div className="flex flex-col items-center gap-4 p-4 py-16 text-center">
@@ -50,7 +53,6 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
     );
   }
 
-  const factor = servings / recipe.baseServings;
   const missing = have ? recipe.ingredients.filter((x) => !have.has(x.id)) : [];
 
   function toggleFavorite() {
@@ -92,60 +94,46 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
       )}
 
       {missing.length > 0 && (
-        <p className="rounded-2xl bg-amber-50 p-3 text-sm text-amber-800">
-          ต้องซื้อเพิ่ม: {missing.map((m) => m.th).join(", ")}
-        </p>
+        <section className="rounded-3xl bg-amber-50 p-4">
+          <h3 className="font-semibold text-amber-800">ต้องซื้อเพิ่ม</h3>
+          <ul className="mt-2 flex flex-col gap-3">
+            {missing.map((m) => (
+              <MissingItem key={m.id} item={m} allergies={allergies} />
+            ))}
+          </ul>
+        </section>
       )}
 
       <section>
-        <div className="mb-2 flex items-center justify-between">
+        <div className="mb-2 flex items-baseline justify-between">
           <h3 className="text-lg font-semibold">วัตถุดิบ</h3>
-          <Stepper value={servings} onChange={setServings} unit="ที่" />
+          <span className="text-sm text-muted">สำหรับ {recipe.baseServings} ที่</span>
         </div>
         <ul className="divide-y divide-edge rounded-3xl bg-white px-4 shadow-card">
           {recipe.ingredients.map((x) => {
             const isMissing = missing.includes(x);
             return (
-              <li key={x.id} className="flex min-h-11 items-center justify-between gap-3 py-2">
+              <li key={x.id} className="flex min-h-10 items-center justify-between gap-3 py-1.5">
                 <span>
                   {x.th}
                   {isMissing && <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">ขาด</span>}
                 </span>
-                <span className="text-muted">{scaleQty(x.qty, factor)}</span>
+                <span className="text-muted">{x.qty}</span>
               </li>
             );
           })}
         </ul>
       </section>
 
-      <section>
-        <h3 className="mb-2 text-lg font-semibold">วิธีทำ</h3>
-        <ol className="flex flex-col gap-3">
-          {recipe.steps.map((step, i) => (
-            <li key={i} className="flex gap-3">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-butter text-sm font-semibold">
-                {i + 1}
-              </span>
-              <span className="pt-0.5">{step}</span>
-            </li>
-          ))}
-        </ol>
-      </section>
+      <StepsTimeline steps={recipe.steps} onFinish={() => setCooking(true)} />
 
-      <section className="rounded-3xl bg-white p-4 shadow-card">
+      {(cooking || saved) && (
+      <section ref={ratingRef} className="rounded-3xl bg-white p-4 shadow-card">
         {saved ? (
           <p role="status" className="text-center">
             บันทึกลงประวัติแล้ว ·{" "}
             <Link href="/history" className="underline">ดูประวัติ</Link>
           </p>
-        ) : !cooking ? (
-          <button
-            type="button"
-            onClick={() => setCooking(true)}
-            className="btn-primary w-full"
-          >
-            ทำเมนูนี้แล้ว
-          </button>
         ) : (
           <div className="flex flex-col items-center gap-3">
             <p className="font-medium">อร่อยแค่ไหน?</p>
@@ -175,6 +163,48 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
           </div>
         )}
       </section>
+      )}
     </main>
+  );
+}
+
+// One missing ingredient with an on-demand, allergy-filtered list of swaps.
+function MissingItem({ item, allergies }: { item: RecipeIngredient; allergies: string[] }) {
+  const [state, setState] = useState<"idle" | "loading" | "error" | SwapResult>("idle");
+
+  function load() {
+    setState("loading");
+    getSubstitutes(item.id, allergies).then(setState, () => setState("error"));
+  }
+
+  return (
+    <li>
+      <div className="flex items-center justify-between gap-3">
+        <span className="font-medium text-amber-800">{item.th}</span>
+        {state === "idle" && (
+          <button type="button" onClick={load} className="btn-secondary min-h-11 px-4 text-sm">
+            ใช้อะไรแทนได้?
+          </button>
+        )}
+      </div>
+      <div aria-live="polite" className="mt-1 text-sm">
+        {state === "loading" && <p className="text-muted">กำลังหา…</p>}
+        {state === "error" && (
+          <p className="text-red-700">
+            โหลดไม่สำเร็จ{" "}
+            <button type="button" onClick={load} className="min-h-11 font-semibold underline">ลองอีกครั้ง</button>
+          </p>
+        )}
+        {typeof state === "object" && state.kind === "ok" && (
+          <ul className="mt-1 flex flex-wrap gap-2">
+            {state.options.map((o) => (
+              <li key={o.label} className="rounded-full bg-butter px-3 py-1 font-medium text-ink">แทนด้วย {o.label}</li>
+            ))}
+          </ul>
+        )}
+        {typeof state === "object" && state.kind === "unsafe" && <p className="text-muted">ไม่มีตัวแทนที่ปลอดภัยสำหรับคุณ</p>}
+        {typeof state === "object" && state.kind === "none" && <p className="text-muted">ยังไม่มีคำแนะนำสำหรับวัตถุดิบนี้</p>}
+      </div>
+    </li>
   );
 }

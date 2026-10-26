@@ -15,11 +15,20 @@ export default function StepsTimeline({ steps, onFinish }: { steps: string[]; on
   const [current, setCurrent] = useState(0);
   const [done, setDone] = useState<Set<number>>(new Set());
   const cardRef = useRef<HTMLDivElement>(null);
+  const follow = useRef(false);
   const last = current === steps.length - 1;
 
+  // Follow the current step after the user moves, never on page load.
   useEffect(() => {
+    if (!follow.current) return;
+    follow.current = false;
     cardRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
   }, [current]);
+
+  function go(i: number) {
+    follow.current = true;
+    setCurrent(i);
+  }
 
   // Keep the screen on while cooking; unsupported browsers just skip it.
   useEffect(() => {
@@ -39,7 +48,7 @@ export default function StepsTimeline({ steps, onFinish }: { steps: string[]; on
   function next() {
     setDone(new Set(done).add(current));
     if (last) onFinish();
-    else setCurrent(current + 1);
+    else go(current + 1);
   }
 
   return (
@@ -83,7 +92,7 @@ export default function StepsTimeline({ steps, onFinish }: { steps: string[]; on
           const isDone = done.has(i);
           return (
             <li key={i} className="relative">
-              <button type="button" onClick={() => setCurrent(i)} className="flex min-h-14 w-full items-center gap-3 text-left">
+              <button type="button" onClick={() => go(i)} className="flex min-h-14 w-full items-center gap-3 text-left">
                 <span
                   className={`z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${isDone ? "bg-brand text-white" : "bg-white text-muted ring-2 ring-edge ring-inset"}`}
                 >
