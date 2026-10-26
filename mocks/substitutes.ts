@@ -6,7 +6,7 @@ const o = (label: string, ingredientIds: string[], allergens: string[] | null): 
 
 export const substitutes: Record<string, SwapOption[]> = {
   "oyster-sauce": [o("ซีอิ๊วดำ + น้ำตาล", ["dark-soy-sauce", "sugar"], ["soy", "wheat"]), o("ซอสปรุงรส", ["seasoning-sauce"], ["soy", "wheat"])],
-  "fish-sauce": [o("ซีอิ๊วขาว", ["light-soy-sauce"], ["soy", "wheat"]), o("เกลือ", ["salt"], [])],
+  "fish-sauce": [o("ซีอิ๊วขาว", ["soy-sauce"], ["soy", "wheat"]), o("เกลือ", ["salt"], [])],
   "holy-basil": [o("ใบโหระพา", ["thai-basil"], [])],
   "thai-basil": [o("ใบกะเพรา", ["holy-basil"], [])],
   lime: [o("มะขามเปียก", ["tamarind"], []), o("น้ำส้มสายชู", ["vinegar"], [])],
@@ -16,7 +16,7 @@ export const substitutes: Record<string, SwapOption[]> = {
   chicken: [o("หมู", ["pork"], []), o("เต้าหู้", ["tofu"], ["soy"])],
   shrimp: [o("ไก่", ["chicken"], []), o("ปลาหมึก", ["squid"], ["shellfish"])],
   tofu: [o("ไข่", ["egg"], ["egg"]), o("เห็ด", ["mushroom"], [])],
-  "morning-glory": [o("คะน้า", ["kale"], []), o("ผักกาดขาว", ["napa-cabbage"], [])],
+  "morning-glory": [o("คะน้า", ["chinese-kale"], []), o("ผักกาดขาว", ["napa-cabbage"], [])],
   cabbage: [o("ผักกาดขาว", ["napa-cabbage"], []), o("หัวไชเท้า", ["daikon"], [])],
   "coconut-milk": [o("นมสด", ["milk"], ["milk"]), o("นมอัลมอนด์", ["almond-milk"], ["tree_nut"]), o("น้ำซุป", ["stock"], null) /* store-bought stock varies (soy, wheat, milk): unknown, so always hidden */],
   lemongrass: [o("ผิวมะนาว", ["lime-zest"], [])],
