@@ -1,6 +1,53 @@
 @import "tailwindcss";
 
+/* MakeADish tokens. Contrast rules and usage live in DESIGN.md. */
 @theme inline {
-  --color-line: #06c755;
-  --font-sans: var(--font-thai), system-ui, sans-serif;
+  --color-brand: #09809d; /* teal: headers, hero; white text passes 4.5:1 */
+  --color-brand-deep: #066a82; /* buttons, user chat bubble */
+  --color-ink: #0b3a47; /* body text */
+  --color-muted: #4f6e78; /* secondary text; 4.5:1 on white and mist */
+  --color-edge: #cfe3e9; /* borders, dividers, disabled fills */
+  --color-mist: #eaf5f8; /* page background behind cards */
+  --color-butter: #f6e39a; /* accent fills; as text only at 24px+ on brand */
+  --color-butter-soft: #fbf3d2;
+  --shadow-card: 0 6px 20px -8px rgb(9 128 157 / 0.28);
+  --font-sans: var(--font-prompt), system-ui, sans-serif;
+}
+
+@utility btn-primary {
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  padding-inline: 1.5rem;
+  background: var(--color-brand-deep);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  &:active {
+    background: var(--color-ink);
+  }
+  &:disabled {
+    background: var(--color-edge);
+    color: var(--color-muted);
+    cursor: default;
+  }
+}
+
+@utility btn-secondary {
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  padding-inline: 1.25rem;
+  background: white;
+  color: var(--color-ink);
+  font-weight: 500;
+  box-shadow: inset 0 0 0 1.5px var(--color-edge);
+  cursor: pointer;
+  &:active {
+    background: var(--color-mist);
+  }
 }
