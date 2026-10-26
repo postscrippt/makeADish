@@ -32,9 +32,14 @@ test("the key Thai allergen sources are tagged", () => {
 });
 
 test("brand-dependent ingredients are unknown, not 'none'", () => {
-  for (const slug of ["stock", "chili-paste", "chili-sauce", "curry-powder", "instant-noodle", "bread", "sausage", "cooking-oil"]) {
+  for (const slug of ["stock", "chili-paste", "chili-sauce", "curry-powder", "instant-noodle", "bread", "sausage"]) {
     assert.equal(rules[slug], null, slug);
   }
+});
+
+test("refined cooking oil has no allergens (owner decision), so it does not make a recipe unknown", () => {
+  assert.deepEqual(rules["cooking-oil"], []);
+  assert.deepEqual(allergensOf(["pork", "cooking-oil"], rules), []);
 });
 
 test("allergens are the sorted union of the ingredients", () => {
