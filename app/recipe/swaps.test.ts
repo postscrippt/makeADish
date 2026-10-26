@@ -21,3 +21,10 @@ test("every ingredient in the mock recipes has at least one swap", async () => {
   const { substitutes } = await import("../../mocks/substitutes.ts");
   for (const r of recipes) for (const x of r.ingredients) assert.ok((substitutes[x.id] ?? []).length > 0, x.id);
 });
+
+test("tree nut allergy hides almond milk as a coconut milk swap", async () => {
+  const { substitutes } = await import("../../mocks/substitutes.ts");
+  const labels = (r: ReturnType<typeof safeSwaps>) => (r.kind === "ok" ? r.options.map((o) => o.label) : []);
+  assert.ok(labels(safeSwaps(substitutes["coconut-milk"], [])).includes("นมอัลมอนด์"));
+  assert.ok(!labels(safeSwaps(substitutes["coconut-milk"], ["tree_nut"])).includes("นมอัลมอนด์"));
+});
