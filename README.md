@@ -94,6 +94,24 @@ Presenter script: [docs/demo-script.md](docs/demo-script.md). How the UI fits to
 
 The whole project should run at zero cost. Free-tier limits change, so check rate limits on Day 1 and cache LLM results where possible.
 
+### LLM provider and limits
+
+Tested with `scripts/test-llm.mjs` (run `node --env-file=.env.local scripts/test-llm.mjs <photo>`).
+
+| Job | Model | Result |
+|---|---|---|
+| Thai text | `gemini-3.5-flash-lite` | Pass, natural Thai, about 1.5-2 s |
+| Vision | `gemini-3.5-flash-lite` | Pass. Listed the right ingredients for one food photo and returned `NO_FOOD` for a non-food photo |
+| Embeddings | `gemini-embedding-001` | Pass, 768 dimensions, matches `vector(768)` |
+| Fallback | `gemini-3.8-flash` | Works, but was slow (35 s) and returned HTTP 503 under load |
+
+Limits (free tier, read from AI Studio): 15 requests per minute on the flash model. Daily limit, embedding limit and the free tier's data-use terms are not recorded yet.
+
+Rules for the LLM wrapper:
+- Retry on HTTP 429, 5xx and network errors, with a short backoff (about 2 s, then 5 s).
+- If the main model still fails, fall back to the second model.
+- With 15 requests per minute, a scan plus an agent loop of up to 3 tries can use several requests per user. Cache results and avoid parallel calls so a demo with a few users does not hit the limit.
+
 ## Design decisions
 
 **Allergen policy.** Allergy filtering is the one hard safety rule.
