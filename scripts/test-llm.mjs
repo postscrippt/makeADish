@@ -17,20 +17,41 @@ if (!KEY) {
   process.exit(1);
 }
 
-async function call(path, body) {
+const TIMEOUT_MS = 60_000;
+const RETRY_DELAYS_MS = [2000, 5000]; // retried on 429, 5xx and network errors
+
+async function callOnce(path, body) {
   const res = await fetch(`${BASE}/${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-goog-api-key": KEY },
     body: JSON.stringify(body),
+    signal: AbortSignal.timeout(TIMEOUT_MS),
   });
   const json = await res.json().catch(() => ({}));
   if (!res.ok) {
     const msg = json?.error?.message ?? res.statusText;
-    throw new Error(`HTTP ${res.status}: ${msg}`);
+    const err = new Error(`HTTP ${res.status}: ${msg}`);
+    err.retryable = res.status === 429 || res.status >= 500;
+    throw err;
   }
   // Rate-limit headers, if the API sends any.
   const limits = [...res.headers].filter(([k]) => /ratelimit|retry/i.test(k));
   return { json, limits };
+}
+
+async function call(path, body) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await callOnce(path, body);
+    } catch (e) {
+      // fetch failures and timeouts have no HTTP status; the real reason is in e.cause.
+      const network = e.retryable === undefined;
+      if (network) e.message = `${e.message} (${e.cause?.code ?? e.cause?.message ?? e.name})`;
+      if (!(network || e.retryable) || attempt >= RETRY_DELAYS_MS.length) throw e;
+      console.log(`      retry ${attempt + 1} after: ${e.message}`);
+      await new Promise((r) => setTimeout(r, RETRY_DELAYS_MS[attempt]));
+    }
+  }
 }
 
 const textOf = (json) => json?.candidates?.[0]?.content?.parts?.map((p) => p.text).join("") ?? "";
