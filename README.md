@@ -105,12 +105,21 @@ Tested with `scripts/test-llm.mjs` (run `node --env-file=.env.local scripts/test
 | Embeddings | `gemini-embedding-001` | Pass, 768 dimensions, matches `vector(768)` |
 | Fallback | `gemini-3.8-flash` | Works, but was slow (35 s) and returned HTTP 503 under load |
 
-Limits (free tier, read from AI Studio): `gemini-3.5-flash-lite` allows 15 requests per minute and 250k tokens per minute. Daily limit, embedding limit and the free tier's data-use terms are not recorded yet.
+Limits (free tier, read from AI Studio):
+
+| Model | Requests/min | Tokens/min | Requests/day |
+|---|---|---|---|
+| `gemini-3.5-flash-lite` | 15 | 250k | 500 |
+| `gemini-embedding-001` | 100 | 30k | 1000 |
+
+The free tier's data-use terms are not recorded yet.
 
 Rules for the LLM wrapper:
 - Retry on HTTP 429, 5xx and network errors, with a short backoff (about 2 s, then 5 s).
 - If the main model still fails, fall back to the second model.
 - With 15 requests per minute, a scan plus an agent loop of up to 3 tries can use several requests per user. Cache results and avoid parallel calls so a demo with a few users does not hit the limit.
+- The daily caps are the tighter limit: 500 text/vision requests and 1000 embedding requests per day, shared by development, testing and the demo. Every search embeds one query, so test with mock mode on and keep real calls for integration and rehearsal.
+- Embed the recipe set once, throttled to stay under 30k tokens per minute (batch several recipes per request), and store the vectors. Never re-embed unchanged recipes.
 
 ## Design decisions
 
