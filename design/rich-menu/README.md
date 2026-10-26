@@ -1,6 +1,6 @@
 # LINE rich menu
 
-The menu at the bottom of the LINE chat. It's a compact menu (2500×843): a big Scan tile, then History, Menus and Ask.
+The menu at the bottom of the LINE chat. It's a compact menu (2500×843): a big Scan tile on the left, with History, Menus and Ask stacked on the right.
 
 - `rich-menu.png` is the image you upload (PNG, under 1 MB).
 - `rich-menu.html` is the editable source. After editing, re-render it from this folder:
@@ -9,16 +9,16 @@ The menu at the bottom of the LINE chat. It's a compact menu (2500×843): a big 
   ```
 - `rich-menu.json` holds the tap areas and links, for the API route below. Swap the URLs for LIFF URLs once a LIFF app exists.
 
-| Tile | x | width | Opens |
+| Tile | x, y | width × height | Opens |
 |---|---|---|---|
-| สแกนวัตถุดิบ | 0 | 1000 | `/scan` |
-| ประวัติ | 1000 | 500 | `/history` |
-| เมนูทั้งหมด | 1500 | 500 | `/menus` |
-| ถามผู้ช่วย | 2000 | 500 | `/ask` |
+| สแกนวัตถุดิบ | 0, 0 | 1250 × 843 | `/scan` |
+| ประวัติ | 1250, 0 | 1250 × 281 | `/history` |
+| เมนูทั้งหมด | 1250, 281 | 1250 × 281 | `/menus` |
+| ถามผู้ช่วย | 1250, 562 | 1250 × 281 | `/ask` |
 
 ## Set it up
 
-**A. LINE Official Account Manager** (no code): go to Rich menus → Create, choose the Compact size and a template whose areas match the table above, upload `rich-menu.png`, and set each area's action to Link. If no template has the 1000/500/500/500 split, use B.
+**A. LINE Official Account Manager** (no code): go to Rich menus → Create, choose the Compact size and a template whose areas match the table above, upload `rich-menu.png`, and set each area's action to Link. If no template has this split (half-width tile on the left, three rows on the right), use B.
 
 **B. Messaging API** (any area layout). Run this locally with your channel access token. Never commit the token.
 ```bash

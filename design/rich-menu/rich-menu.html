@@ -9,33 +9,36 @@
   html, body { width: 2500px; height: 843px; overflow: hidden; }
   body { display: flex; font-family: "Noto Sans Thai", sans-serif; background: #fff; color: #18181b; }
   .tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 48px; height: 843px; }
-  .tile svg { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; }
-  .hero { width: 1000px; background: #06c755; color: #18181b; }
+  svg { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; }
+  .hero { width: 1250px; background: #06c755; color: #18181b; }
   .hero svg { width: 300px; height: 300px; stroke-width: 1.6; }
   .hero span { font-size: 132px; font-weight: 700; line-height: 1.3; }
-  .small { width: 500px; border-left: 4px solid #e4e4e7; }
-  .hero + .small { border-left: 0; }
-  .small svg { width: 210px; height: 210px; stroke-width: 1.8; color: #06c755; }
-  .small span { font-size: 88px; font-weight: 700; line-height: 1.3; }
+  .stack { width: 1250px; display: flex; flex-direction: column; }
+  .row { flex: 1; display: flex; align-items: center; gap: 64px; padding-left: 140px; }
+  .row + .row { border-top: 4px solid #e4e4e7; }
+  .row svg { width: 150px; height: 150px; stroke-width: 1.8; color: #06c755; }
+  .row span { font-size: 100px; font-weight: 700; line-height: 1.3; }
 </style>
 </head>
 <body>
-  <!-- Area widths must match rich-menu.json: 1000 / 500 / 500 / 500 -->
+  <!-- Areas must match rich-menu.json: hero 1250×843, then three rows 1250×281 -->
   <div class="tile hero">
     <svg viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3.5"/></svg>
     <span>สแกนวัตถุดิบ</span>
   </div>
-  <div class="tile small">
+  <div class="stack">
+  <div class="row">
     <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3.5 2"/></svg>
     <span>ประวัติ</span>
   </div>
-  <div class="tile small">
+  <div class="row">
     <svg viewBox="0 0 24 24"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></svg>
     <span>เมนูทั้งหมด</span>
   </div>
-  <div class="tile small">
+  <div class="row">
     <svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.6L3 21l1.9-5.6A8.5 8.5 0 1 1 21 11.5z"/></svg>
     <span>ถามผู้ช่วย</span>
   </div>
+</div>
 </body>
 </html>
