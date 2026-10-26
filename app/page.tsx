@@ -6,7 +6,6 @@ const icons = {
   scan: "M3 8.5A2.5 2.5 0 0 1 5.5 6h2l1.5-2h6l1.5 2h2A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5zM12 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z",
   history: "M12 21a9 9 0 1 0-9-9M3 12l-1-2.5M3 12l2.5-1.5M12 7v5l3 2",
   menus: "M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5zM13 4h5.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H13zM7 8h1M16 8h1",
-  ask: "M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 3.5V17A2.5 2.5 0 0 1 4 14.5zM8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01",
 };
 
 function Icon({ d, className }: { d: string; className: string }) {
@@ -17,11 +16,10 @@ function Icon({ d, className }: { d: string; className: string }) {
   );
 }
 
-// Mirrors the LINE rich menu: Scan is the big tile, the other three are rows. In LINE each opens its page directly.
+// Mirrors the LINE rich menu: Scan is the big tile, the other two are rows. In LINE each opens its page directly.
 const rows = [
   { href: "/history", icon: icons.history, label: "ประวัติ", hint: "เมนูที่เคยทำและเมนูโปรด" },
   { href: "/menus", icon: icons.menus, label: "เมนูทั้งหมด", hint: "ค้นหาสูตรอาหาร" },
-  { href: "/ask", icon: icons.ask, label: "ถามผู้ช่วย", hint: "ถามเรื่องทำอาหาร" },
 ];
 
 export default function Home() {
