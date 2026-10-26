@@ -1,0 +1,12 @@
+{
+  "size": { "width": 2500, "height": 843 },
+  "selected": true,
+  "name": "AI Menu main",
+  "chatBarText": "เมนู",
+  "areas": [
+    { "bounds": { "x": 0, "y": 0, "width": 1000, "height": 843 }, "action": { "type": "uri", "label": "สแกนวัตถุดิบ", "uri": "https://ai-menu-five.vercel.app/scan" } },
+    { "bounds": { "x": 1000, "y": 0, "width": 500, "height": 843 }, "action": { "type": "uri", "label": "ประวัติ", "uri": "https://ai-menu-five.vercel.app/history" } },
+    { "bounds": { "x": 1500, "y": 0, "width": 500, "height": 843 }, "action": { "type": "uri", "label": "เมนูทั้งหมด", "uri": "https://ai-menu-five.vercel.app/menus" } },
+    { "bounds": { "x": 2000, "y": 0, "width": 500, "height": 843 }, "action": { "type": "uri", "label": "ถามผู้ช่วย", "uri": "https://ai-menu-five.vercel.app/ask" } }
+  ]
+}
