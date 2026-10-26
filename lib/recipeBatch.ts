@@ -17,7 +17,7 @@ export type RecipeDraft = {
   steps: string[];
 };
 
-const HEADER = /^(.*?)\s*([a-z-]+) · spice (\d) · (\d+) min · serves (\d+) · allergens: (.*)$/;
+const HEADER = /^(.*?)\s*([a-z-]+) · spice (\d) · (\d+) min · serves (\d+) · allergens:\s*(.*)$/;
 
 export function parseBatch(md: string): RecipeDraft[] {
   const sections = md.replace(/\r\n/g, "\n").split(/^## \d+\. /m).slice(1);
