@@ -3,11 +3,12 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { checkDrafts, parseBatch } from "./recipeBatch.ts";
 import { buildRecipeSql } from "./recipeSql.ts";
+import type { AllergenRules } from "./allergens.ts";
 import { allergenRules } from "../data/allergen-rules.ts";
 import { ingredients } from "../data/ingredients.ts";
 
 const known = new Set(ingredients.map((i) => i.slug));
-const rules = { salt: [], egg: ["egg"], "fish-sauce": ["fish"], stock: null } as Record<string, string[] | null>;
+const rules: AllergenRules = { salt: [], egg: ["egg"], "fish-sauce": ["fish"], stock: null };
 const readFile = (p: string) => readFileSync(new URL(p, import.meta.url), "utf8");
 
 const dish = (over: { header?: string; rows?: string; steps?: string } = {}) => `# Batch
