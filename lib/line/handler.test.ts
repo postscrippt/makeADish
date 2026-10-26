@@ -105,7 +105,10 @@ test("the search postback runs the search and replies with the carousel", async 
   assert.deepEqual(calls.searches[0].ingredientIds, ["egg", "pork", "garlic"]);
   assert.equal(calls.replies.length, 1);
   assert.equal((calls.replies[0].messages[0] as { contents: { type: string } }).contents.type, "carousel");
-  assert.match(json(calls.replies[0].messages[0]), /https:\/\/app\.test\/recipe\/[a-z-]+\?from=results/);
+  // from=results reads a draft from sessionStorage, which is empty when LINE opens the page fresh, so the link carries the ids.
+  const body = json(calls.replies[0].messages[0]);
+  assert.match(body, /https:\/\/app\.test\/recipe\/[a-z0-9-]+\?ids=egg,pork,garlic/);
+  assert.doesNotMatch(body, /from=results/);
 });
 
 test("allergy filter comes from the saved profile, never from the message", async () => {

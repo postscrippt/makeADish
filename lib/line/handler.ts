@@ -92,7 +92,7 @@ async function onPostback(event: LineEvent, deps: Deps): Promise<LineMessage | n
   const list = ids.join(",");
   return resultsCarousel(
     result,
-    (id) => deps.url(`/recipe/${id}?from=results`),
+    (id) => deps.url(`/recipe/${id}?ids=${list}`),
     deps.url(`/results?ids=${list}`),
     deps.url(`/form?ids=${list}`),
   );
