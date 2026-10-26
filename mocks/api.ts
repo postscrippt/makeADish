@@ -1,5 +1,5 @@
-// The one place pages get data from. Today it returns mock data; issue #13 swaps
-// the insides for Person B's real endpoints without touching any page.
+// The one place pages get data from. NEXT_PUBLIC_USE_MOCKS=false calls Person B's endpoints (docs/api-contract.md);
+// otherwise everything runs on mock data with no keys. History, favorites and swaps stay local until their endpoints land.
 import type {
   ChatMessage, Favorite, HistoryEntry, Ingredient, Options, Profile, Recipe, RecipeMatch, RecipeSummary, ScanResult,
   SearchRequest, SearchResult,
@@ -22,12 +22,35 @@ const devSwitch = () => new URLSearchParams(location.search).get("mock");
 
 const readList = <T,>(key: string): T[] => JSON.parse(localStorage.getItem(key) ?? "[]") as T[];
 
-function notWired(): never {
-  throw new Error("Real endpoints are not wired yet (issue #13). Set NEXT_PUBLIC_USE_MOCKS=true.");
+// Every call except options/ingredients says who is calling with the anonymous id kept in this browser.
+async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const headers = new Headers(init.headers);
+  if (!path.startsWith("/api/options") && !path.startsWith("/api/ingredients")) headers.set("x-anon-id", localProfile().anonId);
+  const res = await fetch(path, { ...init, headers });
+  if (!res.ok) throw new Error(`${path} failed (${res.status})`);
+  return (res.status === 204 ? undefined : await res.json()) as T;
+}
+
+const json = (body: unknown): RequestInit => ({
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify(body),
+});
+
+function localProfile(): Profile {
+  const saved = localStorage.getItem(PROFILE_KEY);
+  if (saved) return JSON.parse(saved) as Profile;
+  const fresh: Profile = { anonId: crypto.randomUUID(), allergies: [], spice: 1 };
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(fresh));
+  return fresh;
 }
 
 export async function scan(photo: Blob): Promise<ScanResult> {
-  if (!USE_MOCKS) notWired();
+  if (!USE_MOCKS) {
+    const form = new FormData();
+    form.append("photo", photo, "photo.jpg");
+    return api<ScanResult>("/api/scan", { method: "POST", body: form });
+  }
   void photo; // the mock ignores the photo; it is never stored
   await wait(1200);
   const forced = devSwitch();
@@ -39,43 +62,39 @@ export async function scan(photo: Blob): Promise<ScanResult> {
 }
 
 export async function getIngredients(): Promise<Ingredient[]> {
-  if (!USE_MOCKS) notWired();
+  if (!USE_MOCKS) return api<Ingredient[]>("/api/ingredients");
   return ingredients;
 }
 
 export async function getOptions(): Promise<Options> {
-  if (!USE_MOCKS) notWired();
+  if (!USE_MOCKS) return api<Options>("/api/options");
   return { allergens, categories };
 }
 
-// shortcut: profile lives in localStorage under an anonymous id; move to the DB when #13 lands.
+// The anonymous id lives in this browser; with real endpoints the allergies and spice come from the server.
 export async function getProfile(): Promise<Profile> {
-  if (!USE_MOCKS) notWired();
-  const saved = localStorage.getItem(PROFILE_KEY);
-  if (saved) return JSON.parse(saved) as Profile;
-  const fresh: Profile = { anonId: crypto.randomUUID(), allergies: [], spice: 1 };
-  localStorage.setItem(PROFILE_KEY, JSON.stringify(fresh));
-  return fresh;
+  if (USE_MOCKS) return localProfile();
+  const profile = await api<Profile>("/api/profile");
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+  return profile;
 }
 
-// Inside LINE the profile is also saved on the server and linked to the LINE user, so the chat filters the same allergies.
-// Throws when that save fails (401 bad/expired login, 503 not set up): the chat would not know the allergies.
+// Inside LINE the save also sends the LINE ID token, which links this profile to the chat user.
+// Throws when the server save fails (401 bad/expired login, 503 not set up): nothing was saved there.
 export async function saveProfile(profile: Profile): Promise<void> {
-  if (!USE_MOCKS) notWired();
   localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
   const token = await lineIdToken();
-  if (!token) return;
-  const res = await fetch("/api/profile", {
+  if (USE_MOCKS && !token) return;
+  await api<void>("/api/profile", {
     method: "PUT",
-    headers: { "content-type": "application/json", "x-anon-id": profile.anonId, "x-line-id-token": token },
+    headers: { "content-type": "application/json", ...(token ? { "x-line-id-token": token } : {}) },
     body: JSON.stringify(profile),
   });
-  if (!res.ok) throw new Error(`profile not saved (${res.status})`);
 }
 
 // The real version runs the agent on the server; the hard filters and overlap math below mirror the README rules.
 export async function searchRecipes(req: SearchRequest): Promise<SearchResult> {
-  if (!USE_MOCKS) notWired();
+  if (!USE_MOCKS) return api<SearchResult>("/api/recommend", json(req));
   await wait(1000);
   if (devSwitch() === "error") throw new Error("mock search error");
   if (devSwitch() === "empty") return { matches: [], almostThere: [], tries: 3 };
@@ -95,8 +114,9 @@ export async function searchRecipes(req: SearchRequest): Promise<SearchResult> {
 }
 
 // Full catalog for the Menus page. Allergy filtering stays a hard filter here too.
+// The real endpoint filters on the allergies saved on the server, so they never go in the URL.
 export async function listRecipes(allergies: string[]): Promise<RecipeSummary[]> {
-  if (!USE_MOCKS) notWired();
+  if (!USE_MOCKS) return api<RecipeSummary[]>("/api/recipes");
   await wait(300);
   return recipes
     .filter((r) => r.allergens !== null && !r.allergens.some((a) => allergies.includes(a)))
@@ -104,46 +124,45 @@ export async function listRecipes(allergies: string[]): Promise<RecipeSummary[]>
 }
 
 export async function getRecipe(id: string): Promise<Recipe | null> {
-  if (!USE_MOCKS) notWired();
+  if (!USE_MOCKS) {
+    return api<Recipe>(`/api/recipes/${encodeURIComponent(id)}`).catch((e: Error) => {
+      if (e.message.includes("(404)")) return null;
+      throw e;
+    });
+  }
   await wait(300);
   return recipes.find((r) => r.id === id && r.allergens !== null) ?? null;
 }
 
-// shortcut: history and favorites live in localStorage; move to the DB when #13 lands.
+// shortcut: history, favorites and swaps stay in this browser in both modes; switch when Person B's endpoints land.
 export async function logCooked(entry: HistoryEntry): Promise<void> {
-  if (!USE_MOCKS) notWired();
   localStorage.setItem(HISTORY_KEY, JSON.stringify([entry, ...readList<HistoryEntry>(HISTORY_KEY)]));
 }
 
 export async function getHistory(): Promise<HistoryEntry[]> {
-  if (!USE_MOCKS) notWired();
   return readList<HistoryEntry>(HISTORY_KEY);
 }
 
 export async function getFavorites(): Promise<Favorite[]> {
-  if (!USE_MOCKS) notWired();
   // Skips entries saved by an earlier build that stored bare ids.
   return readList<Favorite>(FAVORITES_KEY).filter((f) => typeof f === "object" && f !== null);
 }
 
 export async function setFavorite(recipe: Favorite, favorite: boolean): Promise<void> {
-  if (!USE_MOCKS) notWired();
   const rest = (await getFavorites()).filter((f) => f.id !== recipe.id);
   localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorite ? [recipe, ...rest] : rest));
 }
 
 // Swaps for one missing ingredient, with the user's allergies filtered out in code (never by the LLM).
 export async function getSubstitutes(ingredientId: string, allergies: string[]): Promise<SwapResult> {
-  if (!USE_MOCKS) notWired();
   await wait(400);
   if (devSwitch() === "error") throw new Error("mock substitutes error");
   return safeSwaps(substitutes[ingredientId], allergies);
 }
 
-// Unused by the UI since the Ask page was removed; kept as reference for Person B.
+// Unused by the UI since the Ask page was removed; kept as reference for Person B. Mock data only.
 // shortcut: keyword lookup stands in for the agent; the real one answers from the recipe DB and history.
 export async function ask(history: ChatMessage[]): Promise<ChatMessage> {
-  if (!USE_MOCKS) notWired();
   await wait(900);
   if (devSwitch() === "error") throw new Error("mock ask error");
   const question = history[history.length - 1].text.toLowerCase();
