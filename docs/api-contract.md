@@ -113,8 +113,9 @@ Runs the search and agent loop.
 The full catalog for the Menus page.
 
 - **Headers:** `x-anon-id`
-- **Query:** `allergies` (optional, comma-separated allergen ids), `q` (optional search text), `category` (optional)
+- **Query:** `q` (optional search text), `category` (optional)
 - **Response `200`:** `RecipeSummary[]`
+- **Notes:** allergies are never sent in the URL, because query strings end up in server logs. The server filters on the allergies saved in the user's profile (found through `x-anon-id`).
 
 ### `GET /api/recipes/:id`
 
