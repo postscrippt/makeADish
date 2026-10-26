@@ -114,12 +114,13 @@ Wide noodles stir-fried with pork and Chinese kale. stir-fry · spice 0 · 15 mi
 | คะน้า | `chinese-kale` | 100 กรัม |
 | ไข่ | `egg` | 1 ฟอง |
 | กระเทียม | `garlic` | 3 กลีบ |
-| ซีอิ๊วขาว | `soy-sauce` | 1 ช้อนโต๊ะ |
+| ซีอิ๊วขาว | `soy-sauce` | 1 ช้อนชา |
+| ซีอิ๊วดำ | `dark-soy-sauce` | 1 ช้อนชา |
 | ซอสหอยนางรม | `oyster-sauce` | 1 ช้อนโต๊ะ |
 | น้ำตาลทราย | `sugar` | 1 ช้อนชา |
 
 1. เจียวกระเทียมให้หอม ใส่หมูหั่นบาง ผัดจนสุก
-2. ใส่เส้นใหญ่ ซีอิ๊วขาว ซอสหอยนางรม และน้ำตาล ผัดไฟแรงให้เส้นติดกระทะเล็กน้อย
+2. ใส่เส้นใหญ่ ซีอิ๊วขาว ซีอิ๊วดำ ซอสหอยนางรม และน้ำตาล ผัดไฟแรงให้เส้นได้สีเข้มและติดกระทะเล็กน้อย
 3. ดันเส้นไปข้างหนึ่ง ตอกไข่ลงไป ผัดให้เข้ากัน
 4. ใส่คะน้า ผัดอีกประมาณ 1 นาที
 
@@ -250,6 +251,7 @@ These are not in `mocks/data.ts` yet. Thai name · English · aliases.
 | `garlic-chive` | กุยช่าย | garlic chive | |
 | `tamarind-paste` | น้ำมะขามเปียก | tamarind paste | มะขามเปียก |
 | `soy-sauce` | ซีอิ๊วขาว | soy sauce | |
+| `dark-soy-sauce` | ซีอิ๊วดำ | dark soy sauce | |
 | `five-spice` | ผงพะโล้ | five-spice powder | |
 | `mushroom` | เห็ด | mushroom | เห็ดฟาง, เห็ดนางรม |
 | `chinese-kale` | คะน้า | Chinese kale | |
