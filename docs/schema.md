@@ -36,6 +36,16 @@ A recipe's allergens are the union of its ingredients' allergens (`lib/allergens
 
 To change a rule: edit `data/allergen-rules.ts`, run `node scripts/build-allergen-sql.mjs`, and run the new `supabase/seed/ingredient-allergens.sql` in the Supabase SQL editor (after `supabase/seed/ingredients.sql`).
 
+## Loading recipes
+
+`data/recipes/batch-N.md` is the source. `node scripts/build-recipes-sql.mjs` checks every dish and writes `supabase/seed/recipes-batch-1.sql`. The check stops the build if a dish uses an ingredient id that is not in the table, has a bad category or spice level, or if the allergens written in the file differ from what the ingredient rules derive. Run the SQL in the Supabase SQL editor after the migrations and both ingredient seed files.
+
+The SQL finds each dish by `source` and Thai title and updates it in place, so re-running it keeps recipe ids and anything pointing at them (history, favorites). Dishes from batch 1 have `source = 'own:batch-1'`. To take the draft dishes out again: `delete from recipes where source = 'own:batch-1';` (this fails if someone already has one in history, which is intended).
+
+**Batch 1 is loaded for testing and has not been reviewed by a Thai speaker.** Do not treat it as final.
+
+After running, check: `select count(*) from recipes where source = 'own:batch-1';` should be 10, and `select count(*) from recipe_ingredients;` should match the number of ingredient rows in the file (the SQL silently skips an id that is missing from `ingredients`).
+
 ## Access
 
 Row level security is on for every table with no policies, so the public anon key reads nothing. The server uses the service key (`SUPABASE_SERVICE_KEY`) and never exposes it to the browser.
