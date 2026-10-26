@@ -4,12 +4,13 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import PageHeader from "@/components/PageHeader";
 import RecipeCard from "@/components/RecipeCard";
-import { searchRecipes } from "@/mocks/api";
+import Chip from "@/components/Chip";
+import { getOptions, searchRecipes } from "@/mocks/api";
 import { readDraft } from "@/app/draft";
-import type { SearchResult } from "@/types/api";
+import type { Option, SearchResult } from "@/types/api";
 
 type Tab = "matches" | "almostThere";
-type State = { kind: "loading" } | { kind: "noSearch" } | { kind: "error" } | { kind: "done"; result: SearchResult };
+type State = { kind: "loading" } | { kind: "noSearch" } | { kind: "error" } | { kind: "done"; result: SearchResult; categories: Option[] };
 
 const linkButton = "btn-primary";
 
@@ -21,10 +22,10 @@ export default function ResultsPage() {
     const search = readDraft("search");
     if (!search) return setState({ kind: "noSearch" });
     setState({ kind: "loading" });
-    searchRecipes(search)
-      .then((result) => {
+    Promise.all([searchRecipes(search), getOptions()])
+      .then(([result, options]) => {
         setTab(result.matches.length > 0 ? "matches" : "almostThere");
-        setState({ kind: "done", result });
+        setState({ kind: "done", result, categories: options.categories });
       })
       .catch(() => setState({ kind: "error" }));
   }, []);
@@ -59,21 +60,28 @@ export default function ResultsPage() {
           </div>
         )}
 
-        {state.kind === "done" && <Results result={state.result} tab={tab} setTab={setTab} />}
+        {state.kind === "done" && <Results result={state.result} categories={state.categories} tab={tab} setTab={setTab} />}
       </main>
     </>
   );
 }
 
-function Results({ result, tab, setTab }: { result: SearchResult; tab: Tab; setTab: (t: Tab) => void }) {
-  const { matches, almostThere, tries } = result;
+function Results({
+  result, categories, tab, setTab,
+}: { result: SearchResult; categories: Option[]; tab: Tab; setTab: (t: Tab) => void }) {
+  const { tries } = result;
+  const [filter, setFilter] = useState<string | null>(null);
+  // Food type filters what's already loaded; the search itself always runs for every category.
+  const pick = (list: SearchResult["matches"]) => (filter ? list.filter((m) => m.recipe.category === filter) : list);
+  const matches = pick(result.matches);
+  const almostThere = pick(result.almostThere);
 
-  if (matches.length === 0 && almostThere.length === 0) {
+  if (result.matches.length === 0 && result.almostThere.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 py-16 text-center">
         <p className="font-semibold">ไม่พบเมนูที่ตรงเงื่อนไข</p>
         <p className="text-sm text-muted">ค้นหาแล้ว {tries} รอบ ลองเพิ่มวัตถุดิบหรือเปลี่ยนเงื่อนไขดูนะ</p>
-        <Link href="/form" className={`${linkButton} mt-2`}>แก้เงื่อนไข</Link>
+        <Link href="/form" className={`${linkButton} mt-2`}>แก้วัตถุดิบ</Link>
       </div>
     );
   }
@@ -101,11 +109,23 @@ function Results({ result, tab, setTab }: { result: SearchResult; tab: Tab; setT
         ))}
       </div>
 
+      <div role="group" aria-label="ประเภทอาหาร" className="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none]">
+        <Chip selected={filter === null} onClick={() => setFilter(null)}>ทั้งหมด</Chip>
+        {categories.map((c) => (
+          <Chip key={c.id} selected={filter === c.id} onClick={() => setFilter(c.id)}>{c.th}</Chip>
+        ))}
+      </div>
+
       {tab === "almostThere" && list.length > 0 && (
         <p className="mb-3 text-xs text-muted">ซื้อเพิ่มอีก 1-2 อย่างก็ทำได้</p>
       )}
 
-      {list.length === 0 ? (
+      {list.length === 0 && filter ? (
+        <div className="flex flex-col items-center gap-3 py-12 text-center">
+          <p className="text-sm text-muted">ไม่มีเมนู{categories.find((c) => c.id === filter)?.th}ในแท็บนี้</p>
+          <button type="button" onClick={() => setFilter(null)} className="btn-secondary px-6">ดูทั้งหมด</button>
+        </div>
+      ) : list.length === 0 ? (
         <p className="py-12 text-center text-sm text-muted">
           {tab === "matches" ? "ยังไม่มีเมนูที่ใช้วัตถุดิบครบ ลองดูแท็บ “ขาดวัตถุดิบอีกนิด”" : "ไม่มีเมนูที่ขาดแค่ 1-2 อย่าง"}
         </p>
