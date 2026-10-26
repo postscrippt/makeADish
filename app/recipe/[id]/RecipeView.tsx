@@ -7,6 +7,8 @@ import { getFavorites, getOptions, getProfile, getRecipe, getSubstitutes, logCoo
 import { readDraft } from "@/app/draft";
 import type { HistoryEntry, Recipe, RecipeIngredient } from "@/types/api";
 import type { SwapResult } from "@/app/recipe/swaps";
+import { recipeCard } from "@/app/recipe/recipeCard";
+import { canSendToChat, canShare, closeToChat, inLineApp, liffUrl, sendToChat, shareToFriends } from "@/app/liff";
 
 type Rating = HistoryEntry["rating"];
 type Loaded = { recipe: Recipe | null; have: Set<string> | null; allergic: string[]; allergies: string[] };
@@ -87,6 +89,8 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
         </button>
       </section>
 
+      <ChatActions recipe={recipe} missingIds={missing.map((m) => m.id)} />
+
       {allergic.length > 0 && (
         <p role="alert" className="rounded-2xl border border-red-300 bg-red-50 p-3 text-sm font-medium text-red-700">
           ⚠ เมนูนี้มี {allergic.join(", ")} ที่คุณแพ้
@@ -130,10 +134,13 @@ export default function RecipeView({ id, fromSearch }: { id: string; fromSearch:
       {(cooking || saved) && (
       <section ref={ratingRef} className="rounded-3xl bg-white p-4 shadow-card">
         {saved ? (
+          <>
           <p role="status" className="text-center">
             บันทึกลงประวัติแล้ว ·{" "}
             <Link href="/history" className="underline">ดูประวัติ</Link>
           </p>
+          <BackToChat />
+          </>
         ) : (
           <div className="flex flex-col items-center gap-3">
             <p className="font-medium">อร่อยแค่ไหน?</p>
@@ -206,5 +213,57 @@ function MissingItem({ item, allergies }: { item: RecipeIngredient; allergies: s
         {typeof state === "object" && state.kind === "none" && <p className="text-muted">ยังไม่มีคำแนะนำสำหรับวัตถุดิบนี้</p>}
       </div>
     </li>
+  );
+}
+
+// Shown only inside LINE: post the recipe card into this chat, or share it with friends.
+function ChatActions({ recipe, missingIds }: { recipe: Recipe; missingIds: string[] }) {
+  const [can, setCan] = useState({ send: false, share: false });
+  const [status, setStatus] = useState("");
+
+  useEffect(() => {
+    Promise.all([canSendToChat(), canShare()]).then(([send, share]) => setCan({ send, share }));
+  }, []);
+
+  if (!can.send && !can.share) return null;
+  const card = () => [recipeCard(recipe, missingIds, liffUrl(`/recipe/${recipe.id}`))];
+
+  async function run(action: () => Promise<unknown>, done: string) {
+    try {
+      const sent = await action();
+      setStatus(sent === false ? "" : done);
+    } catch {
+      setStatus("ส่งไม่สำเร็จ ลองอีกครั้งนะ");
+    }
+  }
+
+  return (
+    <section className="-mt-3 flex flex-wrap items-center gap-2">
+      {can.send && (
+        <button type="button" onClick={() => run(() => sendToChat(card()), "ส่งสูตรเข้าแชทแล้ว")} className="btn-secondary min-h-11 px-4 text-sm">
+          ส่งเข้าแชท
+        </button>
+      )}
+      {can.share && (
+        <button type="button" onClick={() => run(() => shareToFriends(card()), "แชร์แล้ว")} className="btn-secondary min-h-11 px-4 text-sm">
+          แชร์ให้เพื่อน
+        </button>
+      )}
+      <span role="status" className="text-sm text-muted">{status}</span>
+    </section>
+  );
+}
+
+// After rating inside LINE: one tap back to the chat.
+function BackToChat() {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    inLineApp().then(setShow);
+  }, []);
+  if (!show) return null;
+  return (
+    <button type="button" onClick={closeToChat} className="btn-primary mt-3 w-full">
+      กลับไปที่แชท
+    </button>
   );
 }

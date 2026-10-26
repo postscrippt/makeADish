@@ -50,6 +50,10 @@ Plain-language map of the UI. Updated as pages land.
 | `app/error.tsx` | Friendly "something went wrong + try again" page if a page crashes. Failed loads (e.g. offline) show a message on the page itself. |
 | `app/not-found.tsx` | "ไม่พบหน้านี้" for unknown links. |
 
+## Inside LINE
+
+What happens in the chat and what happens on a page: `docs/line-chat-flow.md`. When `NEXT_PUBLIC_LIFF_ID` is set and a page is opened inside LINE, `app/liff.ts` turns on the recipe page's [ส่งเข้าแชท] / [แชร์ให้เพื่อน] (the card comes from `app/recipe/recipeCard.ts`) and [กลับไปที่แชท] after rating. Outside LINE these buttons don't appear.
+
 ## Where things are remembered
 
 - **Between pages (this tab only):** scanned ingredients and the last search, in `app/draft.ts`.
