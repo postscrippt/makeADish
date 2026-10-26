@@ -40,3 +40,6 @@ next-env.d.ts
 
 # Playwright MCP screenshots and logs
 .playwright-mcp/
+
+# Demo backup recordings (large; keep out of git)
+*.mp4
