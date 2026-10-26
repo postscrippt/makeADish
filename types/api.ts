@@ -10,7 +10,9 @@ export type SpiceLevel = 0 | 1 | 2 | 3;
 
 export type Option = { id: string; th: string };
 
-export type Options = { allergens: Option[]; categories: Option[] };
+// staples: ingredient ids assumed to be in every kitchen. Search never counts them as missing, and pages should not
+// list them under "ต้องซื้อเพิ่ม". Optional so old mocks still type-check.
+export type Options = { allergens: Option[]; categories: Option[]; staples?: string[] };
 
 export type Profile = {
   anonId: string;

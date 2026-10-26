@@ -73,8 +73,9 @@ Reads a photo and returns the ingredients it sees.
 
 - **Response `200`:** `Options`
   ```json
-  { "allergens": [ { "id": "peanut", "th": "ถั่วลิสง" } ], "categories": [ { "id": "stir-fry", "th": "ผัด" } ] }
+  { "allergens": [ { "id": "peanut", "th": "ถั่วลิสง" } ], "categories": [ { "id": "stir-fry", "th": "ผัด" } ], "staples": ["salt", "sugar", "fish-sauce"] }
   ```
+  - `staples` (added later, optional for old clients): ingredient ids assumed to be in every kitchen (salt, sugar, pepper, cooking oil, fish sauce, soy sauce, oyster sauce). `/api/recommend` never counts them as missing and leaves them out of the match percentage. Pages should do the same: do not list a staple under "ต้องซื้อเพิ่ม". Staples do not change allergens: a dish with fish sauce still carries `fish`. The list is in `data/staples.ts`.
 
 ### `GET /api/profile`
 
