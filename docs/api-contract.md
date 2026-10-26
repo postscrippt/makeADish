@@ -149,6 +149,8 @@ Records that the user cooked a dish.
 
 ### `POST /api/ask`
 
+> **Later: chat replies in LINE. Do not build this now.** The Ask page was removed. Chat answers will come through the LINE webhook (`docs/line-chat-flow.md`) if time allows. The shape below is kept for that case only.
+
 The cooking assistant. Same agent as `recommend`, answers from the recipe database and the user's history.
 
 - **Headers:** `x-anon-id`
