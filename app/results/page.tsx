@@ -113,7 +113,7 @@ function Results({ result, tab, setTab }: { result: SearchResult; tab: Tab; setT
         <ul className="flex flex-col gap-3">
           {list.map((m) => (
             <li key={m.recipe.id}>
-              <RecipeCard match={m} />
+              <RecipeCard recipe={m.recipe} match={m} />
             </li>
           ))}
         </ul>

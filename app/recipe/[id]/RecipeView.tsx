@@ -3,16 +3,17 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Stepper from "@/components/Stepper";
-import { getFavorites, getRecipe, logCooked, setFavorite } from "@/mocks/api";
+import { getFavorites, getOptions, getProfile, getRecipe, logCooked, setFavorite } from "@/mocks/api";
 import { readDraft } from "@/app/draft";
 import { scaleQty } from "@/app/recipe/scale";
 import type { HistoryEntry, Recipe } from "@/types/api";
 
 type Rating = HistoryEntry["rating"];
-type Loaded = { recipe: Recipe | null; have: Set<string> | null };
+type Loaded = { recipe: Recipe | null; have: Set<string> | null; allergic: string[] };
 
-export default function RecipeView({ id }: { id: string }) {
+export default function RecipeView({ id, fromSearch }: { id: string; fromSearch: boolean }) {
   const [data, setData] = useState<Loaded | null>(null);
+  const [failed, setFailed] = useState(false);
   const [servings, setServings] = useState(1);
   const [favorite, setFav] = useState(false);
   const [rating, setRating] = useState<Rating | null>(null);
@@ -20,24 +21,31 @@ export default function RecipeView({ id }: { id: string }) {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    Promise.all([getRecipe(id), getFavorites()]).then(([recipe, favorites]) => {
-      const search = readDraft("search");
-      // Only mark missing items when the user came from a search; browsing from Menus has no pantry.
-      const have = search ? new Set(search.ingredientIds) : null;
-      setServings(search?.servings ?? recipe?.baseServings ?? 1);
-      setFav(favorites.includes(id));
-      setData({ recipe, have });
-    });
-  }, [id]);
+    Promise.all([getRecipe(id), getFavorites(), getProfile(), getOptions()])
+      .then(([recipe, favorites, profile, options]) => {
+        // Only mark missing items when opened from Results; Menus, History and Ask have no pantry.
+        const search = fromSearch ? readDraft("search") : null;
+        const have = search ? new Set(search.ingredientIds) : null;
+        // A saved dish can contain an allergy added later (e.g. a favorite), so warn instead of hiding.
+        const allergic = options.allergens
+          .filter((a) => profile.allergies.includes(a.id) && recipe?.allergens?.includes(a.id))
+          .map((a) => a.th);
+        setServings(search?.servings ?? recipe?.baseServings ?? 1);
+        setFav(favorites.some((f) => f.id === id));
+        setData({ recipe, have, allergic });
+      })
+      .catch(() => setFailed(true));
+  }, [id, fromSearch]);
 
+  if (failed) return <p role="alert" className="p-4 text-red-700">โหลดสูตรไม่สำเร็จ กรุณาลองใหม่</p>;
   if (!data) return <p role="status" className="p-4 text-sm text-zinc-500">กำลังโหลด…</p>;
 
-  const { recipe, have } = data;
+  const { recipe, have, allergic } = data;
   if (!recipe) {
     return (
       <div className="flex flex-col items-center gap-4 p-4 py-16 text-center">
         <p className="text-zinc-600">ไม่พบสูตรอาหารนี้</p>
-        <Link href="/results" className="underline">กลับไปผลลัพธ์</Link>
+        <Link href="/" className="underline">กลับหน้าหลัก</Link>
       </div>
     );
   }
@@ -47,7 +55,7 @@ export default function RecipeView({ id }: { id: string }) {
 
   function toggleFavorite() {
     setFav(!favorite);
-    setFavorite(recipe!.id, !favorite);
+    setFavorite({ id: recipe!.id, th: recipe!.th }, !favorite);
   }
 
   async function save() {
@@ -76,6 +84,12 @@ export default function RecipeView({ id }: { id: string }) {
           {favorite ? "♥" : "♡"}
         </button>
       </section>
+
+      {allergic.length > 0 && (
+        <p role="alert" className="rounded-xl border border-red-300 bg-red-50 p-3 text-sm font-medium text-red-700">
+          ⚠ เมนูนี้มี {allergic.join(", ")} ที่คุณแพ้
+        </p>
+      )}
 
       {missing.length > 0 && (
         <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800">

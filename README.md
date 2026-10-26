@@ -70,6 +70,8 @@ Scan photo -> ingredient tags (+/-) -> form (spice, category, allergies, serving
 
 Other pages: **History** (cooked dishes, ratings, favorites), **Menus** (browse and search the catalog), **Ask** (chat with the same agent).
 
+Presenter script: [docs/demo-script.md](docs/demo-script.md). How the UI fits together: [docs/how-the-app-works.md](docs/how-the-app-works.md).
+
 ## How it works
 
 | Part | Type | Notes |
@@ -144,6 +146,8 @@ The UI runs end to end on mock data with no keys, so frontend work never waits o
 docs/            api-contract.md, schema.md (Person B, Day 1) and manual-test-checklist.md (Person A, Day 1). Class PDFs stay out of the repo.
 app/             Pages and routes (Person A)
 components/      UI components (Person A)
+mocks/           Mock data and the single data door, mocks/api.ts (Person A)
+types/           Shared request/response types (both)
 api/ or app/api/ Endpoints: scan, recommend, recipe, history (Person B)
 lib/             LLM wrapper, agent loop, match logic (Person B)
 data/            Recipe dataset, tagging scripts, embedding loader (Person B)
@@ -181,9 +185,9 @@ If behind: cut Ask chat (Day 5) and LIFF first. Never cut the core path.
 
 ## Testing
 
-Automated _(planned)_: match % logic, allergy filter, API contract.
+Automated: `npm test` (servings scaling today). Planned: match % logic, allergy filter, API contract.
 
-Manual checks that need a person (see `docs/manual-test-checklist.md` once added):
+Manual checks that need a person (full checklist: [docs/manual-test-checklist.md](docs/manual-test-checklist.md)):
 
 - Scan about 10 real photos in varied lighting, including a blurry and a non-food one. Target: at least 8 of 10 list the main ingredients correctly, and the non-food photo is rejected with a clear message
 - Test on a real phone at about 375px width

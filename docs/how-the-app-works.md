@@ -5,9 +5,8 @@ Plain-language map of the UI. Updated as pages land.
 ## Pages and where their data comes from
 
 ```
- LINE rich menu tile
-        │
-        ▼
+ / (home) = the LINE rich menu: 4 tiles → /scan · /history · /menus · /ask
+
   /scan ─────────► /form ─────────► /results ─────────► /recipe/[id]
   pick photo       edit tags        two tabs:            amounts × servings
   scan(photo)      spice, category, ทำได้เลย (0 missing)  missing items flagged
@@ -21,6 +20,12 @@ Plain-language map of the UI. Updated as pages land.
   │  searchRecipes · getRecipe · logCooked · getHistory ·            │
   │  getFavorites · setFavorite                                      │
   └──────────────────────────────────────────────────────────────────┘
+        ▲               ▲                ▲
+  /history          /menus           /ask
+  cooked + ★,       catalog, search, chat; answers with
+  favorites ♥       category, hides  recipe links, never
+  getHistory()      your allergens   suggests your allergens
+                    listRecipes()    ask()
         │ today: fake data (mocks/data.ts)
         │ later (#13): Person B's real endpoints
 ```
@@ -37,7 +42,9 @@ Plain-language map of the UI. Updated as pages land.
 | `components/RecipeCard.tsx` | One result in the Results list: name, time, spice, match %, what's missing. |
 | `components/Stepper.tsx` | The − 2 ที่ + servings control (Form and Recipe). |
 | `app/draft.ts` | Remembers the scan result and search between pages, in this browser tab only (`sessionStorage`). Not in the URL, so allergies never show up in links. |
-| `components/Chip.tsx` | The round toggle buttons on the Form page. |
+| `components/Chip.tsx` | The round toggle buttons (Form, Menus). |
+| `app/error.tsx` | Friendly "something went wrong + try again" page if a page crashes. Failed loads (e.g. offline) show a message on the page itself. |
+| `app/not-found.tsx` | "ไม่พบหน้านี้" for unknown links. |
 
 ## Where things are remembered
 
@@ -49,6 +56,7 @@ Plain-language map of the UI. Updated as pages land.
 
 - Scan: open `/scan?mock=nofood`, `?mock=blurry` or `?mock=error`, pick any photo and press Scan.
 - Results: open `/results?mock=empty` or `/results?mock=error` (after doing a search once).
+- Ask: open `/ask?mock=error` and send a question.
 
 ## How results are picked (mock version)
 
@@ -61,3 +69,14 @@ The real version (Person B) follows the same rules on the server.
 ## Mock mode
 
 `NEXT_PUBLIC_USE_MOCKS=true` (the default, see `.env.example`) runs everything on fake data with no keys.
+
+## Swapping in real endpoints (issue #13)
+
+When Person B's endpoints exist:
+
+1. Agree the final shapes in `docs/api-contract.md` and update `types/api.ts` to match.
+2. In `mocks/api.ts`, replace each `notWired()` branch with a `fetch` to the real endpoint, for example
+   `const res = await fetch("/api/scan", { method: "POST", body: form }); if (!res.ok) throw new Error(); return res.json();`
+3. Set `NEXT_PUBLIC_USE_MOCKS=false` in `.env.local` and on Vercel.
+4. No page should need changes. Every page already shows a friendly message when a call throws.
+5. Run `docs/manual-test-checklist.md` again on real data.
