@@ -40,7 +40,7 @@ const total = (g: ReturnType<typeof group>) => g.matches.length + g.almostThere.
 
 // Try 1 is strict (no partial group). Try 2 adds partial dishes at the floor. Try 3 also drops the food-type filter and
 // accepts any dish sharing a core ingredient. Each try runs only while there are fewer than MIN_RESULTS dishes.
-export function rankRecipes(recipes: Recipe[], req: SearchRequest, staples: readonly string[] = STAPLES): SearchResult {
+export function rankRecipes(recipes: Recipe[], req: SearchRequest, staples: readonly string[] = STAPLES): SearchResult & { partial: RecipeMatch[] } {
   const isStaple = new Set(staples);
   const strict = scoreRecipes(recipes, req, isStaple, req.category);
 
