@@ -22,7 +22,7 @@ The TypeScript types live in `types/api.ts`. This page says what each endpoint d
   - A recipe containing one of the user's allergens is never returned.
   - Match percentage and "Almost there" (2 or fewer missing items) are computed in code from ingredient ids. The LLM does not compute them.
   - Servings are not part of the API. Recipes keep `base_servings` only for the "สำหรับ N ที่" label.
-  - The agent retries at most 3 times.
+  - The agent retries at most 3 times. Retries relax only the match floor and the `category` filter, never allergies, unknown-allergen exclusion or spice.
 - **Photos:** we never store photos. The server discards a photo right after scanning. A photo sent in the LINE chat stays only in the user's own chat history.
 
 ### Errors
@@ -102,13 +102,17 @@ Runs the search and agent loop.
   `category: null` means any. `spice` means "up to this level": a recipe is kept if its spice level is at most `spice`.
 - **Response `200`:** `SearchResult`
   ```json
-  { "matches": [ /* RecipeMatch */ ], "almostThere": [ /* RecipeMatch */ ], "tries": 1 }
+  { "matches": [ /* RecipeMatch */ ], "almostThere": [ /* RecipeMatch */ ], "partial": [ /* RecipeMatch */ ], "tries": 1 }
   ```
   - `matches`: missing nothing.
   - `almostThere`: missing 1 or 2 items.
+  - `partial` (new, shown as "Need to shop" / ต้องซื้อเพิ่ม): missing 3 or more items, but the user owns at least one core ingredient and the match is at or above the floor (30% on try 2; any owned core ingredient on try 3). At most 5 dishes. Until the server change in #79 ships, the field may be absent: treat an absent `partial` as an empty list.
   - Each list is sorted by `matchPercent`, highest first.
+  - The three lists together aim for at least 3 dishes. The server relaxes the search to reach that (see the retry loop below), but returns fewer when fewer qualify.
   - `tries` is the number of agent attempts, from 1 to 3. The UI shows it.
-  - Both lists can be empty. That is a valid answer, not an error.
+  - All three lists can be empty. That is a valid answer, not an error.
+  - **Retry loop:** try 1 is strict (`matches` and `almostThere` only). If that gives fewer than 3 dishes, try 2 adds `partial` at the 30% floor. If it is still under 3, try 3 drops the `category` filter (if one was sent) and lowers the floor to any owned core ingredient. It stops as soon as there are 3 dishes.
+  - **Never relaxed on any try:** the user's allergies, recipes with unknown allergen data, and the `spice` limit.
 - **Notes:** the `allergies` in the body are the ones to filter on. The server also unions them with the saved profile allergies, so a stale client cannot weaken the filter.
 
 ### `GET /api/recipes`
@@ -212,7 +216,7 @@ Person B (postscrippt) delegated these and they were settled with the recommende
 2. **`x-anon-id` header** identifies the user for the demo.
 3. **`cook_minutes` added to `recipes`** (migration `0002_cook_minutes_favorites.sql`).
 4. **`favorites` table** replaces `history.is_favorite` (same migration).
-5. **Search returns `200` with empty lists** when nothing matches, and `tries` shows how hard it tried.
+5. **Search returns `200` with empty lists** when nothing matches, and `tries` shows how hard it tried. (Updated for #78: a `partial` list was added; the empty-lists rule applies to all three.)
 6. **Photo limit of 5 MB**, with the client downscaling first.
 7. **Endpoint paths** exactly as listed above. Person A uses these in `mocks/api.ts` for issue #13.
 
