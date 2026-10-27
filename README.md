@@ -26,7 +26,7 @@ The product spec is summarized below. Market sizing and competitor material is k
 - Cook ratings
 
 **Outputs**
-- Ranked recipes in two tabs: Matches and Almost there
+- Ranked recipes in two tabs: Matches and Almost there. Planned: a third group, "Need to shop", so a search never comes back nearly empty (#78)
 - Match percentage and the missing ingredients
 - Step-by-step recipe
 - Cook history and favorites
@@ -46,7 +46,7 @@ The product spec is summarized below. Market sizing and competitor material is k
 |---|---|
 | Scan | User takes or uploads a photo. Vision LLM returns an ingredient list. |
 | Check (`/form`) | "ถูกต้องไหม?": ingredient chips (+/-) and one preferences line (allergies in red, spice) that opens a bottom sheet. Pre-filled from the saved profile. |
-| Results | Agent: plan, search, filter, check, retry. Tab 1 "Matches" uses your ingredients. Tab 2 "Almost there" needs 1-2 more items (listed). Food-type pills filter both tabs. |
+| Results | Agent: plan, search, filter, check, retry. Tab 1 "Matches" uses your ingredients. Tab 2 "Almost there" needs 1-2 more items (listed). Planned (#80): a third group "Need to shop" for partial matches. Food-type pills filter every group. |
 | Recipe | Missing items with allergy-safe swaps, ingredients, and วิธีทำ as a glanceable step timeline (icon, heat, timer, screen kept on). The last step opens the rating, which writes to History. |
 | History | Cooked dishes, ratings, favorites. |
 | Menus | Browse and search the full catalog. |
@@ -54,6 +54,8 @@ The product spec is summarized below. Market sizing and competitor material is k
 **Agent tools:** recipe vector DB (RAG), filter (spice / category / allergy), and user history (skip recent, boost liked).
 
 **Where the recipes come from.** Mainly a set of Thai dishes we write ourselves (about 60 to 100), checked by hand. An open dataset is only an optional supplement, and only if its license allows redistribution. An AI tool tags each recipe with spice level and allergens, on top of a keyword rule map. Tags are spot-checked by hand.
+
+**Growing the recipe set.** 31 dishes are loaded today (batches 0-2), which is too few for users with only a few ingredients. The plan (#81) is to draft 70-100 more offline in batches of about 25, mostly from common home ingredients. Each draft uses only our ingredient ids, passes the machine checks in `lib/recipeBatch.ts`, and is reviewed by a Thai speaker before it is loaded. Nothing is generated while a user is chatting. Letting the AI suggest a dish live is deferred (#76); if it is ever built, those dishes would be labelled "AI-suggested, not tested". Allergens always come from our rules in code, never from what a model says.
 
 **Positioning.** The open gap is Thai-first cooking from your fridge: photo scan, inside LINE, knows your allergies. There is no app to download, every rating improves the next suggestion, and the Thai recipe set is checked by hand.
 
@@ -80,7 +82,7 @@ Presenter script: [docs/demo-script.md](docs/demo-script.md). How the UI fits to
 | Recipe search | RAG (vector search) | Over our recipe table |
 | Allergy / spice / category filters | Hard database filters | The LLM cannot override these |
 | Match % and "Almost there" | Plain code | Computed from ingredient overlap, not by the LLM. 2 or fewer missing items = Almost there |
-| Retry and relax | Agent loop | Capped at 3 tries, shown in the UI |
+| Retry and relax | Agent loop | Capped at 3 tries, shown in the UI. Planned (#79): try 1 is strict, try 2 adds partial matches (at least 30% match), try 3 drops the food-type filter, until at least 3 dishes are found. Allergies, unknown allergen data and spice level are never relaxed |
 | Personalization | Query over user history | Skip recent dishes, boost liked ones |
 
 ## Tech stack _(planned, change if the team decides otherwise)_
