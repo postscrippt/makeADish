@@ -27,8 +27,9 @@ export default function HistoryPage() {
 
   function toggle(recipe: Favorite) {
     const on = !favorites.some((f) => f.id === recipe.id);
+    const before = favorites;
     setFavorites(on ? [recipe, ...favorites] : favorites.filter((f) => f.id !== recipe.id));
-    setFavorite(recipe, on);
+    setFavorite(recipe, on).catch(() => setFavorites(before));
   }
 
   if (!history) {

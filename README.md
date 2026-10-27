@@ -2,7 +2,9 @@
 
 A Thai-first cooking helper that lives in LINE. Take a photo of what is in your kitchen, confirm the ingredients, set your allergies and spice level, and get recipes you can cook now, plus ones that are "almost there" and need one or two more items.
 
-> **Status: UI complete on mock data; backend in progress.** Every page runs end to end with no keys (mock mode). Live mock demo: https://ai-menu-five.vercel.app Sections marked _(planned)_ are not built yet. Update this file as things land.
+> **Status: live in LINE on the real backend.** The chat flow works end to end in the LINE Official Account (rich menu → photo in the chat → confirm card → results carousel → recipe page), and the pages run on the real API and Supabase database (31 dishes). Live site: https://ai-menu-five.vercel.app. The UI still runs with no keys in mock mode for local work. Sections marked _(planned)_ are not built yet. Update this file as things land.
+>
+> **Next:** a third result group for partial matches, "ต้องซื้อเพิ่ม" (#78: search #79, Results page #80), more dishes (#81, target 60-100), real-photo and allergy testing (#32), demo rehearsal (#33).
 
 ## Why this exists
 
@@ -12,7 +14,7 @@ The product spec is summarized below. Market sizing and competitor material is k
 
 ## Product spec
 
-**Idea.** A cooking helper inside LINE. The main chat is a hub with a rich menu (Scan, History, Menus); replying to plain chat messages with the cooking assistant comes later. Tap Scan and the camera opens right in the chat (once the webhook is live; until then a LINE Mini App page opens). Send a photo of your ingredients, and it asks one question: is this what you have? Fix the list, check your saved allergies and spice level, and tap find. It shows recipes you can make now, and a second tab with recipes that are almost a match and need one or two more items, with food-type filters. A recipe suggests allergy-safe swaps for anything missing, and walks you through the steps on a big, glanceable timeline. Finishing the last step asks for a rating and saves it to History.
+**Idea.** A cooking helper inside LINE. The main chat is a hub with a rich menu (Scan, History, Menus); replying to plain chat messages with the cooking assistant comes later. Tap Scan and the camera opens right in the chat. Send a photo of your ingredients, and it asks one question: is this what you have? Fix the list, check your saved allergies and spice level, and tap find. It shows recipes you can make now, and a second tab with recipes that are almost a match and need one or two more items, with food-type filters. A recipe suggests allergy-safe swaps for anything missing, and walks you through the steps on a big, glanceable timeline. Finishing the last step asks for a rating and saves it to History.
 
 **Chat and Mini App, each where it's best.** Quick steps live in the chat: the camera, a one-tap "is this right?" card and a swipeable results carousel, with no page loads. Steps that need a real screen open the Mini App: editing ingredients and allergies, filters, and cooking with the step timeline. The full split and its reasons are in `docs/line-chat-flow.md`.
 
@@ -26,7 +28,7 @@ The product spec is summarized below. Market sizing and competitor material is k
 - Cook ratings
 
 **Outputs**
-- Ranked recipes in two tabs: Matches and Almost there. Planned: a third group, "Need to shop", so a search never comes back nearly empty (#78)
+- Ranked recipes in two tabs: Matches, and "Need to shop" (ต้องซื้อเพิ่ม) with two sections, missing 1-2 items and missing more. The second section is planned (#78) so a search never comes back nearly empty
 - Match percentage and the missing ingredients
 - Step-by-step recipe
 - Cook history and favorites
@@ -46,7 +48,7 @@ The product spec is summarized below. Market sizing and competitor material is k
 |---|---|
 | Scan | User takes or uploads a photo. Vision LLM returns an ingredient list. |
 | Check (`/form`) | "ถูกต้องไหม?": ingredient chips (+/-) and one preferences line (allergies in red, spice) that opens a bottom sheet. Pre-filled from the saved profile. |
-| Results | Agent: plan, search, filter, check, retry. Tab 1 "Matches" uses your ingredients. Tab 2 "Almost there" needs 1-2 more items (listed). Planned (#80): a third group "Need to shop" for partial matches. Food-type pills filter every group. |
+| Results | Agent: plan, search, filter, check, retry. Tab 1 "Matches" uses your ingredients. Tab 2 "ต้องซื้อเพิ่ม" has two sections: "ขาดอีก 1-2 อย่าง" (almost there, items listed) and, planned in #80, "ขาดหลายอย่าง" (partial matches). Food-type pills filter both tabs. Pantry staples (salt, sugar, pepper, oil, fish sauce, soy sauce, oyster sauce; `data/staples.ts`) are assumed in every kitchen and never count as missing. |
 | Recipe | Missing items with allergy-safe swaps, ingredients, and วิธีทำ as a glanceable step timeline (icon, heat, timer, screen kept on). The last step opens the rating, which writes to History. |
 | History | Cooked dishes, ratings, favorites. |
 | Menus | Browse and search the full catalog. |
@@ -82,16 +84,16 @@ Presenter script: [docs/demo-script.md](docs/demo-script.md). How the UI fits to
 | Recipe search | RAG (vector search) | Over our recipe table |
 | Allergy / spice / category filters | Hard database filters | The LLM cannot override these |
 | Match % and "Almost there" | Plain code | Computed from ingredient overlap, not by the LLM. 2 or fewer missing items = Almost there |
-| Retry and relax | Agent loop | Capped at 3 tries, shown in the UI. Planned (#79): try 1 is strict, try 2 adds partial matches (at least 30% match), try 3 drops the food-type filter, until at least 3 dishes are found. Allergies, unknown allergen data and spice level are never relaxed |
+| Retry and relax | Agent loop | Capped at 3 tries, shown in the UI. Planned (#79): try 1 is strict, try 2 adds partial matches (at least 30% match and 2 owned non-staple ingredients), try 3 drops the food-type filter and the 30% floor, until at least 3 dishes are found. Allergies, unknown allergen data and spice level are never relaxed |
 | Personalization | Query over user history | Skip recent dishes, boost liked ones |
 
-## Tech stack _(planned, change if the team decides otherwise)_
+## Tech stack
 
 - **App and API:** Next.js (TypeScript), mobile-first, styled like a LINE Mini App
 - **Database:** Supabase free tier (Postgres + pgvector) for recipes, embeddings, profiles and history. This is the only vector store; no separate vector service or reranker.
 - **AI:** one LLM provider behind a single wrapper, so switching is a one-line change. Start with the Gemini free API tier (vision, Thai text, embeddings); Groq or OpenRouter free models are fallbacks. A small paid credit is the demo-day fallback.
 - **Hosting:** Vercel free tier
-- **LINE integration:** web app first; LIFF wrapper and rich menu are stretch goals
+- **LINE integration:** LINE Official Account with a Messaging API webhook (`app/api/line/webhook`), a rich menu (`design/rich-menu/`) and the pages opened as a LIFF app. Which step lives in the chat and which on a page: `docs/line-chat-flow.md`.
 
 The whole project should run at zero cost. Free-tier limits change, so check rate limits on Day 1 and cache LLM results where possible.
 
@@ -153,7 +155,9 @@ Then open http://localhost:3000 on your phone-sized browser window. Run `npm tes
 
 ### Deploy (Vercel, free tier)
 
-Import the GitHub repo at vercel.com/new (framework: Next.js, no build settings to change). Add the environment variables from `.env.example`; for a mock-only demo, `NEXT_PUBLIC_USE_MOCKS=true` is enough. `SUPABASE_SERVICE_KEY` must not get a `NEXT_PUBLIC_` prefix.
+Import the GitHub repo at vercel.com/new (framework: Next.js, no build settings to change). Add the environment variables below under Production; for a mock-only demo, `NEXT_PUBLIC_USE_MOCKS=true` is enough. Server keys must never get a `NEXT_PUBLIC_` prefix.
+
+Deploy from the repo root on `dev`: `npx vercel deploy --prod --project ai-menu`. `NEXT_PUBLIC_*` values are baked in at build time, so redeploy after changing them.
 
 ### Environment variables
 
@@ -161,30 +165,38 @@ Copy `.env.example` to `.env.local` and fill in your own values. **Never commit 
 
 | Variable | Purpose |
 |---|---|
-| `NEXT_PUBLIC_USE_MOCKS` | `true` runs the UI on mock data with no keys |
+| `NEXT_PUBLIC_USE_MOCKS` | Unset or `true`: pages use mock data with no keys. `false`: pages call the real API (production) |
 | `LLM_API_KEY` | Vision, agent, tagging and embeddings |
-| `LLM_PROVIDER` | Which provider the wrapper should use |
+| `LLM_PROVIDER` | Which provider the wrapper should use (default `gemini`) |
+| `LLM_MODEL`, `LLM_FALLBACK_MODEL` | Optional model overrides (defaults in `lib/llm.ts`) |
 | `SUPABASE_URL` | Database URL |
 | `SUPABASE_ANON_KEY` | Public client key |
 | `SUPABASE_SERVICE_KEY` | Server-only key. Never expose to the browser. |
+| `NEXT_PUBLIC_LIFF_ID` | LIFF app id (LINE Login channel). Empty = LINE features in the pages stay off |
+| `LINE_LOGIN_CHANNEL_ID` | Server-only. Verifies the LIFF ID token that links a profile to the chat user |
+| `LINE_CHANNEL_SECRET`, `LINE_CHANNEL_ACCESS_TOKEN` | Server-only. The Messaging API bot used by the webhook |
 
 ### Mock mode
 
-The UI runs end to end on mock data with no keys, so frontend work never waits on backend work. `NEXT_PUBLIC_USE_MOCKS=true` (the default in `.env.example`) makes every page read from `mocks/api.ts`. See `docs/how-the-app-works.md`.
+The UI runs end to end on mock data with no keys, so frontend work never waits on backend work. Every page reads data through one file, `mocks/api.ts`. With `NEXT_PUBLIC_USE_MOCKS=true` (the default in `.env.example`) it returns mock data; with `false` it calls the endpoints in `docs/api-contract.md`. Swaps are always computed in the browser until their endpoint lands. See `docs/how-the-app-works.md`.
 
-## Project structure _(planned)_
+## Project structure
 
 ```
-docs/            api-contract.md, schema.md (Person B, Day 1) and manual-test-checklist.md (Person A, Day 1). Class PDFs stay out of the repo.
-app/             Pages and routes (Person A)
+docs/            api-contract.md, schema.md, line-chat-flow.md, how-the-app-works.md, demo-script.md, manual-test-checklist.md. Class PDFs stay out of the repo.
+app/             Pages (Person A); app/line/ builds the chat cards
+app/api/         Endpoints: scan, options, ingredients, profile, recommend, recipes, history, favorites, line/webhook (Person B)
 components/      UI components (Person A)
 mocks/           Mock data and the single data door, mocks/api.ts (Person A)
 types/           Shared request/response types (both)
-api/ or app/api/ Endpoints: scan, recommend, recipe, history (Person B)
-lib/             LLM wrapper, agent loop, match logic (Person B)
-data/            Recipe dataset, tagging scripts, embedding loader (Person B)
-tests/           Automated tests
+lib/             LLM wrapper, scan, match logic, stores, LINE client and webhook handler (Person B)
+data/            Recipe batches, ingredients, allergen rules, staples (Person B)
+scripts/         SQL builders for the recipe, ingredient and allergen seeds, LLM smoke test
+supabase/        Database migrations and seeds
+design/          Rich menu image, source and upload steps
 ```
+
+Tests sit next to the code they cover (`*.test.ts` in `app/` and `lib/`).
 
 ## Team workflow
 
@@ -217,7 +229,7 @@ If behind: cut LIFF and chat replies in LINE first (the Ask page is already cut)
 
 ## Testing
 
-Automated: `npm test` (step parsing and the swap allergy filter today). Planned: match % logic, allergy filter, API contract.
+Automated: `npm test` runs every `*.test.ts` in `app/` and `lib/`: match % and staples, the allergy filter, recipe batches, the API routes (profile, recipes, history and favorites), the LINE webhook, signature and ID-token checks, chat cards, step parsing, swaps, the cooking timer and photo shrinking.
 
 Manual checks that need a person (full checklist: [docs/manual-test-checklist.md](docs/manual-test-checklist.md)):
 
