@@ -52,7 +52,8 @@ test("spice level means up to this level; category null means any", () => {
   const hot = recipe("hot", { ids: ["egg"], spice: 3 });
   assert.equal(rankRecipes([hot], { ...base, ingredientIds: ["egg"], spice: 2 }).matches.length, 0);
   assert.equal(rankRecipes([hot], { ...base, ingredientIds: ["egg"], spice: 3 }).matches.length, 1);
-  assert.equal(rankRecipes([hot], { ...base, ingredientIds: ["egg"], category: "soup" }).matches.length, 0);
+  const soup = rankRecipes([hot], { ...base, ingredientIds: ["egg"], category: "soup" });
+  assert.equal(soup.tries, 3, "the category is only dropped on the last try");
 });
 
 test("no ingredients entered gives nothing, not a crash", () => {
@@ -86,7 +87,7 @@ test("a missing non-staple still counts, out of the non-staple ingredients only"
 
 test("holding only staples is not holding the dish, and a dish of only staples is never suggested", () => {
   const dish = recipe("needs-egg", { ids: ["egg", "salt"] });
-  assert.deepEqual(rankRecipes([dish], { ...base, ingredientIds: ["salt", "fish-sauce"] }), { matches: [], almostThere: [], tries: 1 });
+  assert.deepEqual(rankRecipes([dish], { ...base, ingredientIds: ["salt", "fish-sauce"] }), { matches: [], almostThere: [], partial: [], tries: 3 });
   const onlyStaples = recipe("only-staples", { ids: ["salt", "sugar"] });
   assert.deepEqual(rankRecipes([onlyStaples], { ...base, ingredientIds: ["salt"] }).matches, []);
 });
@@ -107,4 +108,70 @@ test("a custom staples list can be passed, and an empty one restores the strict 
   const dish = recipe("strict", { ids: ["egg", "pork", "salt"] });
   const strict = rankRecipes([dish], { ...base, ingredientIds: ["egg", "pork"] }, []);
   assert.equal(strict.almostThere.length, 1, "salt is missing when nothing is a staple");
+});
+
+// ---- retry loop and the partial group ----
+const have2: SearchRequest = { ...base, ingredientIds: ["pork", "egg"] };
+const forty = (id: string, over: Partial<Recipe> = {}) => recipe(id, { ids: ["pork", "egg", `${id}-a`, `${id}-b`, `${id}-c`], ...over }); // 2 of 5 = 40%, 3 missing
+const twenty = (id: string, over: Partial<Recipe> = {}) => recipe(id, { ids: ["pork", `${id}-a`, `${id}-b`, `${id}-c`, `${id}-d`], ...over }); // 1 of 5 = 20%, 4 missing
+
+test("three or more dishes from the strict search stop at try 1 with no partial group", () => {
+  const r = rankRecipes(catalog, base);
+  assert.equal(r.tries, 1);
+  assert.deepEqual(r.partial, []);
+});
+
+test("try 2 adds partial dishes at the 30% floor, best match first, with what is missing", () => {
+  const r = rankRecipes([forty("a"), forty("b"), forty("c"), twenty("low")], have2);
+  assert.equal(r.tries, 2);
+  assert.deepEqual(r.partial.map((m) => m.recipe.id), ["a", "b", "c"]);
+  assert.ok(r.partial.every((m) => m.matchPercent === 40 && m.missing.length === 3));
+  assert.deepEqual(r.partial[0].missing.map((x) => x.id), ["a-a", "a-b", "a-c"]);
+});
+
+test("try 3 accepts a dish below the floor, and reports 3 tries even when it is still short", () => {
+  const r = rankRecipes([forty("a"), twenty("low")], have2);
+  assert.equal(r.tries, 3);
+  assert.deepEqual(r.partial.map((m) => [m.recipe.id, m.matchPercent]), [["a", 40], ["low", 20]]);
+});
+
+test("the partial group is capped at 5, and a dish is in one group only", () => {
+  const many = Array.from({ length: 8 }, (_, i) => forty(`d${i}`));
+  const r = rankRecipes([...many, recipe("full", { ids: ["pork", "egg"] })], have2);
+  assert.equal(r.partial.length, 5);
+  assert.deepEqual(r.matches.map((m) => m.recipe.id), ["full"]);
+  assert.ok(!r.partial.some((m) => m.recipe.id === "full"));
+});
+
+test("the food-type filter is respected until try 3, then dropped", () => {
+  const stirFry = [forty("a"), forty("b"), forty("c")];
+  assert.equal(rankRecipes(stirFry, { ...have2, category: "stir-fry" }).tries, 2);
+  const soupOnly = rankRecipes(stirFry, { ...have2, category: "soup" });
+  assert.equal(soupOnly.tries, 3);
+  assert.equal(soupOnly.partial.length, 3);
+});
+
+test("allergies, unknown allergen data and spice are never relaxed, on any try", () => {
+  const dishes = [
+    forty("egg-dish", { allergens: ["egg"] }),
+    forty("unknown", { allergens: null }),
+    forty("hot", { spice: 3 }),
+    twenty("egg-low", { allergens: ["egg"] }),
+  ];
+  const r = rankRecipes(dishes, { ...have2, spice: 1, allergies: ["egg"] });
+  assert.equal(r.tries, 3);
+  assert.deepEqual([r.matches, r.almostThere, r.partial], [[], [], []]);
+});
+
+test("staples do not count toward the partial percentage either", () => {
+  const dish = recipe("staple-heavy", { ids: ["pork", "egg", "a", "b", "c", "salt", "sugar", "fish-sauce"] });
+  const r = rankRecipes([dish], have2);
+  assert.equal(r.partial[0].matchPercent, 40);
+  assert.ok(r.partial[0].missing.every((x) => !["salt", "sugar", "fish-sauce"].includes(x.id)));
+});
+
+test("holding no core ingredient of any dish still gives nothing, even on try 3", () => {
+  const r = rankRecipes([forty("a"), twenty("b")], { ...base, ingredientIds: ["unrelated"] });
+  assert.deepEqual([r.matches, r.almostThere, r.partial], [[], [], []]);
+  assert.equal(r.tries, 3);
 });
