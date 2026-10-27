@@ -10,7 +10,7 @@ import { readDraft, writeDraft } from "@/app/draft";
 import { idsFromLink } from "@/app/linkIds";
 import type { Option, SearchRequest, SearchResult } from "@/types/api";
 
-type Tab = "matches" | "almostThere";
+type Tab = "matches" | "toBuy";
 type State = { kind: "loading" } | { kind: "noSearch" } | { kind: "error" } | { kind: "done"; result: SearchResult; categories: Option[] };
 
 const linkButton = "btn-primary";
@@ -39,7 +39,7 @@ export default function ResultsPage() {
     setState({ kind: "loading" });
     Promise.all([searchRecipes(search), getOptions()])
       .then(([result, options]) => {
-        setTab(result.matches.length > 0 ? "matches" : "almostThere");
+        setTab(result.matches.length > 0 ? "matches" : "toBuy");
         setState({ kind: "done", result, categories: options.categories });
       })
       .catch(() => setState({ kind: "error" }));
@@ -90,8 +90,9 @@ function Results({
   const pick = (list: SearchResult["matches"]) => (filter ? list.filter((m) => m.recipe.category === filter) : list);
   const matches = pick(result.matches);
   const almostThere = pick(result.almostThere);
+  const partial = pick(result.partial ?? []); // absent until the server sends it (#79)
 
-  if (result.matches.length === 0 && result.almostThere.length === 0) {
+  if (result.matches.length === 0 && result.almostThere.length === 0 && !result.partial?.length) {
     return (
       <div className="flex flex-col items-center gap-3 py-16 text-center">
         <p className="font-semibold">ไม่พบเมนูที่ตรงเงื่อนไข</p>
@@ -103,9 +104,12 @@ function Results({
 
   const tabs: [Tab, string, number][] = [
     ["matches", "ทำได้เลย", matches.length],
-    ["almostThere", "ขาดวัตถุดิบอีกนิด", almostThere.length],
+    ["toBuy", "ต้องซื้อเพิ่ม", almostThere.length + partial.length],
   ];
-  const list = tab === "matches" ? matches : almostThere;
+  // Tab 2 holds two groups: missing 1-2 items, then missing 3 or more.
+  const groups: [string, SearchResult["matches"]][] =
+    tab === "matches" ? [["", matches]] : [["ขาดอีก 1-2 อย่าง", almostThere], ["ขาดหลายอย่าง", partial]];
+  const empty = groups.every(([, g]) => g.length === 0);
 
   return (
     <>
@@ -131,27 +135,30 @@ function Results({
         ))}
       </div>
 
-      {tab === "almostThere" && list.length > 0 && (
-        <p className="mb-3 text-xs text-muted">ซื้อเพิ่มอีก 1-2 อย่างก็ทำได้</p>
-      )}
-
-      {list.length === 0 && filter ? (
+      {empty && filter ? (
         <div className="flex flex-col items-center gap-3 py-12 text-center">
           <p className="text-sm text-muted">ไม่มีเมนู{categories.find((c) => c.id === filter)?.th}ในแท็บนี้</p>
           <button type="button" onClick={() => setFilter(null)} className="btn-secondary px-6">ดูทั้งหมด</button>
         </div>
-      ) : list.length === 0 ? (
+      ) : empty ? (
         <p className="py-12 text-center text-sm text-muted">
-          {tab === "matches" ? "ยังไม่มีเมนูที่ใช้วัตถุดิบครบ ลองดูแท็บ “ขาดวัตถุดิบอีกนิด”" : "ไม่มีเมนูที่ขาดแค่ 1-2 อย่าง"}
+          {tab === "matches" ? "ยังไม่มีเมนูที่ใช้วัตถุดิบครบ ลองดูแท็บ “ต้องซื้อเพิ่ม”" : "ไม่มีเมนูที่ต้องซื้อเพิ่ม"}
         </p>
       ) : (
-        <ul className="flex flex-col gap-3">
-          {list.map((m) => (
-            <li key={m.recipe.id}>
-              <RecipeCard recipe={m.recipe} match={m} />
-            </li>
-          ))}
-        </ul>
+        groups.map(([title, list]) =>
+          list.length === 0 ? null : (
+            <section key={title} aria-label={title || undefined} className="mb-5">
+              {title && <h2 className="mb-2 text-sm font-semibold text-muted">{title}</h2>}
+              <ul className="flex flex-col gap-3">
+                {list.map((m) => (
+                  <li key={m.recipe.id}>
+                    <RecipeCard recipe={m.recipe} match={m} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ),
+        )
       )}
 
       {tries > 1 && <p className="mt-4 text-center text-xs text-muted">ค้นหาแล้ว {tries} รอบ</p>}

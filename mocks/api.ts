@@ -9,6 +9,7 @@ import { recipes } from "./recipes";
 import { substitutes } from "./substitutes";
 import { safeSwaps, type SwapResult } from "@/app/recipe/swaps";
 import { lineIdToken } from "@/app/liff";
+import { STAPLES } from "@/data/staples";
 
 const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS !== "false";
 const PROFILE_KEY = "aimenu.profile";
@@ -97,20 +98,30 @@ export async function searchRecipes(req: SearchRequest): Promise<SearchResult> {
   if (!USE_MOCKS) return api<SearchResult>("/api/recommend", json(req));
   await wait(1000);
   if (devSwitch() === "error") throw new Error("mock search error");
-  if (devSwitch() === "empty") return { matches: [], almostThere: [], tries: 3 };
+  if (devSwitch() === "empty") return { matches: [], almostThere: [], partial: [], tries: 3 };
   const have = new Set(req.ingredientIds);
   const ranked: RecipeMatch[] = recipes
     .filter((r) => r.allergens !== null && !r.allergens.some((a) => req.allergies.includes(a)))
     .filter((r) => r.spice <= req.spice && (req.category === null || r.category === req.category))
-    .map(({ id, th, en, category, spice, minutes, ingredients: list }) => {
+    .map(({ id, th, en, category, spice, minutes, ingredients }) => {
+      // Staples are assumed in every kitchen: never missing and not part of the percentage (same as the server).
+      const list = ingredients.filter((x) => !STAPLES.includes(x.id));
       const missing = list.filter((x) => !have.has(x.id)).map((x) => ({ id: x.id, th: x.th }));
       const matchPercent = Math.round(((list.length - missing.length) / list.length) * 100);
       return { recipe: { id, th, en, category, spice, minutes }, matchPercent, missing };
     })
+    .filter((m) => m.matchPercent > 0) // a dish you own nothing for is not a suggestion (same as the server)
     .sort((a, b) => b.matchPercent - a.matchPercent);
   const matches = ranked.filter((m) => m.missing.length === 0);
   const almostThere = ranked.filter((m) => m.missing.length > 0 && m.missing.length <= 2);
-  return { matches, almostThere, tries: matches.length + almostThere.length > 0 ? 1 : 3 };
+  if (matches.length + almostThere.length >= 3) return { matches, almostThere, partial: [], tries: 1 };
+  // Like the server's try 2 (#79): missing 3+, at least 30% and 2 owned non-staple ingredients, at most 5.
+  const owned = req.ingredientIds.filter((id) => !STAPLES.includes(id));
+  const partial = ranked
+    .filter((m) => m.missing.length >= 3 && m.matchPercent >= 30)
+    .filter((m) => owned.filter((id) => recipes.find((r) => r.id === m.recipe.id)!.ingredients.some((x) => x.id === id)).length >= 2)
+    .slice(0, 5);
+  return { matches, almostThere, partial, tries: matches.length + almostThere.length + partial.length > 0 ? 2 : 3 };
 }
 
 // Full catalog for the Menus page. Allergy filtering stays a hard filter here too.
