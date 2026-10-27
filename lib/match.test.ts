@@ -113,7 +113,7 @@ test("a custom staples list can be passed, and an empty one restores the strict 
 // ---- retry loop and the partial group ----
 const have2: SearchRequest = { ...base, ingredientIds: ["pork", "egg"] };
 const forty = (id: string, over: Partial<Recipe> = {}) => recipe(id, { ids: ["pork", "egg", `${id}-a`, `${id}-b`, `${id}-c`], ...over }); // 2 of 5 = 40%, 3 missing
-const twenty = (id: string, over: Partial<Recipe> = {}) => recipe(id, { ids: ["pork", `${id}-a`, `${id}-b`, `${id}-c`, `${id}-d`], ...over }); // 1 of 5 = 20%, 4 missing
+const twenty = (id: string, over: Partial<Recipe> = {}) => recipe(id, { ids: ["pork", "egg", `${id}-a`, `${id}-b`, `${id}-c`, `${id}-d`, `${id}-e`], ...over }); // 2 of 7 = 29%, 5 missing: under the 30% floor
 
 test("three or more dishes from the strict search stop at try 1 with no partial group", () => {
   const r = rankRecipes(catalog, base);
@@ -132,7 +132,16 @@ test("try 2 adds partial dishes at the 30% floor, best match first, with what is
 test("try 3 accepts a dish below the floor, and reports 3 tries even when it is still short", () => {
   const r = rankRecipes([forty("a"), twenty("low")], have2);
   assert.equal(r.tries, 3);
-  assert.deepEqual(r.partial.map((m) => [m.recipe.id, m.matchPercent]), [["a", 40], ["low", 20]]);
+  assert.deepEqual(r.partial.map((m) => [m.recipe.id, m.matchPercent]), [["a", 40], ["low", 29]]);
+});
+
+test("a partial dish needs at least 2 owned non-staple ingredients, on every try", () => {
+  const onePork = recipe("one-owned", { ids: ["pork", "a", "b", "c"] }); // 1 of 4: one owned, three missing
+  const r = rankRecipes([onePork], { ...base, ingredientIds: ["pork"] });
+  assert.equal(r.tries, 3);
+  assert.deepEqual(r.partial, []);
+  const two = rankRecipes([recipe("two-owned", { ids: ["pork", "egg", "a", "b", "c", "d", "e"] })], have2);
+  assert.deepEqual(two.partial.map((m) => m.recipe.id), ["two-owned"]);
 });
 
 test("the partial group is capped at 5, and a dish is in one group only", () => {

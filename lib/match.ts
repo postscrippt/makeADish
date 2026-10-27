@@ -6,12 +6,15 @@ import { STAPLES } from "../data/staples.ts";
 const ALMOST_THERE_MAX_MISSING = 2;
 const MIN_RESULTS = 3; // the search relaxes (tries 2 and 3) while all groups together hold fewer dishes than this
 const PARTIAL_FLOOR_PERCENT = 30; // try 2: a partial dish must match at least this much
+const PARTIAL_MIN_OWNED = 2; // a partial dish needs this many owned non-staple ingredients, so garlic + chili alone do not flood it
 const PARTIAL_MAX = 5;
+
+type Scored = { match: RecipeMatch; owned: number };
 
 // Every dish that passes the hard filters and shares at least one core ingredient, best match first.
 // The allergy, unknown-allergen and spice filters are here and nowhere else, so no retry can relax them.
 // `staples` are assumed to be in the kitchen: they are never missing and do not count toward the percentage.
-function scoreRecipes(recipes: Recipe[], req: SearchRequest, isStaple: Set<string>, category: string | null): RecipeMatch[] {
+function scoreRecipes(recipes: Recipe[], req: SearchRequest, isStaple: Set<string>, category: string | null): Scored[] {
   const have = new Set(req.ingredientIds);
   return recipes
     // Unknown allergen data (null) is never shown; any overlap with the user's allergies is dropped.
@@ -23,23 +26,27 @@ function scoreRecipes(recipes: Recipe[], req: SearchRequest, isStaple: Set<strin
       const owned = core.length - missing.length;
       // A dish you hold nothing for is not a suggestion, and neither is one made only of staples.
       if (core.length === 0 || owned === 0) return [];
-      return [{ recipe: { id, th, en, category, spice, minutes }, matchPercent: Math.round((owned / core.length) * 100), missing }];
+      return [{ match: { recipe: { id, th, en, category, spice, minutes }, matchPercent: Math.round((owned / core.length) * 100), missing }, owned }];
     })
-    .sort((a, b) => b.matchPercent - a.matchPercent);
+    .sort((a, b) => b.match.matchPercent - a.match.matchPercent);
 }
 
-function group(ranked: RecipeMatch[], partialFloor: number) {
+function group(ranked: Scored[], partialFloor: number) {
+  const all = ranked.map((s) => s.match);
   return {
-    matches: ranked.filter((m) => m.missing.length === 0),
-    almostThere: ranked.filter((m) => m.missing.length > 0 && m.missing.length <= ALMOST_THERE_MAX_MISSING),
-    partial: ranked.filter((m) => m.missing.length > ALMOST_THERE_MAX_MISSING && m.matchPercent >= partialFloor).slice(0, PARTIAL_MAX),
+    matches: all.filter((m) => m.missing.length === 0),
+    almostThere: all.filter((m) => m.missing.length > 0 && m.missing.length <= ALMOST_THERE_MAX_MISSING),
+    partial: ranked
+      .filter((s) => s.match.missing.length > ALMOST_THERE_MAX_MISSING && s.match.matchPercent >= partialFloor && s.owned >= PARTIAL_MIN_OWNED)
+      .map((s) => s.match)
+      .slice(0, PARTIAL_MAX),
   };
 }
 
 const total = (g: ReturnType<typeof group>) => g.matches.length + g.almostThere.length + g.partial.length;
 
 // Try 1 is strict (no partial group). Try 2 adds partial dishes at the floor. Try 3 also drops the food-type filter and
-// accepts any dish sharing a core ingredient. Each try runs only while there are fewer than MIN_RESULTS dishes.
+// the percentage floor (the owned-ingredient minimum stays). Each try runs only while there are fewer than MIN_RESULTS dishes.
 export function rankRecipes(recipes: Recipe[], req: SearchRequest, staples: readonly string[] = STAPLES): SearchResult & { partial: RecipeMatch[] } {
   const isStaple = new Set(staples);
   const strict = scoreRecipes(recipes, req, isStaple, req.category);
