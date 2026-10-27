@@ -51,6 +51,7 @@ export type RecipeMatch = {
 export type SearchResult = {
   matches: RecipeMatch[]; // missing nothing
   almostThere: RecipeMatch[]; // missing 1-2 items
+  partial?: RecipeMatch[]; // missing 3 or more but above the match floor ("Need to shop"); absent means empty. #79 makes it always present
   tries: number; // agent attempts, max 3
 };
 
