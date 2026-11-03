@@ -7,13 +7,14 @@ import { recipes } from "../../mocks/recipes.ts";
 import type { LineMessage } from "./client.ts";
 import type { ScanResult, SearchRequest, SpiceLevel } from "../../types/api.ts";
 
-type Calls = { replies: { token: string; messages: LineMessage[] }[]; loading: string[]; content: string[]; searches: SearchRequest[] };
+type Calls = { replies: { token: string; messages: LineMessage[] }[]; pushes: { to: string; messages: LineMessage[] }[]; loading: string[]; content: string[]; searches: SearchRequest[] };
 
 function setup(over: Partial<Deps> = {}, profile: { allergies: string[]; spice: SpiceLevel } = { allergies: [], spice: 1 }) {
-  const calls: Calls = { replies: [], loading: [], content: [], searches: [] };
+  const calls: Calls = { replies: [], pushes: [], loading: [], content: [], searches: [] };
   const deps: Deps = {
     client: {
       async reply(token, messages) { calls.replies.push({ token, messages }); },
+      async push(to, messages) { calls.pushes.push({ to, messages }); },
       async startLoading(chatId) { calls.loading.push(chatId); },
       async getContent(id) { calls.content.push(id); return { bytes: new Uint8Array([1, 2, 3]), mime: "image/jpeg" }; },
     },
@@ -91,6 +92,22 @@ test("a thrown error while downloading or scanning still gets one friendly reply
   await handleEvent(image(), deps);
   assert.equal(calls.replies.length, 1);
   assert.doesNotMatch(json(calls.replies[0].messages[0]), /boom/);
+});
+
+test("a scan that outlasts the deadline still gets a friendly reply", async () => {
+  const { deps, calls } = setup({ scan: () => new Promise(() => {}), scanDeadlineMs: 20 });
+  await handleEvent(image(), deps);
+  assert.equal(calls.replies.length, 1);
+  assert.match(json(calls.replies[0].messages[0]), /สแกนไม่สำเร็จ/);
+});
+
+test("a reply that fails (expired token) is pushed to the user instead", async () => {
+  const { deps, calls } = setup();
+  deps.client.reply = async () => { throw new Error("LINE reply failed: HTTP 400"); };
+  await handleEvent(image(), deps);
+  assert.equal(calls.pushes.length, 1);
+  assert.equal(calls.pushes[0].to, "U1");
+  assert.match(json(calls.pushes[0].messages[0]), /เจอวัตถุดิบ 5 อย่าง/);
 });
 
 test("an empty scan asks the user to retry", async () => {
