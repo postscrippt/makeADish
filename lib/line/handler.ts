@@ -21,11 +21,20 @@ export type Deps = {
   allergens: Option[]; // id -> Thai name, for the confirm card
   knownIngredientIds: Set<string>; // postback ids are checked against this
   url(path: string): string; // absolute link to a page (LIFF link when configured)
+  scanDeadlineMs?: number; // tests shorten it
 };
+
+// A slow model call must end in a friendly message, not in silence.
+function withDeadline<T>(work: Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  const late = new Promise<never>((_, reject) => { timer = setTimeout(() => reject(new Error(`scan took longer than ${ms} ms`)), ms); });
+  return Promise.race([work, late]).finally(() => clearTimeout(timer));
+}
 
 export const SCAN_TRIGGER = "สแกนวัตถุดิบ";
 const SPICE_LABELS = ["ไม่เผ็ด", "เผ็ดน้อย", "เผ็ดกลาง", "เผ็ดมาก"];
-const LOADING_SECONDS = 30; // LINE accepts multiples of 5, up to 60
+const LOADING_SECONDS = 45; // LINE accepts multiples of 5, up to 60
+const SCAN_DEADLINE_MS = 40_000; // give up before the loading animation ends and the function time limit hits
 const MAX_POSTBACK_CHARS = 290; // LINE's limit is 300 for postback data
 const REASON_TEXT = {
   no_food: "ไม่เจออาหารในรูปนี้ ลองถ่ายใหม่ให้เห็นวัตถุดิบชัด ๆ นะ",
@@ -62,8 +71,10 @@ async function onImage(event: LineEvent, deps: Deps): Promise<LineMessage> {
 
   let scan: ScanResult;
   try {
-    const photo = await deps.client.getContent(event.message!.id);
-    scan = await deps.scan(photo); // the bytes go out of scope here; nothing keeps them
+    scan = await withDeadline(
+      deps.client.getContent(event.message!.id).then((photo) => deps.scan(photo)), // the bytes go out of scope here; nothing keeps them
+      deps.scanDeadlineMs ?? SCAN_DEADLINE_MS,
+    );
   } catch (e) {
     // The user sees a friendly message, so log why. Never the photo or any token.
     console.error("LINE image scan failed:", e instanceof Error ? e.message : "unknown error");
@@ -111,5 +122,14 @@ export async function handleEvent(event: LineEvent, deps: Deps): Promise<void> {
     message = await onPostback(event, deps);
   }
 
-  if (message) await deps.client.reply(event.replyToken, [message]);
+  if (!message) return;
+  try {
+    await deps.client.reply(event.replyToken, [message]);
+  } catch (e) {
+    // The reply token may have expired during a slow scan; push to the user instead of staying silent.
+    const userId = event.source?.userId;
+    console.error("LINE reply failed:", e instanceof Error ? e.message : "unknown error");
+    if (!userId) throw e;
+    await deps.client.push(userId, [message]);
+  }
 }
