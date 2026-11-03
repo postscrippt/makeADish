@@ -74,13 +74,15 @@ test("recommend respects spice (up to) and category", async () => {
   const mild = (await (await handleRecommend(post(search({ spice: 1 })), deps())).json()) as SearchResult;
   assert.ok(!titles(mild).includes("ต้มยำ"));
   const soup = (await (await handleRecommend(post(search({ category: "soup" })), deps())).json()) as SearchResult;
-  assert.deepEqual(titles(soup), ["ต้มยำ"]);
+  // One soup is under the 3-dish minimum, so try 3 drops the food-type filter; the soup is still in the list.
+  assert.equal(soup.tries, 3);
+  assert.ok(titles(soup).includes("ต้มยำ"));
 });
 
 test("recommend: an empty result is a normal 200", async () => {
   const res = await handleRecommend(post(search({ ingredientIds: [] })), deps());
   assert.equal(res.status, 200);
-  assert.deepEqual(await res.json(), { matches: [], almostThere: [], tries: 1 });
+  assert.deepEqual(await res.json(), { matches: [], almostThere: [], partial: [], tries: 3 });
 });
 
 test("recommend validates the body and the header", async () => {

@@ -57,6 +57,19 @@ test("resultsCarousel: can-make first, almost-there with what's missing, ends wi
   assert.ok(actions(bubbles[2]).some((x) => x.uri === url("/results")));
 });
 
+test("resultsCarousel shows partial dishes last, labelled ต้องซื้อเพิ่ม, with what is missing", () => {
+  const r: SearchResult = {
+    matches: [match("a", "ไข่เจียว", 100)],
+    almostThere: [],
+    partial: [match("c", "แกงเขียวหวาน", 40, ["พริกแกง", "กะทิ", "มะเขือ"])],
+    tries: 2,
+  };
+  const bubbles = (resultsCarousel(r, (id) => `/recipe/${id}`, url("/results"), url("/form")) as { contents: { contents: unknown[] } }).contents.contents;
+  assert.equal(bubbles.length, 3);
+  assert.ok(texts(bubbles[1]).includes("ต้องซื้อเพิ่ม"));
+  assert.ok(texts(bubbles[1]).some((x) => x.includes("ขาด: พริกแกง, กะทิ, มะเขือ")));
+});
+
 test("resultsCarousel stays within LINE's 12-bubble limit", () => {
   const many = Array.from({ length: 20 }, (_, i) => match(`r${i}`, `เมนู${i}`, 100));
   const m = resultsCarousel({ matches: many, almostThere: many, tries: 1 }, (id) => url(`/recipe/${id}`), url("/results"), url("/form")) as { contents: { contents: unknown[] } };

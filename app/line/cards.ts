@@ -78,7 +78,14 @@ export function confirmCard(
   };
 }
 
-function dishBubble(m: RecipeMatch, canMake: boolean, recipeUrl: string) {
+type DishKind = "ready" | "almost" | "shop";
+const DISH_LABEL: Record<DishKind, { label: string; color: string }> = {
+  ready: { label: "ทำได้เลย", color: C.brandDeep },
+  almost: { label: "ขาดอีกนิด", color: C.amber },
+  shop: { label: "ต้องซื้อเพิ่ม", color: C.amber },
+};
+
+function dishBubble(m: RecipeMatch, kind: DishKind, recipeUrl: string) {
   const r = m.recipe;
   return {
     type: "bubble",
@@ -88,7 +95,7 @@ function dishBubble(m: RecipeMatch, canMake: boolean, recipeUrl: string) {
       layout: "vertical",
       spacing: "sm",
       contents: [
-        text(canMake ? "ทำได้เลย" : "ขาดอีกนิด", { size: "xs", weight: "bold", color: canMake ? C.brandDeep : C.amber }),
+        text(DISH_LABEL[kind].label, { size: "xs", weight: "bold", color: DISH_LABEL[kind].color }),
         text(r.th, { size: "lg", weight: "bold" }),
         text(spiceMeta(r.minutes, r.spice), { color: C.muted }),
         {
@@ -119,7 +126,11 @@ function dishBubble(m: RecipeMatch, canMake: boolean, recipeUrl: string) {
 // Step 5: the results as swipeable cards. Input must come from the hard-filtered search (allergies, unknown
 // allergen data already removed); this only lays it out. Tabs and food-type filters live on the page (allUrl).
 export function resultsCarousel(result: SearchResult, recipeUrl: (id: string) => string, allUrl: string, editUrl: string): LineMessage {
-  const all = [...result.matches.map((m) => [m, true] as const), ...result.almostThere.map((m) => [m, false] as const)];
+  const all = [
+    ...result.matches.map((m) => [m, "ready"] as const),
+    ...result.almostThere.map((m) => [m, "almost"] as const),
+    ...(result.partial ?? []).map((m) => [m, "shop"] as const),
+  ];
 
   if (all.length === 0) {
     return {
@@ -157,10 +168,10 @@ export function resultsCarousel(result: SearchResult, recipeUrl: (id: string) =>
   const canMake = result.matches.length;
   return {
     type: "flex",
-    altText: canMake > 0 ? `เจอ ${canMake} เมนูที่ทำได้เลย` : `เจอ ${all.length} เมนูที่ขาดอีกนิด`,
+    altText: canMake > 0 ? `เจอ ${canMake} เมนูที่ทำได้เลย` : `เจอ ${all.length} เมนูที่ขาดวัตถุดิบบางอย่าง`,
     contents: {
       type: "carousel",
-      contents: [...all.slice(0, MAX_DISHES).map(([m, ok]) => dishBubble(m, ok, recipeUrl(m.recipe.id))), seeAll],
+      contents: [...all.slice(0, MAX_DISHES).map(([m, kind]) => dishBubble(m, kind, recipeUrl(m.recipe.id))), seeAll],
     },
   };
 }

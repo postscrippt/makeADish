@@ -106,12 +106,12 @@ Runs the search and agent loop.
   ```
   - `matches`: missing nothing.
   - `almostThere`: missing 1 or 2 items.
-  - `partial` (new, shown as "Need to shop" / ต้องซื้อเพิ่ม): missing 3 or more items, but the user owns at least one core ingredient and the match is at or above the floor (30% on try 2; any owned core ingredient on try 3). At most 5 dishes. Until the server change in #79 ships, the field may be absent: treat an absent `partial` as an empty list.
+  - `partial` (new, shown as "Need to shop" / ต้องซื้อเพิ่ม): missing 3 or more items, but the user owns at least 2 non-staple ingredients of the dish and the match is at or above the floor (30% on try 2; no percentage floor on try 3). At most 5 dishes. The field is always present from the server; treat an absent `partial` (older mocks) as an empty list.
   - Each list is sorted by `matchPercent`, highest first.
   - The three lists together aim for at least 3 dishes. The server relaxes the search to reach that (see the retry loop below), but returns fewer when fewer qualify.
   - `tries` is the number of agent attempts, from 1 to 3. The UI shows it.
   - All three lists can be empty. That is a valid answer, not an error.
-  - **Retry loop:** try 1 is strict (`matches` and `almostThere` only). If that gives fewer than 3 dishes, try 2 adds `partial` at the 30% floor. If it is still under 3, try 3 drops the `category` filter (if one was sent) and lowers the floor to any owned core ingredient. It stops as soon as there are 3 dishes.
+  - **Retry loop:** try 1 is strict (`matches` and `almostThere` only). If that gives fewer than 3 dishes, try 2 adds `partial` at the 30% floor. If it is still under 3, try 3 drops the `category` filter (if one was sent) and drops the percentage floor (the 2-owned-ingredient minimum stays). It stops as soon as there are 3 dishes.
   - **Never relaxed on any try:** the user's allergies, recipes with unknown allergen data, and the `spice` limit.
 - **Notes:** the `allergies` in the body are the ones to filter on. The server also unions them with the saved profile allergies, so a stale client cannot weaken the filter.
 
