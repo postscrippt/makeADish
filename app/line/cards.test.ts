@@ -57,6 +57,30 @@ test("resultsCarousel: can-make first, almost-there with what's missing, ends wi
   assert.ok(actions(bubbles[2]).some((x) => x.uri === url("/results")));
 });
 
+test("resultsCarousel: partial dishes come last, labelled ต้องซื้อเพิ่ม with what's missing; absent partial is fine", () => {
+  const r: SearchResult = {
+    matches: [match("a", "ไข่เจียว", 100)],
+    almostThere: [match("b", "กะเพรา", 80, ["ใบกะเพรา"])],
+    partial: [match("c", "ต้มยำ", 40, ["กุ้ง", "ตะไคร้", "ข่า"])],
+    tries: 2,
+  };
+  const bubbles = (resultsCarousel(r, (id) => id, url("/results"), url("/form")) as { contents: { contents: unknown[] } }).contents.contents;
+  assert.equal(bubbles.length, 4);
+  assert.ok(texts(bubbles[2]).includes("ต้องซื้อเพิ่ม"));
+  assert.ok(texts(bubbles[2]).some((x) => x.includes("ขาด: กุ้ง, ตะไคร้, ข่า")));
+  assert.ok(texts(bubbles[3]).some((x) => x.includes("ทั้งหมด 3 เมนู")));
+  const noPartial = resultsCarousel({ ...r, partial: undefined }, (id) => id, url("/results"), url("/form")) as { contents: { contents: unknown[] } };
+  assert.equal(noPartial.contents.contents.length, 3);
+});
+
+test("resultsCarousel: only partial dishes is not the empty state; all three empty is", () => {
+  const only = resultsCarousel({ matches: [], almostThere: [], partial: [match("c", "ต้มยำ", 40, ["กุ้ง", "ข่า", "ตะไคร้"])], tries: 3 }, (id) => id, url("/results"), url("/form"));
+  assert.ok(!texts(only).some((x) => x.includes("ไม่พบเมนู")));
+  assert.ok((only as { altText: string }).altText.includes("ต้องซื้อเพิ่ม"));
+  const none = resultsCarousel({ matches: [], almostThere: [], partial: [], tries: 3 }, (id) => id, url("/results"), url("/form"));
+  assert.ok(texts(none).some((x) => x.includes("ไม่พบเมนู")));
+});
+
 test("resultsCarousel stays within LINE's 12-bubble limit", () => {
   const many = Array.from({ length: 20 }, (_, i) => match(`r${i}`, `เมนู${i}`, 100));
   const m = resultsCarousel({ matches: many, almostThere: many, tries: 1 }, (id) => url(`/recipe/${id}`), url("/results"), url("/form")) as { contents: { contents: unknown[] } };

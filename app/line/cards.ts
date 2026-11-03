@@ -78,7 +78,11 @@ export function confirmCard(
   };
 }
 
-function dishBubble(m: RecipeMatch, canMake: boolean, recipeUrl: string) {
+type DishKind = "make" | "almost" | "shop";
+const KIND_LABEL: Record<DishKind, string> = { make: "ทำได้เลย", almost: "ขาดอีกนิด", shop: "ต้องซื้อเพิ่ม" };
+const KIND_COLOR: Record<DishKind, string> = { make: C.brandDeep, almost: C.amber, shop: C.amber };
+
+function dishBubble(m: RecipeMatch, kind: DishKind, recipeUrl: string) {
   const r = m.recipe;
   return {
     type: "bubble",
@@ -88,7 +92,7 @@ function dishBubble(m: RecipeMatch, canMake: boolean, recipeUrl: string) {
       layout: "vertical",
       spacing: "sm",
       contents: [
-        text(canMake ? "ทำได้เลย" : "ขาดอีกนิด", { size: "xs", weight: "bold", color: canMake ? C.brandDeep : C.amber }),
+        text(KIND_LABEL[kind], { size: "xs", weight: "bold", color: KIND_COLOR[kind] }),
         text(r.th, { size: "lg", weight: "bold" }),
         text(spiceMeta(r.minutes, r.spice), { color: C.muted }),
         {
@@ -119,7 +123,12 @@ function dishBubble(m: RecipeMatch, canMake: boolean, recipeUrl: string) {
 // Step 5: the results as swipeable cards. Input must come from the hard-filtered search (allergies, unknown
 // allergen data already removed); this only lays it out. Tabs and food-type filters live on the page (allUrl).
 export function resultsCarousel(result: SearchResult, recipeUrl: (id: string) => string, allUrl: string, editUrl: string): LineMessage {
-  const all = [...result.matches.map((m) => [m, true] as const), ...result.almostThere.map((m) => [m, false] as const)];
+  // The "partial" group (#79) comes last, so a long list cuts it first. An absent `partial` means empty.
+  const all = [
+    ...result.matches.map((m) => [m, "make"] as const),
+    ...result.almostThere.map((m) => [m, "almost"] as const),
+    ...(result.partial ?? []).map((m) => [m, "shop"] as const),
+  ];
 
   if (all.length === 0) {
     return {
@@ -155,12 +164,13 @@ export function resultsCarousel(result: SearchResult, recipeUrl: (id: string) =>
   };
 
   const canMake = result.matches.length;
+  const nearly = result.almostThere.length;
   return {
     type: "flex",
-    altText: canMake > 0 ? `เจอ ${canMake} เมนูที่ทำได้เลย` : `เจอ ${all.length} เมนูที่ขาดอีกนิด`,
+    altText: canMake > 0 ? `เจอ ${canMake} เมนูที่ทำได้เลย` : nearly > 0 ? `เจอ ${all.length} เมนูที่ขาดอีกนิด` : `เจอ ${all.length} เมนูที่ต้องซื้อเพิ่ม`,
     contents: {
       type: "carousel",
-      contents: [...all.slice(0, MAX_DISHES).map(([m, ok]) => dishBubble(m, ok, recipeUrl(m.recipe.id))), seeAll],
+      contents: [...all.slice(0, MAX_DISHES).map(([m, kind]) => dishBubble(m, kind, recipeUrl(m.recipe.id))), seeAll],
     },
   };
 }

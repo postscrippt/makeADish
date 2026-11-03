@@ -4,7 +4,7 @@ A Thai-first cooking helper that lives in LINE. Take a photo of what is in your 
 
 > **Status: live in LINE on the real backend.** The chat flow works end to end in the LINE Official Account (rich menu → photo in the chat → confirm card → results carousel → recipe page), and the pages run on the real API and Supabase database (31 dishes). Live site: https://ai-menu-five.vercel.app. The UI still runs with no keys in mock mode for local work. Sections marked _(planned)_ are not built yet. Update this file as things land.
 >
-> **Next:** showing the new partial group, "ต้องซื้อเพิ่ม", in the LINE carousel (#78; the search side is done: the 3-try retry loop and `partial` group in `lib/match.ts`, #79; Results page #80), more dishes (#81, target 60-100), real-photo and allergy testing (#32), demo rehearsal (#33).
+> **Next:** checking the new partial group, "ต้องซื้อเพิ่ม", end to end on real data (#78; done: the 3-try retry loop and `partial` group in `lib/match.ts`, the LINE carousel, #79; the Results page tab, #80), more dishes (#81, target 60-100), real-photo and allergy testing (#32), demo rehearsal (#33).
 
 ## Why this exists
 
