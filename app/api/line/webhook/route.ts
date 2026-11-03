@@ -17,6 +17,9 @@ import { ingredients } from "@/data/ingredients";
 import { allergenOptions } from "@/data/options";
 import { LIFF_ID } from "@/app/liff";
 
+// The scan runs in after(), which counts toward this limit. Without it a slow scan is cut off with no reply.
+export const maxDuration = 60;
+
 const APP_URL = process.env.APP_URL ?? "https://ai-menu-five.vercel.app";
 const index = buildIndex(ingredients);
 
