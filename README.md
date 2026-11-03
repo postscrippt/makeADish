@@ -116,7 +116,7 @@ Limits (free tier, read from AI Studio):
 
 The free tier's data-use terms are not recorded yet.
 
-The fallback allows only 5 requests a minute and 20 a day (checked in AI Studio on 2026-11-03; peak use over the previous 28 days was 8 of 500 a day on the main model). It cannot carry chat traffic, so the plan for AI chat answers (issue #91) uses the main model only. The caps are 10 AI chat replies per user per day and 300 AI chat requests per day across all users, which leaves about 200 of the 500 daily requests for the photo scan and testing. The photo scan is never blocked by the chat caps.
+The fallback allows only 5 requests a minute and 20 a day (checked in AI Studio on 2026-11-03; peak use over the previous 28 days was 8 of 500 a day on the main model). It is too small to be a real safety net, so do not plan around it. The demo has no AI chat: the chat uses the model only to read photos, and recommendations are plain code. If AI chat answers are added later, they would need a per-user and a global daily cap so the photo scan keeps working (the idea is written up in issue #91, closed as not planned).
 
 Rules for the LLM wrapper:
 - Retry on HTTP 429, 5xx and network errors, with a short backoff (about 2 s, then 5 s).
