@@ -21,6 +21,14 @@ test("reply posts the token and messages with the bearer token", async () => {
   assert.deepEqual(JSON.parse(calls[0].init!.body as string), { replyToken: "rt", messages: [{ type: "text", text: "hi" }] });
 });
 
+test("push posts the user id and messages with the bearer token", async () => {
+  const { impl, calls } = fakeFetch(() => new Response("{}", { status: 200 }));
+  await createLineClient("SECRET-TOKEN", impl).push("U1", [{ type: "text", text: "hi" }]);
+  assert.equal(calls[0].url, "https://api.line.me/v2/bot/message/push");
+  assert.equal((calls[0].init!.headers as Record<string, string>).Authorization, "Bearer SECRET-TOKEN");
+  assert.deepEqual(JSON.parse(calls[0].init!.body as string), { to: "U1", messages: [{ type: "text", text: "hi" }] });
+});
+
 test("a failed reply throws the status only, never the token", async () => {
   const { impl } = fakeFetch(() => new Response("bad", { status: 400 }));
   await assert.rejects(createLineClient("SECRET-TOKEN", impl).reply("rt", []), (e: Error) => {

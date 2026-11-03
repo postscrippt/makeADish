@@ -1,9 +1,10 @@
-// The three LINE Messaging API calls the webhook needs. Server-only: it holds the channel access token.
+// The four LINE Messaging API calls the webhook needs. Server-only: it holds the channel access token.
 // fetch is injectable so tests never touch the network.
 export type LineMessage = Record<string, unknown>;
 
 export type LineClient = {
   reply(replyToken: string, messages: LineMessage[]): Promise<void>;
+  push(to: string, messages: LineMessage[]): Promise<void>;
   startLoading(chatId: string, seconds: number): Promise<void>;
   getContent(messageId: string): Promise<{ bytes: Uint8Array; mime: string }>;
 };
@@ -24,6 +25,16 @@ export function createLineClient(accessToken: string, fetchImpl: typeof fetch = 
         body: JSON.stringify({ replyToken, messages }),
       });
       if (!res.ok) throw fail("reply", res);
+    },
+
+    // For when the reply token has expired (a slow scan). Needs the user id.
+    async push(to, messages) {
+      const res = await fetchImpl("https://api.line.me/v2/bot/message/push", {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ to, messages }),
+      });
+      if (!res.ok) throw fail("push", res);
     },
 
     // Best effort: the "typing" animation is nice to have, so a failure must not stop the scan.
