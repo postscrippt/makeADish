@@ -111,9 +111,12 @@ Limits (free tier, read from AI Studio):
 | Model | Requests/min | Tokens/min | Requests/day |
 |---|---|---|---|
 | `gemini-3.5-flash-lite` | 15 | 250k | 500 |
+| `gemini-3.8-flash` (fallback) | 5 | 250k | 20 |
 | `gemini-embedding-001` | 100 | 30k | 1000 |
 
 The free tier's data-use terms are not recorded yet.
+
+The fallback allows only 5 requests a minute and 20 a day (checked in AI Studio on 2026-11-03; peak use over the previous 28 days was 8 of 500 a day on the main model). It is too small to be a real safety net, so do not plan around it. The demo has no AI chat: the chat uses the model only to read photos, and recommendations are plain code. If AI chat answers are added later, they would need a per-user and a global daily cap so the photo scan keeps working (the idea is written up in issue #91, closed as not planned).
 
 Rules for the LLM wrapper:
 - Retry on HTTP 429, 5xx and network errors, with a short backoff (about 2 s, then 5 s).
