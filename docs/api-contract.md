@@ -106,7 +106,7 @@ Runs the search and agent loop.
   ```
   - `matches`: missing nothing.
   - `almostThere`: missing 1 or 2 items.
-  - `partial` (new, shown as "Need to shop" / ต้องซื้อเพิ่ม): missing 3 or more items, but the user owns at least one core ingredient and the match is at or above the floor (30% on try 2; any owned core ingredient on try 3). At most 5 dishes. Until the server change in #79 ships, the field may be absent: treat an absent `partial` as an empty list.
+  - `partial` (new, shown as "Need to shop" / ต้องซื้อเพิ่ม): missing 3 or more items, but the user owns at least one core ingredient and the match is at or above the floor (30% on try 2; any owned core ingredient on try 3). At most 5 dishes. The server now always sends it (`[]` when empty, #79). Older clients may still treat an absent `partial` as an empty list.
   - Each list is sorted by `matchPercent`, highest first.
   - The three lists together aim for at least 3 dishes. The server relaxes the search to reach that (see the retry loop below), but returns fewer when fewer qualify.
   - `tries` is the number of agent attempts, from 1 to 3. The UI shows it.

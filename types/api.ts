@@ -51,7 +51,7 @@ export type RecipeMatch = {
 export type SearchResult = {
   matches: RecipeMatch[]; // missing nothing
   almostThere: RecipeMatch[]; // missing 1-2 items
-  partial?: RecipeMatch[]; // missing 3 or more but above the match floor ("Need to shop"); absent means empty. #79 makes it always present
+  partial?: RecipeMatch[]; // missing 3 or more but above the match floor ("Need to shop"); the server always sends it (empty list when none); the field stays optional so older mocks still type-check
   tries: number; // agent attempts, max 3
 };
 
