@@ -76,7 +76,7 @@ export default function CookMode({
             <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-butter">
               <StepIcon icon={p.icon} className="h-10 w-10" />
             </span>
-            <h2 className="min-w-0 flex-1 truncate text-[34px] leading-tight font-bold">{p.verb}</h2>
+            <h2 className="min-w-0 flex-1 truncate text-[2.125rem] leading-tight font-bold">{p.verb}</h2>
             {p.heat && (
               <div className="flex shrink-0 flex-col items-center gap-0.5">
                 <span className="flex gap-0.5">
@@ -86,14 +86,14 @@ export default function CookMode({
                     </svg>
                   ))}
                 </span>
-                <span className="text-xs font-semibold">{heatLabels[p.heat]}</span>
+                <span className="text-sm font-semibold">{heatLabels[p.heat]}</span>
               </div>
             )}
           </div>
 
             <main ref={mainRef} className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 pt-1 pb-4">
               <section className="flex shrink-0 flex-col gap-4 rounded-3xl bg-white p-5 shadow-card">
-                <p className="text-[22px] leading-relaxed text-ink">{p.detail || steps[step]}</p>
+                <p className="text-[1.375rem] leading-relaxed text-ink">{p.detail || steps[step]}</p>
                 {/* Keyed by step, so each step gets its own fresh timer. */}
                 {p.minutes && <Timer key={step} minutes={p.minutes} />}
                 {used.length > 0 && (

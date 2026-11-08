@@ -8,7 +8,8 @@ const STEPS = 3; // check ingredients, results, recipe
 // `step` shows where the user is in the scan flow. Leave it out on pages opened straight from the rich menu.
 // `children` turns the bar into a hero: the page's headline and key summary sit inside the teal, with a rounded bottom
 // that the white content below rises over. A hero scrolls away (the bar is sticky only without one).
-export default function PageHeader({ title, step, children }: { title: string; step?: 1 | 2 | 3; children?: React.ReactNode }) {
+// `titleAs="p"` is for a page whose hero already holds the real h1 (the Recipe page: the dish name).
+export default function PageHeader({ title, step, children, titleAs: Title = "h1" }: { title: string; step?: 1 | 2 | 3; children?: React.ReactNode; titleAs?: "h1" | "p" }) {
   const router = useRouter();
   const canGoBack = useCanGoBack();
   return (
@@ -26,7 +27,7 @@ export default function PageHeader({ title, step, children }: { title: string; s
           <span className="w-2" />
         )}
         {/* Bold 20px counts as large text, so white on brand passes contrast. */}
-        <h1 className="flex-1 text-xl font-bold">{title}</h1>
+        <Title className="flex-1 text-xl font-bold">{title}</Title>
         {step && (
           <div role="img" aria-label={`ขั้นที่ ${step} จาก ${STEPS}`} className="flex gap-1.5 pr-3">
             {Array.from({ length: STEPS }, (_, i) => (

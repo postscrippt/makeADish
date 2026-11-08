@@ -92,7 +92,7 @@ export default function ResultsPage() {
       <main className="px-5 pt-6 pb-10">
         {state.kind === "loading" && (
           <div role="status" className="flex flex-col items-center gap-3 py-16 text-sm text-muted">
-            <span className="h-8 w-8 animate-spin rounded-full border-4 border-brand border-t-transparent" />
+            <span className="h-8 w-8 animate-spin motion-reduce:animate-pulse rounded-full border-4 border-brand border-t-transparent" />
             กำลังหาเมนูที่ทำได้จากวัตถุดิบของคุณ…
           </div>
         )}
@@ -158,7 +158,7 @@ function Hero({ state, onEdit, syncFailed }: { state: Done; onEdit: () => void; 
         </ul>
         <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-white/25 pt-4">
           <div>
-            <dt className="text-xs">แพ้อาหาร</dt>
+            <dt className="text-sm">แพ้อาหาร</dt>
             <dd className="mt-1 flex flex-wrap gap-1.5">
               {allergyNames.length > 0 ? (
                 allergyNames.map((n) => <span key={n} className="rounded-full bg-white px-3 py-0.5 text-sm font-semibold text-red-700">{n}</span>)
@@ -168,7 +168,7 @@ function Hero({ state, onEdit, syncFailed }: { state: Done; onEdit: () => void; 
             </dd>
           </div>
           <div>
-            <dt className="text-xs">ความเผ็ด</dt>
+            <dt className="text-sm">ความเผ็ด</dt>
             <dd className="mt-1 text-sm font-semibold">{spiceLabels[profile.spice]}</dd>
           </div>
         </dl>
@@ -258,7 +258,7 @@ function Results({ state, tab, setTab, onEdit }: { state: Done; tab: Tab; setTab
         )
       )}
 
-      {tries > 1 && <p className="mt-4 text-center text-xs text-muted">ค้นหาแล้ว {tries} รอบ</p>}
+      {tries > 1 && <p className="mt-4 text-center text-sm text-muted">ค้นหาแล้ว {tries} รอบ</p>}
     </>
   );
 }

@@ -66,7 +66,7 @@ export default function IngredientPicker({
               <li key={s.id}>
                 <button type="button" onClick={() => add(s)} className="flex min-h-12 w-full items-center justify-between px-4 text-left active:bg-mist">
                   {s.th}
-                  <span className="text-xs text-muted">{s.en}</span>
+                  <span className="text-sm text-muted">{s.en}</span>
                 </button>
               </li>
             ))}

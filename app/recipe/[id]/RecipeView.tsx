@@ -73,10 +73,10 @@ export default function RecipeView({
   return (
     // Fills the screen, so the start bar sits at the bottom even on a short recipe.
     <div className="flex min-h-dvh flex-col">
-    <PageHeader title="สูตรอาหาร" step={step}>
+    <PageHeader title="สูตรอาหาร" step={step} titleAs="p">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-3xl leading-tight font-bold text-balance text-butter">{recipe.th}</h2>
+          <h1 className="text-3xl leading-tight font-bold text-balance text-butter">{recipe.th}</h1>
           <p className="mt-1 text-white">{recipe.en}</p>
         </div>
         <button
@@ -171,7 +171,7 @@ function MissingRow({ item, allergies }: { item: RecipeIngredient; allergies: st
   return (
     <li className="-mx-4 bg-amber-50 px-4 py-4">
       <div className="flex items-center justify-between gap-3">
-        <span className="font-medium text-amber-800">{item.th} <span className="ml-1 rounded bg-amber-100 px-1.5 py-0.5 text-xs">ต้องซื้อ</span></span>
+        <span className="font-medium text-amber-800">{item.th} <span className="ml-1 rounded bg-amber-100 px-2 py-0.5 text-sm">ต้องซื้อ</span></span>
         <span className="text-muted">{item.qty}</span>
       </div>
       <div aria-live="polite" className="text-sm">
