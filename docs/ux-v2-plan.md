@@ -106,11 +106,10 @@ Each PR gets up to three review rounds: 375px screenshots against this doc, then
 ## Not verified here
 Real LINE (LIFF webview, rich menu, wake lock, vibration, back/close behavior) is not covered; only mock mode at 375px in a desktop browser.
 
-## Cook mode layout (revised after review)
-Problem: the step card stretched to the screen and re-centered or re-anchored its content depending on which extras a step had, so the verb and instruction moved from step to step and a different gap opened each time.
+## Cook mode layout (revised twice after review)
+Problem 1: the step card stretched to the screen and re-centered or re-anchored its content per step, so the verb and instruction moved and a different gap opened each time. Problem 2 (the first fix): scaling the instruction up to fill the stretched card made huge type in a still-empty card.
 
-Rule: fixed zones in a fixed order, anchored the same on every step. Variable content changes size, never position.
-1. Action band, pinned: icon + verb (44px) + heat flames at the right.
-2. Instruction card (takes the free height): the instruction is sized to fill it (22-52px), top-left anchored. Ingredients pinned to its bottom.
-3. Timer tile, only when the step has a time.
-4. "ต่อไป" strip.
+Rule: cards hug their content at fixed type sizes; the free height holds something useful and the same on every step; nothing moves between steps.
+1. Action band, pinned above the scroll: icon + verb (34px) + heat flames at the right.
+2. Card (hugs): instruction 22px, timer tile if the step has a time, "ใช้ในขั้นนี้" pills if any.
+3. Step list from the current step on, ending with the rating: it fills the rest of the screen with orientation (what is next, how much is left). Steps already done are one tap back on ‹.
