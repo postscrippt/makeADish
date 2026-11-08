@@ -69,7 +69,7 @@ export default function FormPage() {
   if (!options || !profile) {
     return (
       <>
-        <PageHeader title="ตรวจวัตถุดิบ" />
+        <PageHeader title="ตรวจวัตถุดิบ" step={1} />
         <p role="status" className="p-4 text-sm text-muted">กำลังโหลด…</p>
       </>
     );
@@ -80,7 +80,7 @@ export default function FormPage() {
   return (
     // Column fills the screen so the "หาเมนู" bar sits at the bottom even when the list is short.
     <div className="flex min-h-dvh flex-col">
-      <PageHeader title={title} />
+      <PageHeader title={title} step={1} />
       <main className="flex flex-1 flex-col gap-5 p-4 pb-8">
         <div>
           <h2 className="text-xl font-bold">ถูกต้องไหม?</h2>

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Prompt } from "next/font/google";
 import "./globals.css";
 import LiffBoot from "@/components/LiffBoot";
+import NavTracker from "@/components/NavTracker";
 
 // Prompt: Thai + Latin geometric face that pairs with the deck's Poppins look.
 const prompt = Prompt({
@@ -20,7 +22,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="th" className={`${prompt.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         {/* Runs before the first paint: a LIFF link lands on "/" with ?liff.state=… and is forwarded a moment later,
-            so hide the home page instead of flashing it. LiffBoot shows it again if no forward happens. */}
+            so hide the root page instead of flashing it. LiffBoot shows it again if no forward happens. */}
         <script dangerouslySetInnerHTML={{ __html: `if(location.search.indexOf("liff.state")>-1)document.documentElement.classList.add("liff-forwarding")` }} />
       </head>
       <body className="min-h-full bg-brand font-sans text-ink">
@@ -29,6 +31,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {children}
         </div>
         <LiffBoot />
+        {/* usePathname reads runtime data on dynamic routes, so it must sit in Suspense (cacheComponents). */}
+        <Suspense fallback={null}>
+          <NavTracker />
+        </Suspense>
       </body>
     </html>
   );
