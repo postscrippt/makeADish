@@ -21,8 +21,6 @@ export default function RecipeView({
   // The step cook mode is on, or null while it is closed. A chat card's "เริ่มทำ" (?cook=1) opens it straight away.
   const [cookStep, setCookStep] = useState<number | null>(cook ? 0 : null);
   const [resumeAt, setResumeAt] = useState(0);
-  // Ingredients the user has got out of the cupboard; only a helper for this visit.
-  const [ready, setReady] = useState<Set<string>>(new Set());
 
   const haveKey = haveIds.join(","); // a string, so the effect doesn't rerun on every render
 
@@ -67,19 +65,14 @@ export default function RecipeView({
     setFavorite({ id: recipe!.id, th: recipe!.th }, !favorite).catch(() => setFav(favorite));
   }
 
-  const toggleReady = (xid: string) => setReady((s) => { const n = new Set(s); if (!n.delete(xid)) n.add(xid); return n; });
-
   return (
     // Fills the screen below the 56px header, so the start bar sits at the bottom even on a short recipe.
     <div className="flex min-h-[calc(100dvh-3.5rem)] flex-col">
-    <main className="flex flex-1 flex-col gap-6 p-4 pb-6">
+    <main className="flex flex-1 flex-col gap-5 p-4 pb-6">
       <section className="flex items-start justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-bold text-ink">{recipe.th}</h2>
-          <p className="text-sm text-muted">
-            {recipe.en} · {recipe.minutes} นาที
-            {recipe.spice > 0 && <span aria-label={`ความเผ็ดระดับ ${recipe.spice}`}> · {"🌶".repeat(recipe.spice)}</span>}
-          </p>
+        <div className="min-w-0">
+          <h2 className="text-2xl leading-snug font-bold text-ink">{recipe.th}</h2>
+          <p className="text-sm text-muted">{recipe.en}</p>
         </div>
         <button
           type="button"
@@ -92,65 +85,56 @@ export default function RecipeView({
         </button>
       </section>
 
-      <ChatActions recipe={recipe} missingIds={missing.map((m) => m.id)} />
-
       {allergic.length > 0 && (
         <p role="alert" className="rounded-2xl border border-red-300 bg-red-50 p-3 text-sm font-medium text-red-700">
           ⚠ เมนูนี้มี {allergic.join(", ")} ที่คุณแพ้
         </p>
       )}
 
-      {missing.length > 0 && (
-        <section className="rounded-3xl bg-amber-50 p-4">
-          <h3 className="font-semibold text-amber-800">ต้องซื้อเพิ่ม</h3>
-          <ul className="mt-2 flex flex-col gap-3">
-            {missing.map((m) => (
-              <MissingItem key={m.id} item={m} allergies={allergies} />
-            ))}
-          </ul>
-        </section>
+      {/* Three quick facts, then (only when a pantry is known) whether you can start right now. */}
+      <section aria-label="ข้อมูลเมนู" className="grid grid-cols-3 divide-x divide-edge rounded-3xl bg-white py-3 text-center shadow-card">
+        <p><span className="block text-xl font-bold">{recipe.minutes}</span><span className="text-xs text-muted">นาที</span></p>
+        <p><span className="block text-xl font-bold">{recipe.baseServings}</span><span className="text-xs text-muted">ที่</span></p>
+        <p>
+          <span aria-label={`ความเผ็ดระดับ ${recipe.spice}`} className="block text-xl font-bold">{recipe.spice > 0 ? "🌶".repeat(recipe.spice) : "ไม่เผ็ด"}</span>
+          <span className="text-xs text-muted">ความเผ็ด</span>
+        </p>
+      </section>
+      {have && (
+        <p className={`-mt-2 rounded-full px-4 py-2 text-center text-sm font-semibold ${missing.length === 0 ? "bg-butter text-ink" : "bg-amber-50 text-amber-800"}`}>
+          {missing.length === 0 ? "มีวัตถุดิบครบ เริ่มทำได้เลย" : `ต้องซื้อเพิ่ม ${missing.length} อย่าง`}
+        </p>
       )}
 
       <section>
-        <div className="mb-2 flex items-baseline justify-between">
-          <h3 className="text-lg font-semibold">วัตถุดิบ</h3>
-          <span className="text-sm text-muted">สำหรับ {recipe.baseServings} ที่</span>
-        </div>
-        <ul className="divide-y divide-edge rounded-3xl bg-white px-4 shadow-card">
-          {recipe.ingredients.map((x) => {
-            const isMissing = missing.includes(x);
-            const got = ready.has(x.id);
-            return (
-              <li key={x.id}>
-                <button type="button" role="checkbox" aria-checked={got} onClick={() => toggleReady(x.id)} className="flex min-h-12 w-full items-center gap-3 py-1.5 text-left">
-                  <span aria-hidden className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-sm ${got ? "bg-brand text-white" : "ring-2 ring-edge ring-inset"}`}>
-                    {got && "✓"}
-                  </span>
-                  <span className={`flex flex-1 items-center justify-between gap-3 ${got ? "text-muted line-through" : ""}`}>
-                    <span>
-                      {x.th}
-                      {isMissing && <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800 no-underline">ขาด</span>}
-                    </span>
-                    <span className="text-muted">{x.qty}</span>
-                  </span>
-                </button>
+        <h3 className="mb-2 text-lg font-semibold">วัตถุดิบ</h3>
+        <ul className="divide-y divide-edge overflow-hidden rounded-3xl bg-white px-4 shadow-card">
+          {recipe.ingredients.map((x) =>
+            missing.includes(x) ? (
+              <MissingRow key={x.id} item={x} allergies={allergies} />
+            ) : (
+              <li key={x.id} className="flex min-h-12 items-center justify-between gap-3 py-2">
+                <span>{x.th}</span>
+                <span className="text-muted">{x.qty}</span>
               </li>
-            );
-          })}
+            ),
+          )}
         </ul>
       </section>
 
       <section>
         <h3 className="mb-2 text-lg font-semibold">วิธีทำ <span className="text-sm font-normal text-muted">{recipe.steps.length} ขั้น</span></h3>
-        <ol className="flex flex-col gap-2 rounded-3xl bg-white p-4 shadow-card">
+        <ol className="flex flex-col gap-3 rounded-3xl bg-white p-4 shadow-card">
           {recipe.steps.map((step, i) => (
-            <li key={i} className="flex gap-3 text-muted">
-              <span aria-hidden className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-butter text-sm font-semibold text-ink">{i + 1}</span>
-              <span>{step}</span>
+            <li key={i} className="flex gap-3">
+              <span aria-hidden className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-butter text-sm font-semibold text-ink">{i + 1}</span>
+              <span className="pt-0.5">{step}</span>
             </li>
           ))}
         </ol>
       </section>
+
+      <ChatActions recipe={recipe} missingIds={missing.map((m) => m.id)} />
     </main>
 
     <div className="sticky bottom-0 z-10 rounded-t-3xl bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-card">
@@ -163,6 +147,7 @@ export default function RecipeView({
       <CookMode
         name={recipe.th}
         steps={recipe.steps}
+        ingredients={recipe.ingredients}
         startAt={cookStep}
         onExit={(step) => { setResumeAt(step); setCookStep(null); }}
         onSave={(rating) => logCooked({ recipeId: recipe.id, th: recipe.th, rating, cookedAt: new Date().toISOString() })}
@@ -172,8 +157,8 @@ export default function RecipeView({
   );
 }
 
-// One missing ingredient with an on-demand, allergy-filtered list of swaps.
-function MissingItem({ item, allergies }: { item: RecipeIngredient; allergies: string[] }) {
+// A missing ingredient, shown in the ingredient list itself: amber row, with an on-demand, allergy-filtered list of swaps under it.
+function MissingRow({ item, allergies }: { item: RecipeIngredient; allergies: string[] }) {
   const [state, setState] = useState<"idle" | "loading" | "error" | SwapResult>("idle");
 
   function load() {
@@ -182,17 +167,18 @@ function MissingItem({ item, allergies }: { item: RecipeIngredient; allergies: s
   }
 
   return (
-    <li>
+    <li className="-mx-4 bg-amber-50 px-4 py-3">
       <div className="flex items-center justify-between gap-3">
-        <span className="font-medium text-amber-800">{item.th}</span>
+        <span className="font-medium text-amber-800">{item.th} <span className="ml-1 rounded bg-amber-100 px-1.5 py-0.5 text-xs">ต้องซื้อ</span></span>
+        <span className="text-muted">{item.qty}</span>
+      </div>
+      <div aria-live="polite" className="text-sm">
         {state === "idle" && (
-          <button type="button" onClick={load} className="btn-secondary min-h-11 px-4 text-sm">
+          <button type="button" onClick={load} className="-ml-2 flex min-h-11 items-center px-2 font-semibold text-brand-deep">
             ใช้อะไรแทนได้?
           </button>
         )}
-      </div>
-      <div aria-live="polite" className="mt-1 text-sm">
-        {state === "loading" && <p className="text-muted">กำลังหา…</p>}
+        {state === "loading" && <p className="py-2 text-muted">กำลังหา…</p>}
         {state === "error" && (
           <p className="text-red-700">
             โหลดไม่สำเร็จ{" "}
@@ -200,14 +186,14 @@ function MissingItem({ item, allergies }: { item: RecipeIngredient; allergies: s
           </p>
         )}
         {typeof state === "object" && state.kind === "ok" && (
-          <ul className="mt-1 flex flex-wrap gap-2">
+          <ul className="mt-2 flex flex-wrap gap-2">
             {state.options.map((o) => (
               <li key={o.label} className="rounded-full bg-butter px-3 py-1 font-medium text-ink">แทนด้วย {o.label}</li>
             ))}
           </ul>
         )}
-        {typeof state === "object" && state.kind === "unsafe" && <p className="text-muted">ไม่มีตัวแทนที่ปลอดภัยสำหรับคุณ</p>}
-        {typeof state === "object" && state.kind === "none" && <p className="text-muted">ยังไม่มีคำแนะนำสำหรับวัตถุดิบนี้</p>}
+        {typeof state === "object" && state.kind === "unsafe" && <p className="mt-1 text-muted">ไม่มีตัวแทนที่ปลอดภัยสำหรับคุณ</p>}
+        {typeof state === "object" && state.kind === "none" && <p className="mt-1 text-muted">ยังไม่มีคำแนะนำสำหรับวัตถุดิบนี้</p>}
       </div>
     </li>
   );
@@ -235,7 +221,7 @@ function ChatActions({ recipe, missingIds }: { recipe: Recipe; missingIds: strin
   }
 
   return (
-    <section className="-mt-3 flex flex-wrap items-center gap-2">
+    <section className="flex flex-wrap items-center gap-2">
       {can.send && (
         <button type="button" onClick={() => run(() => sendToChat(card()), "ส่งสูตรเข้าแชทแล้ว")} className="btn-secondary min-h-11 px-4 text-sm">
           ส่งเข้าแชท
