@@ -9,6 +9,9 @@ import { readDraft, writeDraft } from "@/app/draft";
 import { idsFromLink } from "@/app/linkIds";
 import type { Ingredient, Options, Profile, SpiceLevel } from "@/types/api";
 
+// One-tap adds for people who type their ingredients themselves (the "พิมพ์เอง" path); ids missing from the catalog are skipped.
+const QUICK_IDS = ["pork", "chicken", "egg", "garlic", "chili", "holy-basil"];
+
 // The check screen: one question ("is this what you have?"). Preferences are a saved one-liner; food type lives on Results.
 export default function FormPage() {
   const router = useRouter();
@@ -47,6 +50,15 @@ export default function FormPage() {
         .filter((x) => [x.th, x.en, ...x.aliases].some((name) => name.toLowerCase().includes(q)))
         .slice(0, 6)
     : [];
+
+  const quick = QUICK_IDS.flatMap((id) => catalog.find((x) => x.id === id) ?? []).filter((x) => !tags.some((t) => t.id === x.id));
+
+  // Keep the search focused after each add, so the phone keyboard stays up for the next ingredient.
+  function add(item: Ingredient) {
+    setTags([...tags, item]);
+    setQuery("");
+    searchRef.current?.focus();
+  }
 
   async function savePrefs(allergies: string[], spice: SpiceLevel) {
     const next = { ...profile!, allergies, spice };
@@ -122,6 +134,10 @@ export default function FormPage() {
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && suggestions[0]) add(suggestions[0]);
+                }}
+                enterKeyHint="done"
                 placeholder="พิมพ์ชื่อวัตถุดิบ เช่น ไก่, กระเทียม"
                 aria-label="ค้นหาวัตถุดิบเพื่อเพิ่ม"
                 className="min-h-11 w-full rounded-full border-[1.5px] border-edge bg-white px-4 text-base"
@@ -133,10 +149,7 @@ export default function FormPage() {
                     <li key={s.id}>
                       <button
                         type="button"
-                        onClick={() => {
-                          setTags([...tags, s]);
-                          setQuery("");
-                        }}
+                        onClick={() => add(s)}
                         className="flex min-h-11 w-full items-center justify-between px-3 text-left active:bg-mist"
                       >
                         {s.th}
@@ -145,6 +158,20 @@ export default function FormPage() {
                     </li>
                   ))}
                 </ul>
+              )}
+              {!q && quick.length > 0 && (
+                <div className="mt-3">
+                  <p className="mb-2 text-sm text-muted">เพิ่มเร็ว</p>
+                  <ul className="flex flex-wrap gap-2">
+                    {quick.map((x) => (
+                      <li key={x.id}>
+                        <button type="button" onClick={() => add(x)} className="min-h-11 rounded-full border-[1.5px] border-edge bg-white px-4 text-base active:bg-butter-soft">
+                          + {x.th}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
             </div>
           )}
@@ -175,9 +202,9 @@ export default function FormPage() {
         )}
       </main>
 
-      <div className="sticky bottom-0 rounded-t-3xl bg-white p-4 shadow-card">
+      <div className="sticky bottom-0 rounded-t-3xl bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-card">
         <button type="button" onClick={submit} disabled={tags.length === 0} className="btn-primary w-full text-base">
-          หาเมนู
+          {tags.length > 0 ? `หาเมนู จาก ${tags.length} อย่าง` : "เพิ่มวัตถุดิบก่อน"}
         </button>
       </div>
 

@@ -42,9 +42,15 @@ export default function PrefsSheet({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className="relative flex w-full max-w-[430px] flex-col gap-5 rounded-t-3xl bg-white p-5 pb-6 shadow-card outline-none"
+        className="relative flex max-h-[90dvh] w-full max-w-[430px] flex-col gap-5 overflow-y-auto rounded-t-3xl bg-white p-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-card outline-none"
       >
-        <h2 id={titleId} className="text-xl font-bold">อาหารที่แพ้และความเผ็ด</h2>
+        {/* A visible close: phones have no Escape key, and the backdrop is easy to miss. */}
+        <div className="-mt-1 flex items-center justify-between gap-2">
+          <h2 id={titleId} className="text-xl font-bold">อาหารที่แพ้และความเผ็ด</h2>
+          <button type="button" onClick={onClose} aria-label="ปิด" className="-mr-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-2xl text-muted active:bg-mist">
+            ×
+          </button>
+        </div>
         <section>
           <h3 className="mb-1 font-semibold">แพ้อาหาร</h3>
           <p className="mb-2 text-sm text-muted">เมนูที่มีวัตถุดิบเหล่านี้จะไม่แสดงเลย</p>
@@ -66,9 +72,16 @@ export default function PrefsSheet({
             ))}
           </div>
         </section>
-        <button type="button" onClick={() => onSave(picked, level)} className="btn-primary w-full">
-          บันทึก
-        </button>
+        <div className="flex gap-2">
+          {picked.length > 0 && (
+            <button type="button" onClick={() => setPicked([])} className="btn-secondary">
+              ล้างที่แพ้
+            </button>
+          )}
+          <button type="button" onClick={() => onSave(picked, level)} className="btn-primary flex-1">
+            บันทึก
+          </button>
+        </div>
       </div>
     </div>
   );
