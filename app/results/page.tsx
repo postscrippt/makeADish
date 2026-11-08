@@ -142,27 +142,39 @@ function Hero({ state, onEdit, syncFailed }: { state: Done; onEdit: () => void; 
   return (
     <section aria-label="ที่ใช้ค้นหา">
       <h2 className="text-3xl leading-tight font-bold text-balance text-butter">{now > 0 ? `ทำได้เลย ${now} เมนู` : "ขาดของอีกนิดเดียว"}</h2>
-      <p className="mt-1 text-white">จากวัตถุดิบ {tags.length} อย่าง</p>
-      <ul aria-label="วัตถุดิบ" className="mt-4 flex flex-wrap gap-2">
-        {shown.map((t) => (
-          <li key={t.id} className="rounded-full bg-butter px-3 py-1 text-sm font-medium text-ink">{t.th}</li>
-        ))}
-        {tags.length > shown.length && <li className="rounded-full bg-white px-3 py-1 text-sm font-medium text-ink">+{tags.length - shown.length}</li>}
-      </ul>
-      <div className="mt-5 flex items-center justify-between gap-3">
-        <p className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-sm text-white">
-          {allergyNames.length > 0 ? (
-            <span className="rounded-full bg-white px-3 py-1 font-semibold text-red-700">แพ้: {allergyNames.join(", ")}</span>
-          ) : (
-            <span>ยังไม่ได้ระบุอาหารที่แพ้</span>
-          )}
-          <span>{spiceLabels[profile.spice]}</span>
-        </p>
-        <button type="button" onClick={onEdit} className="btn-secondary min-h-11 shrink-0 px-5 text-sm">แก้ไข</button>
+
+      {/* What the search is based on, grouped in one panel: ingredients, then the two filters, and the one edit button. */}
+      <div className="mt-5 rounded-3xl bg-brand-deep p-4">
+        <div className="flex items-center justify-between gap-3">
+          <p className="font-semibold">จากวัตถุดิบ {tags.length} อย่าง</p>
+          <button type="button" onClick={onEdit} className="btn-secondary min-h-11 shrink-0 px-5 text-sm">แก้ไข</button>
+        </div>
+        <ul aria-label="วัตถุดิบ" className="mt-3 flex flex-wrap gap-2">
+          {shown.map((t) => (
+            <li key={t.id} className="rounded-full bg-butter px-3 py-1 text-sm font-medium text-ink">{t.th}</li>
+          ))}
+          {tags.length > shown.length && <li className="rounded-full bg-white px-3 py-1 text-sm font-medium text-ink">+{tags.length - shown.length}</li>}
+        </ul>
+        <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-white/25 pt-4">
+          <div>
+            <dt className="text-xs">แพ้อาหาร</dt>
+            <dd className="mt-1 flex flex-wrap gap-1.5">
+              {allergyNames.length > 0 ? (
+                allergyNames.map((n) => <span key={n} className="rounded-full bg-white px-3 py-0.5 text-sm font-semibold text-red-700">{n}</span>)
+              ) : (
+                <span className="text-sm font-semibold">ยังไม่ได้ระบุ</span>
+              )}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs">ความเผ็ด</dt>
+            <dd className="mt-1 text-sm font-semibold">{spiceLabels[profile.spice]}</dd>
+          </div>
+        </dl>
+        {syncFailed && (
+          <p role="alert" className="mt-3 rounded-2xl bg-white p-3 text-sm text-red-700">บันทึกไปที่แชทไม่สำเร็จ แชทอาจยังไม่รู้ว่าคุณแพ้อะไร ลองกดแก้ไขแล้วบันทึกอีกครั้ง</p>
+        )}
       </div>
-      {syncFailed && (
-        <p role="alert" className="mt-3 rounded-2xl bg-white p-3 text-sm text-red-700">บันทึกไปที่แชทไม่สำเร็จ แชทอาจยังไม่รู้ว่าคุณแพ้อะไร ลองกดแก้ไขแล้วบันทึกอีกครั้ง</p>
-      )}
     </section>
   );
 }
