@@ -47,7 +47,7 @@ The product spec is summarized below. Market sizing and competitor material is k
 | Page | What it does |
 |---|---|
 | Scan | User takes or uploads a photo. Vision LLM returns an ingredient list. |
-| Check (`/form`) | "ถูกต้องไหม?": ingredient chips (+/-) and one preferences line (allergies in red, spice) that opens a bottom sheet. Pre-filled from the saved profile. |
+| Type ingredients (`/form`) | "มีอะไรในครัวบ้าง?": the same form as the Results edit sheet (`SearchForm`): ingredient search with quick-add and browse-all, allergies (red), spice, one button. Allergies and spice are pre-filled from the saved profile. |
 | Results | Agent: plan, search, filter, check, retry. Tab 1 "Matches" uses your ingredients. Tab 2 "Almost there" needs 1-2 more items (listed). Food-type pills filter both tabs. Pantry staples (salt, sugar, pepper, oil, fish sauce, soy sauce, oyster sauce; `data/staples.ts`) are assumed in every kitchen and never count as missing. |
 | Recipe | Missing items with allergy-safe swaps, ingredients, an ingredient checklist, and a full-screen cook mode for วิธีทำ: one big step at a time (icon, heat, timer, screen kept on) with a tappable step bar. The last step opens the rating, which writes to History. |
 | History | Cooked dishes, ratings, favorites. |

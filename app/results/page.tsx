@@ -249,7 +249,7 @@ function Results({ state, tab, setTab, onEdit }: { state: Done; tab: Tab; setTab
               <ul className="flex flex-col gap-4">
                 {list.map((m) => (
                   <li key={m.recipe.id}>
-                    <RecipeCard recipe={m.recipe} match={m} />
+                    <RecipeCard recipe={m.recipe} match={m} hideReady={tab === "matches"} />
                   </li>
                 ))}
               </ul>

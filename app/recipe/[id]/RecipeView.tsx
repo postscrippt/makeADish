@@ -77,7 +77,6 @@ export default function RecipeView({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-3xl leading-tight font-bold text-balance text-butter">{recipe.th}</h1>
-          <p className="mt-1 text-white">{recipe.en}</p>
         </div>
         <button
           type="button"
@@ -102,14 +101,11 @@ export default function RecipeView({
         </p>
       )}
 
-      {have && (
-        <p className={`rounded-full px-4 py-2.5 text-center text-sm font-semibold ${missing.length === 0 ? "bg-butter text-ink" : "bg-amber-50 text-amber-800"}`}>
-          {missing.length === 0 ? "มีวัตถุดิบครบ เริ่มทำได้เลย" : `ต้องซื้อเพิ่ม ${missing.length} อย่าง`}
-        </p>
-      )}
-
       <section>
-        <h3 className="mb-3 text-xl font-bold">วัตถุดิบ</h3>
+        {/* The one place a gap is counted; the amber rows below say which. Same "ขาด N อย่าง" wording as the dish cards. */}
+        <h3 className="mb-3 text-xl font-bold">
+          วัตถุดิบ{missing.length > 0 && <span className="ml-2 text-sm font-semibold text-amber-800">ขาด {missing.length} อย่าง</span>}
+        </h3>
         <ul className="divide-y divide-edge overflow-hidden rounded-3xl bg-white px-4 shadow-card">
           {recipe.ingredients.map((x) =>
             missing.includes(x) ? (
@@ -139,8 +135,8 @@ export default function RecipeView({
       <ChatActions recipe={recipe} missingIds={missing.map((m) => m.id)} />
     </main>
 
-    <div className="sticky bottom-0 z-10 rounded-t-3xl bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-card">
-      <button type="button" onClick={() => setCookStep(resumeAt)} className="btn-primary min-h-14 w-full text-lg">
+    <div className="sticky bottom-0 z-10 border-t border-edge bg-white px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <button type="button" onClick={() => setCookStep(resumeAt)} className="btn-primary min-h-12 w-full text-lg">
         {resumeAt > 0 ? `ทำต่อ ขั้นที่ ${resumeAt + 1}` : "เริ่มทำ"}
       </button>
     </div>
@@ -171,7 +167,7 @@ function MissingRow({ item, allergies }: { item: RecipeIngredient; allergies: st
   return (
     <li className="-mx-4 bg-amber-50 px-4 py-4">
       <div className="flex items-center justify-between gap-3">
-        <span className="font-medium text-amber-800">{item.th} <span className="ml-1 rounded bg-amber-100 px-2 py-0.5 text-sm">ต้องซื้อ</span></span>
+        <span className="font-medium text-amber-800"><span className="sr-only">ขาด </span>{item.th}</span>
         <span className="text-muted">{item.qty}</span>
       </div>
       <div aria-live="polite" className="text-sm">

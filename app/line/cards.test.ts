@@ -52,12 +52,13 @@ test("resultsCarousel: can-make first, almost-there with what's missing, ends wi
   const bubbles = m.contents.contents;
   assert.equal(bubbles.length, 3);
   assert.ok(texts(bubbles[0]).includes("ทำได้เลย"));
-  assert.ok(texts(bubbles[1]).some((x) => x.includes("ขาด: ใบกะเพรา")));
+  assert.ok(texts(bubbles[1]).includes("ขาด 1 อย่าง: ใบกะเพรา"));
+  assert.ok(![...texts(bubbles[0]), ...texts(bubbles[1])].some((x) => x.includes("%")), "no match % on the cards");
   assert.ok(actions(bubbles[0]).some((x) => x.uri === url("/recipe/a?from=results")));
   assert.ok(actions(bubbles[2]).some((x) => x.uri === url("/results")));
 });
 
-test("resultsCarousel shows partial dishes last, labelled ต้องซื้อเพิ่ม, with what is missing", () => {
+test("resultsCarousel shows partial dishes last, with how many and what is missing", () => {
   const r: SearchResult = {
     matches: [match("a", "ไข่เจียว", 100)],
     almostThere: [],
@@ -66,8 +67,7 @@ test("resultsCarousel shows partial dishes last, labelled ต้องซื้�
   };
   const bubbles = (resultsCarousel(r, (id) => `/recipe/${id}`, url("/results"), url("/form")) as { contents: { contents: unknown[] } }).contents.contents;
   assert.equal(bubbles.length, 3);
-  assert.ok(texts(bubbles[1]).includes("ต้องซื้อเพิ่ม"));
-  assert.ok(texts(bubbles[1]).some((x) => x.includes("ขาด: พริกแกง, กะทิ, มะเขือ")));
+  assert.ok(texts(bubbles[1]).includes("ขาด 3 อย่าง: พริกแกง, กะทิ, มะเขือ"));
 });
 
 test("resultsCarousel stays within LINE's 12-bubble limit", () => {

@@ -45,7 +45,8 @@ Plain-language map of the UI. Updated as pages land.
 | `mocks/substitutes.ts` | Hand-picked swaps for the mock recipes. |
 | `components/CookMode.tsx` | Full-screen cooking: step card, what the step uses, heat, timer, next-step preview; keeps the screen on. |
 | `app/recipe/stepIngredients.ts` | Which recipe ingredients a step names (for "ใช้ในขั้นนี้"). Tested by `npm test`. |
-| `components/SearchSheet.tsx` | Bottom sheet on Results for ingredients, allergies and spice, with one button. |
+| `components/SearchForm.tsx` | The one ingredient screen: ingredients, allergies and spice, with one button. Used by `/form` and by the Results sheet. |
+| `components/SearchSheet.tsx` | `SearchForm` in a bottom sheet on Results. |
 | `components/IngredientPicker.tsx` | Chips, search and quick-add for ingredients; used by the entry form and the sheet. |
 | `components/RecipeCard.tsx` | One result in the Results list: name, time, spice, match %, what's missing. |
 | `app/draft.ts` | Remembers the scan result and search between pages, in this browser tab only (`sessionStorage`). Not in the URL, so allergies never show up in links. |
