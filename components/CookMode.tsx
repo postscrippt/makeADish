@@ -13,9 +13,7 @@ import type { HistoryEntry, RecipeIngredient } from "@/types/api";
 type Rating = HistoryEntry["rating"];
 
 const heatLabels: Record<Heat, string> = { 1: "ไฟอ่อน", 2: "ไฟกลาง", 3: "ไฟแรง" };
-// A real flame: outer body with a curl, plus an inner tongue cut out in the chip colour. Lit = solid, off = outline.
-const FLAME = "M12 2c1 3.6 5.5 6.2 5.5 11.2a5.5 5.5 0 0 1-11 0c0-2.2 1-3.8 2.2-4.9.3 1.7 1.2 2.6 2.1 2.7C10.6 8.2 10.8 5.2 12 2z";
-const TONGUE = "M12 21a2.6 2.6 0 0 1-2.6-2.6c0-1.5 1.1-2.3 2.6-4.2 1.5 1.9 2.6 2.7 2.6 4.2A2.6 2.6 0 0 1 12 21z";
+const FLAME = "M12 3c3 4 6 6 6 11a6 6 0 0 1-12 0c0-3 2-5 3-7 1 2 3 2 3-4z";
 
 // Full-screen cooking: one step at a time. A pinned action band (icon, verb, heat), a card with the instruction, the
 // timer and what the step uses, then the list of all steps (done, current, next). The bottom bar is just back and next.
@@ -74,7 +72,7 @@ export default function CookMode({
           <>
             {/* Same zones, same order, on every step; the action band is pinned above the scrolling part. Cards hug their content; the free height below belongs to the step list,
                 so the screen is full of orientation (what is done, what is next) instead of blank space. */}
-          <div className="flex min-h-[6.5rem] shrink-0 items-center gap-4 px-5 pt-4 pb-3">
+          <div className="flex min-h-[6.2rem] shrink-0 items-center gap-4 px-5 pt-4 pb-3">
             <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-butter">
               <StepIcon icon={p.icon} className="h-10 w-10" />
             </span>
@@ -82,18 +80,11 @@ export default function CookMode({
             <div className="min-w-0 flex-1">
               <h2 className="truncate text-[2.125rem] leading-tight font-bold">{p.verb}</h2>
               {p.heat && (
-                <p className="mt-0.5 inline-flex items-center gap-2 rounded-full bg-butter py-1 pr-4 pl-2.5 text-sm font-semibold">
+                <p className="mt-1 flex items-center gap-2 text-sm font-semibold">
                   <span aria-hidden className="flex">
                     {[1, 2, 3].map((n) => (
-                      <svg key={n} viewBox="0 0 24 24" className="h-5 w-5">
-                        {n <= p.heat! ? (
-                          <>
-                            <path d={FLAME} fill="currentColor" />
-                            <path d={TONGUE} className="fill-butter" />
-                          </>
-                        ) : (
-                          <path d={FLAME} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" opacity="0.3" />
-                        )}
+                      <svg key={n} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={`h-6 w-6 ${n > p.heat! ? "opacity-25" : ""}`}>
+                        <path d={FLAME} />
                       </svg>
                     ))}
                   </span>
