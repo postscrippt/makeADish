@@ -45,7 +45,7 @@ export default function FormPage() {
   if (!loaded) {
     return (
       <>
-        <PageHeader title="เพิ่มวัตถุดิบ" step={1} />
+        <PageHeader title="เพิ่มวัตถุดิบ" />
         <p role="status" className="p-4 text-sm text-muted">กำลังโหลด…</p>
       </>
     );
@@ -54,9 +54,7 @@ export default function FormPage() {
   return (
     // Column fills the screen so the button bar sits at the bottom even when the list is short.
     <div className="flex min-h-dvh flex-col">
-      <PageHeader title="เพิ่มวัตถุดิบ" step={1}>
-        <h2 className="text-3xl leading-tight font-bold text-butter">มีอะไรในครัวบ้าง?</h2>
-      </PageHeader>
+      <PageHeader title="เพิ่มวัตถุดิบ" />
       {syncFailed && (
         <p role="alert" className="mx-5 mt-4 rounded-2xl bg-white p-3 text-sm text-red-700">บันทึกไปที่แชทไม่สำเร็จ แชทอาจยังไม่รู้ว่าคุณแพ้อะไร ลองกดค้นหาอีกครั้ง</p>
       )}
