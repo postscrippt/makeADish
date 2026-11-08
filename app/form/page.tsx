@@ -6,6 +6,8 @@ import PageHeader from "@/components/PageHeader";
 import SearchForm from "@/components/SearchForm";
 import { getIngredients, getOptions, getProfile, saveProfile } from "@/mocks/api";
 import { startSearch } from "@/app/draft";
+import { canSendToChat, closeToChat, sendToChat } from "@/app/liff";
+import { searchMessage } from "@/app/searchMessage";
 import type { Ingredient, Options, Profile, SpiceLevel } from "@/types/api";
 
 type Loaded = { catalog: Ingredient[]; profile: Profile; options: Options };
@@ -13,6 +15,7 @@ type Loaded = { catalog: Ingredient[]; profile: Profile; options: Options };
 // Typing ingredients by hand ("พิมพ์เอง"). It is the same form as the Results edit sheet (SearchForm), so picking and
 // editing are one screen. The user chose every item, so there is nothing to confirm; allergies sit right here because
 // no confirm card showed them first.
+// Inside LINE it hands the pick back to the chat; on the web (no chat) it goes to /results.
 // A link with ?ids= is the chat's [แก้ไข] button; editing lives on Results, so it forwards there with the sheet open.
 export default function FormPage() {
   const router = useRouter();
@@ -36,6 +39,16 @@ export default function FormPage() {
         await saveProfile(next);
       } catch {
         return setSyncFailed(true);
+      }
+    }
+    // Opened from the chat: post the names as the user's own message and close, so the carousel arrives in the chat,
+    // the one place to pick a dish. If posting fails (no permission, offline), show the results here instead of stranding them.
+    if (await canSendToChat()) {
+      try {
+        await sendToChat([{ type: "text", text: searchMessage(tags) }]);
+        return closeToChat();
+      } catch {
+        // fall through to the web results
       }
     }
     startSearch(tags, next);
