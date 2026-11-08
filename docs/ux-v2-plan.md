@@ -42,7 +42,7 @@ confirm card [ถูกต้อง หาเมนู] ─► carousel ─► [
              [แก้ไข] ─────────► /form?ids=… ─redirect─► Results with the edit sheet open
              carousel [ดูทั้งหมด] ► Results
 
-Mock mode: /scan ──► Results (was: /scan → /form → Results)
+The /scan page is removed (scanning only happens in the chat).
 Typing by hand ("พิมพ์เอง"): /form (entry) ──► Results
 Results ──► Recipe ──► Cook mode ──► rate ──► back to chat
 ```
@@ -91,8 +91,8 @@ Header on every page: the flow shell stays (back only inside the flow, step pill
 - Primary action: **tap a dish**. Search and a scrolling chip row are pinned together; count line below.
 - Uses the same dish card as Results (chevron). Removes the close-to-chat button under the list.
 
-### 7. Scan (`/scan`, mock mode and non-chat fallback)
-- Primary action: **สแกน**; on success goes straight to Results.
+### 7. Scan — removed
+- The `/scan` page is gone: scanning happens only in the LINE chat (rich menu → camera). `app/scan/` and its photo shrinking were deleted.
 
 ## PR plan (stacked, each from the previous branch)
 

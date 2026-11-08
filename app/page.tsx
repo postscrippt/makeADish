@@ -7,7 +7,7 @@ import CloseToChat from "@/components/CloseToChat";
 const MOCK_MODE = process.env.NEXT_PUBLIC_USE_MOCKS !== "false"; // same rule as mocks/api.ts
 
 const devPages = [
-  { href: "/scan", label: "สแกนวัตถุดิบ" },
+  { href: "/form", label: "พิมพ์วัตถุดิบ" },
   { href: "/history", label: "ประวัติ" },
   { href: "/menus", label: "เมนูทั้งหมด" },
 ];
