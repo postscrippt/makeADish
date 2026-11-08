@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import PageHeader from "@/components/PageHeader";
+import CloseToChat from "@/components/CloseToChat";
 import { getFavorites, getHistory, setFavorite } from "@/mocks/api";
 import type { Favorite, HistoryEntry } from "@/types/api";
 
@@ -54,7 +55,8 @@ export default function HistoryPage() {
     <>
       <PageHeader title="ประวัติ" />
       <main className="p-4">
-        <div role="tablist" className="mb-4 grid grid-cols-2 rounded-full bg-white p-1 shadow-card">
+        <div className="sticky top-14 z-[5] -mx-4 -mt-4 mb-1 bg-mist px-4 pt-4 pb-3">
+        <div role="tablist" className="grid grid-cols-2 rounded-full bg-white p-1 shadow-card">
           {(
             [
               ["all", `ที่เคยทำ (${history.length})`],
@@ -73,15 +75,22 @@ export default function HistoryPage() {
             </button>
           ))}
         </div>
+        </div>
 
         {rows.length === 0 ? (
           <div className="flex flex-col items-center gap-4 py-16 text-center">
-            <p className="text-muted">
-              {tab === "all" ? "ยังไม่มีเมนูที่ทำ กด “ทำเมนูนี้แล้ว” ในหน้าสูตรเพื่อบันทึก" : "ยังไม่มีเมนูโปรด กด ♡ ในหน้าสูตรเพื่อเพิ่ม"}
-            </p>
-            <Link href="/scan" className="btn-primary">
-              หาเมนูจากวัตถุดิบ
-            </Link>
+            {tab === "all" ? (
+              <>
+                <p className="text-muted">ยังไม่มีเมนูที่เคยทำ ทำเสร็จแล้วให้คะแนน เมนูจะมาอยู่ที่นี่</p>
+                <p className="text-sm text-muted">เริ่มจากกด “สแกนวัตถุดิบ” ที่เมนูด้านล่างของแชท</p>
+                <CloseToChat className="btn-primary" />
+              </>
+            ) : (
+              <>
+                <p className="text-muted">ยังไม่มีเมนูโปรด กด ♡ ในหน้าสูตรเพื่อเพิ่ม</p>
+                <Link href="/menus" className="btn-primary">ดูเมนูทั้งหมด</Link>
+              </>
+            )}
           </div>
         ) : (
           <ul className="flex flex-col gap-3">
@@ -115,6 +124,7 @@ export default function HistoryPage() {
             })}
           </ul>
         )}
+        {rows.length > 0 && <CloseToChat className="btn-secondary mx-auto mt-6 block" />}
       </main>
     </>
   );
