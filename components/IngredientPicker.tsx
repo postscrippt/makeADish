@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { searchIngredients } from "@/app/ingredientSearch";
+import { groupByCategory } from "@/app/ingredientCategories";
 import type { Ingredient } from "@/types/api";
 
 // One-tap adds; ids missing from the catalog are skipped.
@@ -105,15 +106,22 @@ export default function IngredientPicker({
             {showAll ? "ซ่อนรายการ" : `ดูวัตถุดิบทั้งหมด (${free.length})`}
           </button>
           {showAll && (
-            <ul className="mt-1 flex flex-wrap gap-2">
-              {free.map((x) => (
-                <li key={x.id}>
-                  <button type="button" onClick={() => add(x)} className="min-h-11 rounded-full border-[1.5px] border-edge bg-white px-4 text-base active:bg-butter-soft">
-                    + {x.th}
-                  </button>
-                </li>
+            <div className="mt-1 flex flex-col gap-4">
+              {groupByCategory(free).map((g) => (
+                <section key={g.id} aria-label={g.th}>
+                  <h4 className="mb-2 text-sm text-muted">{g.th}</h4>
+                  <ul className="flex flex-wrap gap-2">
+                    {g.items.map((x) => (
+                      <li key={x.id}>
+                        <button type="button" onClick={() => add(x)} className="min-h-11 rounded-full border-[1.5px] border-edge bg-white px-4 text-base active:bg-mist">
+                          + {x.th}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
               ))}
-            </ul>
+            </div>
           )}
         </div>
       )}

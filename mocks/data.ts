@@ -1,31 +1,31 @@
-import type { Ingredient, Option } from "@/types/api";
+import type { Ingredient, IngredientCategory, Option } from "@/types/api";
 
-const i = (id: string, th: string, en: string, aliases: string[] = []): Ingredient => ({ id, th, en, aliases });
+const i = (id: string, th: string, en: string, category: IngredientCategory, aliases: string[] = []): Ingredient => ({ id, th, en, aliases, category });
 
 export const ingredients: Ingredient[] = [
-  i("pork", "หมู", "pork", ["หมูสับ", "หมูชิ้น", "minced pork"]),
-  i("chicken", "ไก่", "chicken", ["อกไก่", "chicken breast"]),
-  i("beef", "เนื้อวัว", "beef", ["เนื้อ"]),
-  i("shrimp", "กุ้ง", "shrimp", ["prawn"]),
-  i("egg", "ไข่", "egg", ["ไข่ไก่"]),
-  i("tofu", "เต้าหู้", "tofu"),
-  i("garlic", "กระเทียม", "garlic"),
-  i("shallot", "หอมแดง", "shallot"),
-  i("chili", "พริก", "chili", ["พริกขี้หนู", "bird's eye chili"]),
-  i("holy-basil", "กะเพรา", "holy basil"),
-  i("thai-basil", "โหระพา", "Thai basil"),
-  i("lemongrass", "ตะไคร้", "lemongrass"),
-  i("galangal", "ข่า", "galangal"),
-  i("kaffir-lime-leaf", "ใบมะกรูด", "kaffir lime leaf"),
-  i("lime", "มะนาว", "lime"),
-  i("fish-sauce", "น้ำปลา", "fish sauce"),
-  i("oyster-sauce", "ซอสหอยนางรม", "oyster sauce"),
-  i("coconut-milk", "กะทิ", "coconut milk"),
-  i("rice", "ข้าว", "rice", ["ข้าวสวย"]),
-  i("rice-noodle", "เส้นก๋วยเตี๋ยว", "rice noodle", ["เส้นเล็ก", "เส้นใหญ่"]),
-  i("morning-glory", "ผักบุ้ง", "morning glory"),
-  i("tomato", "มะเขือเทศ", "tomato"),
-  i("cabbage", "กะหล่ำปลี", "cabbage"),
+  i("pork", "หมู", "pork", "meat", ["หมูสับ", "หมูชิ้น", "minced pork"]),
+  i("chicken", "ไก่", "chicken", "meat", ["อกไก่", "chicken breast"]),
+  i("beef", "เนื้อวัว", "beef", "meat", ["เนื้อ"]),
+  i("shrimp", "กุ้ง", "shrimp", "seafood", ["prawn"]),
+  i("egg", "ไข่", "egg", "egg-dairy", ["ไข่ไก่"]),
+  i("tofu", "เต้าหู้", "tofu", "staple"),
+  i("garlic", "กระเทียม", "garlic", "vegetable"),
+  i("shallot", "หอมแดง", "shallot", "vegetable"),
+  i("chili", "พริก", "chili", "vegetable", ["พริกขี้หนู", "bird's eye chili"]),
+  i("holy-basil", "กะเพรา", "holy basil", "herb"),
+  i("thai-basil", "โหระพา", "Thai basil", "herb"),
+  i("lemongrass", "ตะไคร้", "lemongrass", "herb"),
+  i("galangal", "ข่า", "galangal", "herb"),
+  i("kaffir-lime-leaf", "ใบมะกรูด", "kaffir lime leaf", "herb"),
+  i("lime", "มะนาว", "lime", "fruit"),
+  i("fish-sauce", "น้ำปลา", "fish sauce", "sauce"),
+  i("oyster-sauce", "ซอสหอยนางรม", "oyster sauce", "sauce"),
+  i("coconut-milk", "กะทิ", "coconut milk", "fruit"),
+  i("rice", "ข้าว", "rice", "staple", ["ข้าวสวย"]),
+  i("rice-noodle", "เส้นก๋วยเตี๋ยว", "rice noodle", "noodle", ["เส้นเล็ก", "เส้นใหญ่"]),
+  i("morning-glory", "ผักบุ้ง", "morning glory", "vegetable"),
+  i("tomato", "มะเขือเทศ", "tomato", "vegetable"),
+  i("cabbage", "กะหล่ำปลี", "cabbage", "vegetable"),
 ];
 
 export const allergens: Option[] = [
