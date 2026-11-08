@@ -1,6 +1,11 @@
 // PROPOSED shapes for docs/api-contract.md (issue #2). Not yet agreed with Person B.
 
-export type Ingredient = { id: string; th: string; en: string; aliases: string[] };
+export type IngredientCategory =
+  | "meat" | "seafood" | "egg-dairy" | "vegetable" | "herb" | "fruit"
+  | "sauce" | "seasoning" | "staple" | "noodle" | "nut-seed" | "other";
+
+// `category` is optional so older mocks and the scan response still type-check; GET /api/ingredients always sends it.
+export type Ingredient = { id: string; th: string; en: string; aliases: string[]; category?: IngredientCategory };
 
 export type ScanResult =
   | { ok: true; ingredients: Ingredient[] }

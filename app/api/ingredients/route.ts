@@ -3,6 +3,6 @@ import { ingredients } from "@/data/ingredients";
 import type { Ingredient } from "@/types/api";
 
 export async function GET() {
-  const list: Ingredient[] = ingredients.map((e) => ({ id: e.slug, th: e.th, en: e.en, aliases: e.aliases }));
+  const list: Ingredient[] = ingredients.map((e) => ({ id: e.slug, th: e.th, en: e.en, aliases: e.aliases, category: e.category }));
   return Response.json(list);
 }
