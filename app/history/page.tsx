@@ -69,7 +69,7 @@ export default function HistoryPage() {
               role="tab"
               aria-selected={tab === id}
               onClick={() => setTab(id)}
-              className={`min-h-10 rounded-full text-sm font-medium ${tab === id ? "bg-butter text-ink" : "text-muted"}`}
+              className={`min-h-11 rounded-full text-sm font-medium ${tab === id ? "bg-butter text-ink" : "text-muted"}`}
             >
               {label}
             </button>
@@ -97,9 +97,9 @@ export default function HistoryPage() {
             {rows.map(({ key, recipe, entry }) => {
               const fav = favorites.some((f) => f.id === recipe.id);
               return (
-                <li key={key} className="flex min-h-16 items-center gap-2 rounded-3xl bg-white p-3 pl-4 shadow-card">
+                <li key={key} className="flex min-h-20 items-center gap-2 rounded-3xl bg-white p-3 pl-4 shadow-card active:bg-butter-soft">
                   <Link href={`/recipe/${recipe.id}`} className="flex-1">
-                    <p className="font-semibold">{recipe.th}</p>
+                    <p className="text-lg leading-snug font-semibold">{recipe.th}</p>
                     {entry && (
                       <p className="text-sm text-muted">
                         <span aria-label={`${entry.rating} ดาว`} className="text-amber-400">
@@ -124,7 +124,6 @@ export default function HistoryPage() {
             })}
           </ul>
         )}
-        {rows.length > 0 && <CloseToChat className="btn-secondary mx-auto mt-6 block" />}
       </main>
     </>
   );

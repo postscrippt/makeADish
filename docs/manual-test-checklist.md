@@ -15,7 +15,7 @@ Tester: ______  Date: ______  Build: mock / real / deployed  Device: ______
 - [ ] Home shows the 3 tiles: สแกนวัตถุดิบ, ประวัติ, เมนูทั้งหมด
 - [ ] History shows the empty message and a button to start scanning
 - [ ] Results opened directly says no ingredients were chosen and links to Scan
-- [ ] The check screen (`/form`) shows "ยังไม่ได้ระบุอาหารที่แพ้ · เผ็ดน้อย" and "ตั้งค่า"
+- [ ] Results (after typing one ingredient) shows "ยังไม่ได้ระบุอาหารที่แพ้" and "ตั้งค่า" in the summary card
 
 ## Scan
 
@@ -29,16 +29,16 @@ Tester: ______  Date: ______  Build: mock / real / deployed  Device: ______
 - [ ] "หรือ พิมพ์วัตถุดิบเอง" goes to Form
 - [ ] The photo is not saved anywhere after the scan (nothing in Network uploads except the scan call)
 
-## Check screen (`/form`)
+## Entry form (`/form`, typing by hand) and the edit sheet
 
-- [ ] Header says "เจอวัตถุดิบ N อย่าง"; scanned ingredients appear as big chips
-- [ ] × removes a chip; "+ เพิ่ม" opens the search box
-- [ ] With nothing scanned: header "เพิ่มวัตถุดิบ", search box already open and focused
-- [ ] Typing Thai (ไก่), English (chicken) or an alias (หมูสับ) finds the ingredient; tapping adds it
+- [ ] `/form` has header "เพิ่มวัตถุดิบ", the search box focused, "เพิ่มเร็ว" chips, and no "ถูกต้องไหม?"
+- [ ] Typing Thai (ไก่), English (chicken) or an alias (หมูสับ) finds the ingredient; tapping adds it; × removes a chip
 - [ ] Typing something unknown shows "ไม่พบวัตถุดิบนี้"
 - [ ] "หาเมนู" is disabled with no ingredients
-- [ ] "ตั้งค่า"/"แก้ไข" opens the sheet; Escape or tapping outside closes it; focus returns to the button
-- [ ] Saved allergies show in red on the line ("แพ้: …") and are remembered on the next visit
+- [ ] `/form?ids=pork,egg` forwards to Results with the "แก้การค้นหา" sheet already open
+- [ ] On Results, "แก้ไข" opens the sheet; Escape, × or tapping outside closes it; focus returns to the button
+- [ ] "ดูเมนูใหม่" applies ingredients, allergies and spice at once and searches again; "เพิ่มวัตถุดิบก่อน" shows with none
+- [ ] Saved allergies show in red on the summary card ("แพ้: …") and are remembered on the next visit
 
 ## Results
 

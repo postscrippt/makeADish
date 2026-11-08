@@ -52,12 +52,12 @@ Font: **Prompt** (Thai + Latin, `next/font/google`, weights 400/500/600/700). It
 - **`btn-secondary`**: white pill with an `edge` ring. For alternatives (e.g. "เลือกจากคลังภาพ").
 - **`PageHeader`**: sticky `brand` bar, back chevron, white bold title.
 - **`Chip`**: unselected is white with an `edge` border and `muted` text. Selected is `butter` with `ink` text. Danger chips (allergies) turn red when selected.
-- **Tabs** (Results, History): a white pill track with `shadow-card`; the active tab is a `butter` pill.
-- **`RecipeCard`**: white card, `butter` match % pill, amber "ขาดอีก" line.
-- **`StepsTimeline`** (วิธีทำ): a 3px `edge` line through 48px circles. Done = `brand` circle with a white check; upcoming = white circle with an `edge` ring; the current step is a white `rounded-3xl` card with a `butter-soft` art area (72px `StepIcon`), the verb at 26px bold, the detail in `muted`, and pills. Heat pill: `mist`, three stroked flames (lit ones full, the rest at 25% opacity) plus ไฟอ่อน/กลาง/แรง. Time pill: `butter`, "⏱ N นาที · เริ่ม" → countdown. One sticky bottom button, min 56px.
+- **Tabs** (Results, History): a white pill track with `shadow-card`, pinned under the header; the active tab is a `butter` pill. Filter chips scroll with the list (only Menus pins its search and chips).
+- **`RecipeCard`**: white card, 18px title, `butter` match % pill, amber "ต้องซื้อ" line, a chevron that says "tap to open".
+- **`CookMode`** (full screen, from "เริ่มทำ"): `brand` header, a tappable step bar, then one column: a white `rounded-3xl` step card that takes the free height (72px `butter-soft` icon circle, verb 36px bold, detail 24px, and "ใช้ในขั้นนี้" ingredient pills with amounts); a heat tile (white, three stroked flames, lit ones full, the rest at 25%) next to a `butter` timer tile (36px tabular time, tap to start or pause); a quiet "ต่อไป" preview of the next step. The bottom bar is only back and the primary button (min 56px).
 - **`StepIcon`**: one stroked icon per action kind (whisk, pan, pot, steam, knife, mortar, add, season, plate, generic).
-- **`PrefsSheet`**: bottom sheet (`rounded-t-3xl bg-white`) over a `bg-ink/40` backdrop. Escape or a backdrop tap closes it.
-- **Preferences line** (check screen): one white card; allergies in `red-700` semibold so the safety filter is always visible.
+- **`SearchSheet`**: bottom sheet (`rounded-t-3xl bg-white`) over a `bg-ink/40` backdrop for everything a search is based on: ingredients (`IngredientPicker`), allergies, spice, and one primary button. Escape or a backdrop tap closes it.
+- **Summary card** (Results): one white card with the ingredients this search used, one แก้ไข button, and the allergy + spice line (allergies in `red-700` semibold so the safety filter is always visible).
 - **Icons**: 24px stroked line icons (stroke 2, round caps) inside a `butter` circle. Same set in `app/page.tsx` and the rich menu.
 - **Logo**: `public/logo.svg` (white MDi mark, transparent background). Use it on teal only. Favicon: `app/icon.svg`.
 

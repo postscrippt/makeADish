@@ -64,8 +64,9 @@ The product spec is summarized below. Market sizing and competitor material is k
 ## The demo flow
 
 ```
-Scan photo -> check screen (fix ingredients; allergies and spice saved in the profile)
-           -> results: [Matches] [Almost there] -> recipe steps
+Scan photo (the chat confirm card asks "is this right?")
+           -> results: [Matches] [Almost there]; ingredients, allergies and spice editable in one sheet
+           -> recipe -> cook mode (steps, timer)
            -> "I cooked this" + rating -> History -> better suggestions next time
 ```
 

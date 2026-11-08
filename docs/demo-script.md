@@ -17,9 +17,9 @@ About 4 minutes. One presenter drives the phone, the other narrates. Practice it
 |---|---|---|
 | 0:00 | Show the LINE chat with the rich menu | "Most recipe apps start from a dish. MakeADish starts from your kitchen, inside LINE, which most Thai users already have open." |
 | 0:20 | Tap **สแกนวัตถุดิบ**, take the photo | "Take one photo of what you have." |
-| 0:35 | Spinner, then the check screen | "It reads the ingredients and asks one question: is this right?" Remove one chip, tap **+ เพิ่ม**, add **ไก่**. Point at the red allergy line. |
+| 0:35 | Spinner, then the chat confirm card | "It reads the ingredients and asks one question: is this right?" Tap **แก้ไข**, remove one chip, add **ไก่** in the sheet. Point at the red allergy line. |
 | 1:00 | Point at the red "แพ้: …" line, tap **แก้ไข** to show the sheet | "Allergies are a hard filter. The AI can never override them. Unknown allergen data means the recipe is never shown." |
-| 1:15 | Tap **หาเมนู** | "Match % is plain code from ingredient overlap, not the AI guessing." |
+| 1:15 | Tap **ดูเมนูใหม่** (or **ถูกต้อง หาเมนู** in the chat) | "Match % is plain code from ingredient overlap, not the AI guessing." |
 | 1:30 | Show **ทำได้เลย**, then **ขาดวัตถุดิบอีกนิด** | "Can cook now, or missing just one or two things." |
 | 1:50 | Open ผัดกะเพราหมู, tap **ใช้อะไรแทนได้?** on ซอสหอยนางรม | "Missing something? It suggests a swap, and never one you're allergic to." |
 | 2:15 | Step through วิธีทำ with **ขั้นต่อไป**; on the last step tap **เสร็จแล้ว ให้คะแนนเมนูนี้**, give 5 stars | "One big step at a time, readable from the counter. Finishing saves it to your history." |
