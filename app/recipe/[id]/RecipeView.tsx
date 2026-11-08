@@ -44,15 +44,14 @@ export default function RecipeView({
   }, [id, fromSearch, haveKey]);
 
 
-  const step = fromSearch ? 3 : undefined;
-  if (failed) return <><PageHeader title="สูตรอาหาร" step={step} /><p role="alert" className="p-5 text-red-700">โหลดสูตรไม่สำเร็จ ลองใหม่อีกครั้งนะ</p></>;
-  if (!data) return <><PageHeader title="สูตรอาหาร" step={step} /><p role="status" className="p-5 text-sm text-muted">กำลังโหลด…</p></>;
+  if (failed) return <><PageHeader title="สูตรอาหาร" /><p role="alert" className="p-5 text-red-700">โหลดสูตรไม่สำเร็จ ลองใหม่อีกครั้งนะ</p></>;
+  if (!data) return <><PageHeader title="สูตรอาหาร" /><p role="status" className="p-5 text-sm text-muted">กำลังโหลด…</p></>;
 
   const { recipe, have, staples, allergic, allergies } = data;
   if (!recipe) {
     return (
       <>
-        <PageHeader title="สูตรอาหาร" step={step} />
+        <PageHeader title="สูตรอาหาร" />
         <div className="flex flex-col items-center gap-4 p-5 py-16 text-center">
           <p className="text-muted">ไม่พบสูตรอาหารนี้</p>
           <CloseToChat className="btn-secondary">ปิด กลับไปที่แชท</CloseToChat>
@@ -73,7 +72,7 @@ export default function RecipeView({
   return (
     // Fills the screen, so the start bar sits at the bottom even on a short recipe.
     <div className="flex min-h-dvh flex-col">
-    <PageHeader title="สูตรอาหาร" step={step} titleAs="p">
+    <PageHeader title="สูตรอาหาร" titleAs="p">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-3xl leading-tight font-bold text-balance text-butter">{recipe.th}</h1>
@@ -129,7 +128,7 @@ export default function RecipeView({
         <ol className="flex flex-col gap-4 rounded-3xl bg-white p-5 shadow-card">
           {recipe.steps.map((step, i) => (
             <li key={i} className="flex gap-3">
-              <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-butter text-sm font-semibold text-ink">{i + 1}</span>
+              <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mist text-sm font-semibold text-brand-deep">{i + 1}</span>
               <span className="pt-1">{step}</span>
             </li>
           ))}
@@ -190,7 +189,7 @@ function MissingRow({ item, allergies }: { item: RecipeIngredient; allergies: st
         {typeof state === "object" && state.kind === "ok" && (
           <ul className="mt-2 flex flex-wrap gap-2">
             {state.options.map((o) => (
-              <li key={o.label} className="rounded-full bg-butter px-3 py-1 font-medium text-ink">แทนด้วย {o.label}</li>
+              <li key={o.label} className="rounded-full border border-edge bg-white px-3 py-1 font-medium text-ink">แทนด้วย {o.label}</li>
             ))}
           </ul>
         )}

@@ -34,7 +34,7 @@ export default function FormPage() {
   if (!catalog || !profile) {
     return (
       <>
-        <PageHeader title="เพิ่มวัตถุดิบ" step={1} />
+        <PageHeader title="เพิ่มวัตถุดิบ" />
         <p role="status" className="p-4 text-sm text-muted">กำลังโหลด…</p>
       </>
     );
@@ -43,9 +43,7 @@ export default function FormPage() {
   return (
     // Column fills the screen so the button bar sits at the bottom even when the list is short.
     <div className="flex min-h-dvh flex-col">
-      <PageHeader title="เพิ่มวัตถุดิบ" step={1}>
-        <h2 className="text-3xl leading-tight font-bold text-butter">มีอะไรในครัวบ้าง?</h2>
-      </PageHeader>
+      <PageHeader title="เพิ่มวัตถุดิบ" />
       <main className="flex flex-1 flex-col gap-4 px-5 pt-6 pb-8">
         <IngredientPicker catalog={catalog} tags={tags} onChange={setTags} autoFocus />
       </main>

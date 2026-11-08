@@ -75,7 +75,7 @@ export default function CookMode({
             {/* Same zones, same order, on every step; the action band is pinned above the scrolling part. Cards hug their content; the free height below belongs to the step list,
                 so the screen is full of orientation (what is done, what is next) instead of blank space. */}
           <div className="flex min-h-[6.2rem] shrink-0 items-center gap-4 px-5 pt-4 pb-3">
-            <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-butter">
+            <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-butter-soft">
               <StepIcon icon={p.icon} className="h-10 w-10" />
             </span>
             {/* The verb and, when the step uses the stove, its heat right under it: the heat belongs to the action. */}

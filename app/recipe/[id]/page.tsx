@@ -3,7 +3,7 @@ import PageHeader from "@/components/PageHeader";
 import RecipeView from "./RecipeView";
 
 // cacheComponents is on: params and searchParams are runtime data, so they must be read inside <Suspense>.
-// RecipeView draws the header itself: the recipe's title lives in the teal hero, and the step pills (step 3) only show when it was opened from Results.
+// RecipeView draws the header itself: the recipe's title lives in the teal hero.
 async function RecipeBody({ params, searchParams }: PageProps<"/recipe/[id]">) {
   const [{ id }, { from, missing, ids, cook }] = await Promise.all([params, searchParams]);
   // From a chat recipe card: ?cook=1 jumps to the steps, ?missing=a,b marks what to buy.

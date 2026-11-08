@@ -85,7 +85,7 @@ export default function ResultsPage() {
 
   return (
     <>
-      <PageHeader title="เลือกเมนู" step={2}>
+      <PageHeader title="เลือกเมนู">
         {state.kind === "loading" && <h2 className="text-3xl leading-tight font-bold text-butter">กำลังหาเมนู…</h2>}
         {state.kind === "done" && <Hero state={state} onEdit={() => setSheetOpen(true)} syncFailed={syncFailed} />}
       </PageHeader>
@@ -152,7 +152,7 @@ function Hero({ state, onEdit, syncFailed }: { state: Done; onEdit: () => void; 
         </div>
         <ul aria-label="วัตถุดิบ" className="mt-3 flex flex-wrap gap-2">
           {shown.map((t) => (
-            <li key={t.id} className="rounded-full bg-butter px-3 py-1 text-sm font-medium text-ink">{t.th}</li>
+            <li key={t.id} className="rounded-full bg-white px-3 py-1 text-sm font-medium text-ink">{t.th}</li>
           ))}
           {tags.length > shown.length && <li className="rounded-full bg-white px-3 py-1 text-sm font-medium text-ink">+{tags.length - shown.length}</li>}
         </ul>
