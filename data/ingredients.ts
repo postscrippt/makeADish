@@ -6,6 +6,10 @@
 // are matched without spaces. Allergen data is NOT here; it is tagged separately (issue #21).
 // A native Thai speaker should review the Thai names and aliases.
 
+import type { IngredientCategory } from "../types/api.ts";
+
+export type { IngredientCategory };
+
 export type IngredientEntry = {
   slug: string; // stable id used by the API, recipes and swaps
   th: string;
@@ -13,10 +17,6 @@ export type IngredientEntry = {
   aliases: string[];
   category: IngredientCategory;
 };
-
-export type IngredientCategory =
-  | "meat" | "seafood" | "egg-dairy" | "vegetable" | "herb" | "fruit"
-  | "sauce" | "seasoning" | "staple" | "noodle" | "nut-seed" | "other";
 
 const i = (slug: string, th: string, en: string, category: IngredientCategory, aliases: string[] = []): IngredientEntry => ({
   slug, th, en, aliases, category,
