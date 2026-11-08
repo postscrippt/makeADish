@@ -25,10 +25,13 @@ export default function RecipeCard({
   recipe,
   match,
   category,
+  hideReady = false,
 }: {
   recipe: RecipeSummary;
   match?: Omit<RecipeMatch, "recipe">;
   category?: string;
+  // The "ทำได้เลย" tab and hero already say it, so its cards skip the label. Missing items always show.
+  hideReady?: boolean;
 }) {
   // ?from=results tells the Recipe page it may compare against the current search.
   const href = match ? `/recipe/${recipe.id}?from=results` : `/recipe/${recipe.id}`;
@@ -44,7 +47,7 @@ export default function RecipeCard({
           {recipe.minutes} นาที
           {recipe.spice > 0 && <span aria-label={`ความเผ็ดระดับ ${recipe.spice}`}> · {"🌶".repeat(recipe.spice)}</span>}
         </p>
-        {match && <Status match={match} />}
+        {match && !(hideReady && match.missing.length === 0) && <Status match={match} />}
       </div>
       <svg aria-hidden viewBox="0 0 24 24" className="h-6 w-6 shrink-0 text-edge" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M9 5l7 7-7 7" />
