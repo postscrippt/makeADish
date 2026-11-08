@@ -13,8 +13,9 @@ import type { HistoryEntry, RecipeIngredient } from "@/types/api";
 type Rating = HistoryEntry["rating"];
 
 const heatLabels: Record<Heat, string> = { 1: "ไฟอ่อน", 2: "ไฟกลาง", 3: "ไฟแรง" };
-// One stroked flame in the step icons' line style: a tall tongue with a curl on the left.
-const FLAME = "M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-2.2 1.9-3.1 3.8-2 6 .5 1 1 1.6 1 3a2.5 2.5 0 0 1-2.5 2.5C8.8 14.5 9 13 8 12c-.6.7-1 1.8-1 3a7 7 0 0 0 5 7z";
+// One simple flame. Lit: filled in the flame colour with a butter core. Off: an empty outline, so the level reads as a gauge.
+const FLAME = "M12 2.5c.7 3.4 5.2 5.6 5.2 10.6a5.2 5.2 0 0 1-10.4 0c0-1.9.8-3.1 1.7-4.2.3 1.5 1 2.3 1.9 2.5C10.2 8.6 10.7 5.4 12 2.5z";
+const CORE = "M12 19.4a2.1 2.1 0 0 1-2.1-2.1c0-1 .7-1.6 2.1-3 1.4 1.4 2.1 2 2.1 3a2.1 2.1 0 0 1-2.1 2.1z";
 
 // Full-screen cooking: one step at a time. A pinned action band (icon, verb, heat), a card with the instruction, the
 // timer and what the step uses, then the list of all steps (done, current, next). The bottom bar is just back and next.
@@ -81,11 +82,18 @@ export default function CookMode({
             <div className="min-w-0 flex-1">
               <h2 className="truncate text-[2.125rem] leading-tight font-bold">{p.verb}</h2>
               {p.heat && (
-                <p className="mt-1 flex items-center gap-2 text-sm font-semibold">
+                <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-flame-deep">
                   <span aria-hidden className="flex">
                     {[1, 2, 3].map((n) => (
-                      <svg key={n} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={`h-6 w-6 ${n > p.heat! ? "opacity-25" : ""}`}>
-                        <path d={FLAME} />
+                      <svg key={n} viewBox="0 0 24 24" strokeLinejoin="round" className="h-6 w-6">
+                        {n <= p.heat! ? (
+                          <>
+                            <path d={FLAME} className="fill-flame stroke-flame" strokeWidth="1.8" />
+                            <path d={CORE} className="fill-butter" />
+                          </>
+                        ) : (
+                          <path d={FLAME} fill="none" className="stroke-muted/40" strokeWidth="1.6" />
+                        )}
                       </svg>
                     ))}
                   </span>

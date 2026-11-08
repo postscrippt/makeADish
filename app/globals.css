@@ -10,6 +10,8 @@
   --color-mist: #eaf5f8; /* page background behind cards */
   --color-butter: #f6e39a; /* accent fills; as text only at 24px+ on brand */
   --color-butter-soft: #fbf3d2;
+  --color-flame: #ea580c; /* lit flame in Cook mode heat (3.2:1 on mist, a graphic next to its text label) */
+  --color-flame-deep: #c2410c; /* heat label text; 4.7:1 on mist */
   --shadow-card: 0 6px 20px -8px rgb(9 128 157 / 0.28);
   --font-sans: var(--font-prompt), system-ui, sans-serif;
 }
