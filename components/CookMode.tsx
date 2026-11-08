@@ -65,7 +65,7 @@ export default function CookMode({
             ×
           </button>
           <h1 className="min-w-0 flex-1 truncate text-lg font-bold">{name}</h1>
-          {!finished && <span className="pr-3 text-sm font-medium">{step + 1}/{steps.length}</span>}
+          {!finished && <span aria-label={`ขั้นที่ ${step + 1} จาก ${steps.length}`} className="pr-3 text-sm font-medium">{step + 1}/{steps.length}</span>}
         </header>
 
         {finished ? (
@@ -84,16 +84,17 @@ export default function CookMode({
 
             <main ref={mainRef} className="flex flex-1 flex-col gap-3 overflow-y-auto p-4 pt-1">
               {/* This card takes the free height, with its content centered, so a short step never leaves a hole. */}
-              <section className="flex min-h-[14rem] flex-1 flex-col justify-center gap-4 rounded-3xl bg-white p-5 shadow-card">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-butter-soft">
-                    <StepIcon icon={p.icon} className="h-12 w-12" />
-                  </span>
-                  <p className="text-sm font-medium text-muted">ขั้นที่ {step + 1} จาก {steps.length}</p>
-                </div>
+              <section className={`flex min-h-[14rem] flex-1 shrink-0 flex-col rounded-3xl bg-white p-5 shadow-card ${used.length > 0 ? "justify-between gap-6" : "justify-center"}`}>
+                {/* Icon and verb are one title; the detail reads on from it; what you use is the quiet last group. */}
                 <div>
-                  <p className="text-4xl leading-tight font-bold">{p.verb}</p>
-                  {p.detail && <p className="mt-2 text-2xl leading-relaxed text-ink">{p.detail}</p>}
+                <div className="flex items-center gap-4">
+                  <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-butter-soft">
+                    <StepIcon icon={p.icon} className="h-10 w-10" />
+                  </span>
+                  <h2 className="text-4xl leading-tight font-bold">{p.verb}</h2>
+                </div>
+                {/* Without the heat/timer row there is room to spare, so the instruction itself gets bigger. */}
+                {p.detail && <p className={`mt-4 leading-snug text-pretty text-ink ${p.heat || p.minutes ? "text-2xl" : "text-3xl"}`}>{p.detail}</p>}
                 </div>
                 {used.length > 0 && (
                   <div className="border-t border-edge pt-3">
