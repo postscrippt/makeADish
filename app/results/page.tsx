@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import PageHeader from "@/components/PageHeader";
 import CloseToChat from "@/components/CloseToChat";
@@ -15,9 +15,6 @@ import type { Ingredient, Options, Profile, SearchRequest, SearchResult, SpiceLe
 type Tab = "matches" | "toBuy";
 type Done = { result: SearchResult; options: Options; profile: Profile; catalog: Ingredient[]; tags: Ingredient[] };
 type State = { kind: "loading" } | { kind: "noSearch" } | { kind: "error" } | ({ kind: "done" } & Done);
-
-// "ไก่, ไข่, หมู": what this search was run on. Long lists are cut by the card (line-clamp), not here.
-const names = (tags: Ingredient[]) => tags.map((t) => t.th).join(", ");
 
 // Where the search comes from: a chat link (?ids=a,b: the carousel's [ดูทั้งหมด] or the confirm card's [แก้ไข] via /form),
 // else the draft the scan or the entry form left in this tab. A link is read once, then dropped from the address,
@@ -87,8 +84,11 @@ export default function ResultsPage() {
 
   return (
     <>
-      <PageHeader title="เลือกเมนู" step={2} />
-      <main className="p-4">
+      <PageHeader title="เลือกเมนู" step={2}>
+        {state.kind === "loading" && <h2 className="text-3xl leading-tight font-bold text-butter">กำลังหาเมนู…</h2>}
+        {state.kind === "done" && <Hero state={state} onEdit={() => setSheetOpen(true)} syncFailed={syncFailed} />}
+      </PageHeader>
+      <main className="px-5 pt-6 pb-10">
         {state.kind === "loading" && (
           <div role="status" className="flex flex-col items-center gap-3 py-16 text-sm text-muted">
             <span className="h-8 w-8 animate-spin rounded-full border-4 border-brand border-t-transparent" />
@@ -113,7 +113,7 @@ export default function ResultsPage() {
         )}
 
         {state.kind === "done" && (
-          <Results state={state} tab={tab} setTab={setTab} onEdit={() => setSheetOpen(true)} syncFailed={syncFailed} />
+          <Results state={state} tab={tab} setTab={setTab} onEdit={() => setSheetOpen(true)} />
         )}
       </main>
 
@@ -132,18 +132,52 @@ export default function ResultsPage() {
   );
 }
 
-function Results({
-  state, tab, setTab, onEdit, syncFailed,
-}: { state: Done; tab: Tab; setTab: (t: Tab) => void; onEdit: () => void; syncFailed: boolean }) {
+// The teal block: what you can cook right now (the answer), then what it was based on (ingredients, allergies, spice)
+// with the one edit button. Nothing here needs confirming.
+function Hero({ state, onEdit, syncFailed }: { state: Done; onEdit: () => void; syncFailed: boolean }) {
   const { result, tags, profile } = state;
+  const allergyNames = state.options.allergens.filter((a) => profile.allergies.includes(a.id)).map((a) => a.th);
+  const shown = tags.slice(0, 6);
+  const now = result.matches.length;
+  return (
+    <section aria-label="ที่ใช้ค้นหา">
+      <h2 className="text-3xl leading-tight font-bold text-balance text-butter">{now > 0 ? `ทำได้เลย ${now} เมนู` : "ขาดของอีกนิดเดียว"}</h2>
+      <p className="mt-1 text-white">จากวัตถุดิบ {tags.length} อย่าง</p>
+      <ul aria-label="วัตถุดิบ" className="mt-4 flex flex-wrap gap-2">
+        {shown.map((t) => (
+          <li key={t.id} className="rounded-full bg-butter px-3 py-1 text-sm font-medium text-ink">{t.th}</li>
+        ))}
+        {tags.length > shown.length && <li className="rounded-full bg-white px-3 py-1 text-sm font-medium text-ink">+{tags.length - shown.length}</li>}
+      </ul>
+      <div className="mt-5 flex items-center justify-between gap-3">
+        <p className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-sm text-white">
+          {allergyNames.length > 0 ? (
+            <span className="rounded-full bg-white px-3 py-1 font-semibold text-red-700">แพ้: {allergyNames.join(", ")}</span>
+          ) : (
+            <span>ยังไม่ได้ระบุอาหารที่แพ้</span>
+          )}
+          <span>{spiceLabels[profile.spice]}</span>
+        </p>
+        <button type="button" onClick={onEdit} className="btn-secondary min-h-11 shrink-0 px-5 text-sm">แก้ไข</button>
+      </div>
+      {syncFailed && (
+        <p role="alert" className="mt-3 rounded-2xl bg-white p-3 text-sm text-red-700">บันทึกไปที่แชทไม่สำเร็จ แชทอาจยังไม่รู้ว่าคุณแพ้อะไร ลองกดแก้ไขแล้วบันทึกอีกครั้ง</p>
+      )}
+    </section>
+  );
+}
+
+function Results({ state, tab, setTab, onEdit }: { state: Done; tab: Tab; setTab: (t: Tab) => void; onEdit: () => void }) {
+  const { result } = state;
   const categories = state.options.categories;
   const { tries } = result;
-  const allergyNames = state.options.allergens.filter((a) => profile.allergies.includes(a.id)).map((a) => a.th);
   const [filter, setFilter] = useState<string | null>(null);
+  const listTop = useRef<HTMLDivElement>(null);
 
-  // The tabs and filters stay pinned while scrolling, so a new list should start at its top.
+  // The tabs stay pinned while scrolling, so a new list should start right under them (not back up in the hero).
   useEffect(() => {
-    window.scrollTo({ top: 0 });
+    const top = listTop.current?.offsetTop ?? 0;
+    if (window.scrollY > top) window.scrollTo({ top });
   }, [tab, filter]);
   // Food type filters what's already loaded; the search itself always runs for every category.
   const pick = (list: SearchResult["matches"]) => (filter ? list.filter((m) => m.recipe.category === filter) : list);
@@ -173,28 +207,8 @@ function Results({
 
   return (
     <>
-      {/* What this search is based on. One edit button opens the sheet; nothing here needs confirming. */}
-      <section aria-label="ที่ใช้ค้นหา" className="mb-3 rounded-3xl bg-white p-4 shadow-card">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-sm text-muted">จากวัตถุดิบ {tags.length} อย่าง</p>
-            <p className="mt-0.5 line-clamp-2 text-lg leading-snug font-semibold">{names(tags)}</p>
-          </div>
-          <button type="button" onClick={onEdit} className="btn-secondary min-h-11 shrink-0 px-4 text-sm">แก้ไข</button>
-        </div>
-        <button type="button" onClick={onEdit} className="mt-2 flex min-h-11 w-full items-center justify-between gap-2 border-t border-edge pt-2 text-left text-sm">
-          <span>
-            {allergyNames.length > 0 ? <span className="font-semibold text-red-700">แพ้: {allergyNames.join(", ")}</span> : <span className="text-muted">ยังไม่ได้ระบุอาหารที่แพ้</span>}
-            <span className="text-muted"> · {spiceLabels[profile.spice]}</span>
-          </span>
-          <span className="shrink-0 font-semibold text-brand-deep">{allergyNames.length > 0 ? "แก้ไข" : "ตั้งค่า"}</span>
-        </button>
-        {syncFailed && (
-          <p role="alert" className="mt-1 text-sm text-red-700">บันทึกไปที่แชทไม่สำเร็จ แชทอาจยังไม่รู้ว่าคุณแพ้อะไร ลองกดแก้ไขแล้วบันทึกอีกครั้ง</p>
-        )}
-      </section>
-
-      <div className="sticky top-14 z-[5] -mx-4 bg-mist px-4 pb-2 pt-1">
+      <div ref={listTop} />
+      <div className="sticky top-0 z-10 -mx-5 -mt-6 bg-mist px-5 pt-5 pb-3">
         <div role="tablist" className="grid grid-cols-2 rounded-full bg-white p-1 shadow-card">
           {tabs.map(([id, label, count]) => (
             <button
@@ -211,7 +225,7 @@ function Results({
         </div>
       </div>
 
-      <div role="group" aria-label="ประเภทอาหาร" className="-mx-4 mb-3 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none]">
+      <div role="group" aria-label="ประเภทอาหาร" className="-mx-5 mb-5 flex gap-2 overflow-x-auto px-5 [scrollbar-width:none]">
         <Chip selected={filter === null} onClick={() => setFilter(null)}>ทั้งหมด</Chip>
         {categories.map((c) => (
           <Chip key={c.id} selected={filter === c.id} onClick={() => setFilter(c.id)}>{c.th}</Chip>
@@ -230,9 +244,9 @@ function Results({
       ) : (
         groups.map(([title, list]) =>
           list.length === 0 ? null : (
-            <section key={title} aria-label={title || undefined} className="mb-5">
-              {title && <h2 className="mb-2 text-sm font-semibold text-muted">{title}</h2>}
-              <ul className="flex flex-col gap-3">
+            <section key={title} aria-label={title || undefined} className="mb-8">
+              {title && <h2 className="mb-3 text-lg font-semibold">{title}</h2>}
+              <ul className="flex flex-col gap-4">
                 {list.map((m) => (
                   <li key={m.recipe.id}>
                     <RecipeCard recipe={m.recipe} match={m} />

@@ -43,9 +43,11 @@ export default function FormPage() {
   return (
     // Column fills the screen so the button bar sits at the bottom even when the list is short.
     <div className="flex min-h-dvh flex-col">
-      <PageHeader title="เพิ่มวัตถุดิบ" step={1} />
-      <main className="flex flex-1 flex-col gap-4 p-4 pb-8">
-        <p className="text-muted">มีอะไรในครัวบ้าง? พิมพ์ทีละอย่าง หรือแตะที่เพิ่มเร็ว</p>
+      <PageHeader title="เพิ่มวัตถุดิบ" step={1}>
+        <h2 className="text-3xl leading-tight font-bold text-butter">มีอะไรในครัวบ้าง?</h2>
+        <p className="mt-1 text-white">พิมพ์ทีละอย่าง หรือแตะที่เพิ่มเร็ว</p>
+      </PageHeader>
+      <main className="flex flex-1 flex-col gap-4 px-5 pt-6 pb-8">
         <IngredientPicker catalog={catalog} tags={tags} onChange={setTags} autoFocus />
       </main>
 

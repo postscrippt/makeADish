@@ -33,9 +33,10 @@ Font: **Prompt** (Thai + Latin, `next/font/google`, weights 400/500/600/700). It
 | Role | Classes |
 |---|---|
 | Hero headline | `text-4xl font-bold text-butter` (on `brand` only) |
+| Screen hero headline | `text-3xl font-bold text-butter text-balance`, inside the `PageHeader` hero (24px+ bold, so butter on `brand` passes) |
 | Page title (header) | `text-xl font-bold text-white` |
 | Recipe title | `text-2xl font-bold` |
-| Section heading | `text-lg font-semibold` |
+| Section heading | `text-xl font-bold` (`text-lg font-semibold` for sub-groups) |
 | Card title | `text-base`–`text-lg font-semibold` |
 | Body | `text-base` |
 | Meta and hints | `text-sm`/`text-xs text-muted` |
@@ -50,14 +51,14 @@ Font: **Prompt** (Thai + Latin, `next/font/google`, weights 400/500/600/700). It
 ## Components
 - **`btn-primary`** (utility in `globals.css`): `brand-deep` pill, white semibold, min height 48px, greys out when disabled. One per screen.
 - **`btn-secondary`**: white pill with an `edge` ring. For alternatives (e.g. "เลือกจากคลังภาพ").
-- **`PageHeader`**: sticky `brand` bar, back chevron, white bold title.
+- **`PageHeader`**: `brand` bar, back chevron, white bold title; sticky when it is just the bar. With children it becomes a **hero** (`rounded-b-[2.5rem]`): the screen's headline in butter and its key summary inside the teal, which scrolls away; white content rises over it. Page content uses `px-5`, `gap-4` between cards and `gap-6` between sections.
 - **`Chip`**: unselected is white with an `edge` border and `muted` text. Selected is `butter` with `ink` text. Danger chips (allergies) turn red when selected.
 - **Tabs** (Results, History): a white pill track with `shadow-card`, pinned under the header; the active tab is a `butter` pill. Filter chips scroll with the list (only Menus pins its search and chips).
-- **`RecipeCard`**: white card, 18px title, `butter` match % pill, amber "ต้องซื้อ" line, a chevron that says "tap to open".
+- **`RecipeCard`**: white card with a 56px `butter-soft` icon circle (drawn `StepIcon` by dish category), 18px title, a meta row with the `butter` match % pill, an amber "ต้องซื้อ" line, and a chevron that says "tap to open".
 - **`CookMode`** (full screen, from "เริ่มทำ"): `brand` header, a tappable step bar, then one column: a white `rounded-3xl` step card that takes the free height (72px `butter-soft` icon circle, verb 36px bold, detail 24px, and "ใช้ในขั้นนี้" ingredient pills with amounts); a heat tile (white, three stroked flames, lit ones full, the rest at 25%) next to a `butter` timer tile (36px tabular time, tap to start or pause); a quiet "ต่อไป" preview of the next step. The bottom bar is only back and the primary button (min 56px).
 - **`StepIcon`**: one stroked icon per action kind (whisk, pan, pot, steam, knife, mortar, add, season, plate, generic).
 - **`SearchSheet`**: bottom sheet (`rounded-t-3xl bg-white`) over a `bg-ink/40` backdrop for everything a search is based on: ingredients (`IngredientPicker`), allergies, spice, and one primary button. Escape or a backdrop tap closes it.
-- **Summary card** (Results): one white card with the ingredients this search used, one แก้ไข button, and the allergy + spice line (allergies in `red-700` semibold so the safety filter is always visible).
+- **Results hero**: "ทำได้เลย N เมนู" in butter, "จากวัตถุดิบ N อย่าง", the ingredients as `butter` pills, then the allergy + spice line and the one แก้ไข button (allergies in a white pill with `red-700` semibold, so the safety filter is always visible and passes contrast on teal).
 - **Icons**: 24px stroked line icons (stroke 2, round caps) inside a `butter` circle. Same set in `app/page.tsx` and the rich menu.
 - **Logo**: `public/logo.svg` (white MDi mark, transparent background). Use it on teal only. Favicon: `app/icon.svg`.
 

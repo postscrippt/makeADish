@@ -38,9 +38,9 @@ export default function HistoryPage() {
       <>
         <PageHeader title="ประวัติ" />
         {failed ? (
-          <p role="alert" className="p-4 text-red-700">โหลดประวัติไม่สำเร็จ ลองใหม่อีกครั้งนะ</p>
+          <p role="alert" className="p-5 text-red-700">โหลดประวัติไม่สำเร็จ ลองใหม่อีกครั้งนะ</p>
         ) : (
-          <p role="status" className="p-4 text-sm text-muted">กำลังโหลด…</p>
+          <p role="status" className="p-5 text-sm text-muted">กำลังโหลด…</p>
         )}
       </>
     );
@@ -53,9 +53,12 @@ export default function HistoryPage() {
 
   return (
     <>
-      <PageHeader title="ประวัติ" />
-      <main className="p-4">
-        <div className="sticky top-14 z-[5] -mx-4 -mt-4 mb-1 bg-mist px-4 pt-4 pb-3">
+      <PageHeader title="ประวัติ">
+        <h2 className="text-3xl leading-tight font-bold text-butter">{history.length > 0 ? `ทำไปแล้ว ${history.length} เมนู` : "ยังไม่มีเมนูที่เคยทำ"}</h2>
+        <p className="mt-1 text-white">เมนูโปรด {favorites.length} เมนู</p>
+      </PageHeader>
+      <main className="px-5 pt-6 pb-10">
+        <div className="sticky top-0 z-10 -mx-5 -mt-6 mb-3 bg-mist px-5 pt-5 pb-3">
         <div role="tablist" className="grid grid-cols-2 rounded-full bg-white p-1 shadow-card">
           {(
             [
@@ -93,11 +96,11 @@ export default function HistoryPage() {
             )}
           </div>
         ) : (
-          <ul className="flex flex-col gap-3">
+          <ul className="flex flex-col gap-4">
             {rows.map(({ key, recipe, entry }) => {
               const fav = favorites.some((f) => f.id === recipe.id);
               return (
-                <li key={key} className="flex min-h-20 items-center gap-2 rounded-3xl bg-white p-3 pl-4 shadow-card active:bg-butter-soft">
+                <li key={key} className="flex min-h-24 items-center gap-2 rounded-3xl bg-white p-4 shadow-card active:bg-butter-soft">
                   <Link href={`/recipe/${recipe.id}`} className="flex-1">
                     <p className="text-lg leading-snug font-semibold">{recipe.th}</p>
                     {entry && (
