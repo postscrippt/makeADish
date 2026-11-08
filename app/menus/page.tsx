@@ -25,8 +25,8 @@ export default function MenusPage() {
       .catch(() => setFailed(true));
   }, []);
 
-  if (failed) return <Shell><p role="alert" className="p-4 text-red-700">โหลดเมนูไม่สำเร็จ ลองใหม่อีกครั้งนะ</p></Shell>;
-  if (!data) return <Shell><p role="status" className="p-4 text-sm text-muted">กำลังโหลด…</p></Shell>;
+  if (failed) return <Shell><p role="alert" className="p-5 text-red-700">โหลดเมนูไม่สำเร็จ ลองใหม่อีกครั้งนะ</p></Shell>;
+  if (!data) return <Shell><p role="status" className="p-5 text-sm text-muted">กำลังโหลด…</p></Shell>;
 
   const q = query.trim().toLowerCase();
   const categoryName = (id: string) => data.categories.find((c) => c.id === id)?.th ?? "";
@@ -35,18 +35,18 @@ export default function MenusPage() {
   );
 
   return (
-    <Shell>
-      <main className="flex flex-col gap-3 p-4">
-        <div className="sticky top-14 z-[5] -mx-4 -mt-4 flex flex-col gap-3 bg-mist px-4 pt-4 pb-2">
+    <>
+      <PageHeader title="เมนูทั้งหมด">
+        <h2 className="text-3xl leading-tight font-bold text-butter">อยากทำอะไรดี?</h2>
         <input
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="ค้นหาเมนู เช่น กะเพรา, ต้มยำ"
           aria-label="ค้นหาเมนู"
-          className="min-h-11 w-full rounded-full border-[1.5px] border-edge bg-white px-4 text-base"
+          className="mt-4 min-h-12 w-full rounded-full bg-white px-5 text-base text-ink"
         />
-        <div role="group" aria-label="ประเภทอาหาร" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
+        <div role="group" aria-label="ประเภทอาหาร" className="-mx-5 mt-4 flex gap-2 overflow-x-auto px-5 [scrollbar-width:none]">
           <Chip selected={category === null} onClick={() => setCategory(null)}>ทั้งหมด</Chip>
           {data.categories.map((c) => (
             <Chip key={c.id} selected={category === c.id} onClick={() => setCategory(c.id)}>
@@ -54,8 +54,9 @@ export default function MenusPage() {
             </Chip>
           ))}
         </div>
-        </div>
-        <p className="text-xs text-muted">
+      </PageHeader>
+      <main className="flex flex-col gap-4 px-5 pt-6 pb-10">
+        <p className="text-sm text-muted">
           {shown.length} เมนู
           {data.hiddenFor.length > 0 && ` · ซ่อนเมนูที่มี ${data.hiddenFor.join(", ")} ตามที่คุณแพ้`}
         </p>
@@ -66,7 +67,7 @@ export default function MenusPage() {
             <button type="button" onClick={() => { setQuery(""); setCategory(null); }} className="btn-secondary px-6">ดูทั้งหมด</button>
           </div>
         ) : (
-          <ul className="flex flex-col gap-3">
+          <ul className="flex flex-col gap-4">
             {shown.map((r) => (
               <li key={r.id}>
                 <RecipeCard recipe={r} category={categoryName(r.category)} />
@@ -75,7 +76,7 @@ export default function MenusPage() {
           </ul>
         )}
       </main>
-    </Shell>
+    </>
   );
 }
 

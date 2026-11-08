@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import CloseToChat from "@/components/CloseToChat";
 import StepIcon from "@/components/StepIcon";
+import { useDialog } from "@/components/useDialog";
 import { parseStep, type Heat } from "@/app/recipe/steps";
 import { stepIngredients } from "@/app/recipe/stepIngredients";
 import { secondsLeft } from "@/app/recipe/timer";
@@ -12,10 +13,12 @@ import type { HistoryEntry, RecipeIngredient } from "@/types/api";
 type Rating = HistoryEntry["rating"];
 
 const heatLabels: Record<Heat, string> = { 1: "ไฟอ่อน", 2: "ไฟกลาง", 3: "ไฟแรง" };
-const FLAME = "M12 3c3 4 6 6 6 11a6 6 0 0 1-12 0c0-3 2-5 3-7 1 2 3 2 3-4z";
+// One simple flame. Lit: filled in the flame colour with a butter core. Off: an empty outline, so the level reads as a gauge.
+const FLAME = "M12 2.5c.7 3.4 5.2 5.6 5.2 10.6a5.2 5.2 0 0 1-10.4 0c0-1.9.8-3.1 1.7-4.2.3 1.5 1 2.3 1.9 2.5C10.2 8.6 10.7 5.4 12 2.5z";
+const CORE = "M12 19.4a2.1 2.1 0 0 1-2.1-2.1c0-1 .7-1.6 2.1-3 1.4 1.4 2.1 2 2.1 3a2.1 2.1 0 0 1-2.1 2.1z";
 
-// Full-screen cooking: one step at a time. The step card grows to fill the screen; under it come what the step uses
-// (with amounts), heat and a big timer, and a preview of the next step. The bottom bar is just back and next.
+// Full-screen cooking: one step at a time. A pinned action band (icon, verb, heat), a card with the instruction, the
+// timer and what the step uses, then the list of all steps (done, current, next). The bottom bar is just back and next.
 // Then the rating. Built for a phone propped on the counter; the screen is kept awake.
 // onExit(step) leaves cook mode and remembers the step, so reopening it resumes there.
 export default function CookMode({
@@ -30,7 +33,6 @@ export default function CookMode({
   const mainRef = useRef<HTMLElement>(null);
   const last = step === steps.length - 1;
   const p = parsed[step];
-  const next = parsed[step + 1];
   const used = stepIngredients(steps[step], ingredients);
 
   // Keep the screen on while cooking; unsupported browsers just skip it.
@@ -48,11 +50,9 @@ export default function CookMode({
     };
   }, []);
 
-  useEffect(() => {
-    rootRef.current?.focus();
-  }, []);
+  useDialog(rootRef, () => onExit(step)); // focus in, Escape leaves (the step is remembered), Tab stays inside
 
-  // A long step is scrolled inside its card; the next one should start at the top.
+  // Each step starts at the top of the scrolling part.
   useEffect(() => {
     mainRef.current?.scrollTo({ top: 0 });
   }, [step]);
@@ -65,36 +65,49 @@ export default function CookMode({
             ×
           </button>
           <h1 className="min-w-0 flex-1 truncate text-lg font-bold">{name}</h1>
-          {!finished && <span className="pr-3 text-sm font-medium">{step + 1}/{steps.length}</span>}
+          {!finished && <span aria-label={`ขั้นที่ ${step + 1} จาก ${steps.length}`} className="pr-3 text-sm font-medium">{step + 1}/{steps.length}</span>}
         </header>
 
         {finished ? (
           <Finish onSave={onSave} onBack={() => onExit(step)} />
         ) : (
           <>
-            <ol aria-label="ขั้นตอนทั้งหมด" className="flex shrink-0 gap-1 px-4 pt-2">
-              {parsed.map((q, i) => (
-                <li key={i} className="flex-1">
-                  <button type="button" onClick={() => setStep(i)} aria-label={`ไปขั้นที่ ${i + 1}: ${q.verb}`} aria-current={i === step ? "step" : undefined} className="flex h-6 w-full items-center">
-                    <span className={`h-2 w-full rounded-full ${i < step ? "bg-brand" : i === step ? "bg-butter ring-2 ring-brand" : "bg-edge"}`} />
-                  </button>
-                </li>
-              ))}
-            </ol>
-
-            <main ref={mainRef} className="flex flex-1 flex-col gap-3 overflow-y-auto p-4 pt-1">
-              {/* This card takes the free height, with its content centered, so a short step never leaves a hole. */}
-              <section className="flex min-h-[14rem] flex-1 flex-col justify-center gap-4 rounded-3xl bg-white p-5 shadow-card">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-butter-soft">
-                    <StepIcon icon={p.icon} className="h-12 w-12" />
+            {/* Same zones, same order, on every step; the action band is pinned above the scrolling part. Cards hug their content; the free height below belongs to the step list,
+                so the screen is full of orientation (what is done, what is next) instead of blank space. */}
+          <div className="flex min-h-[6.2rem] shrink-0 items-center gap-4 px-5 pt-4 pb-3">
+            <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-butter">
+              <StepIcon icon={p.icon} className="h-10 w-10" />
+            </span>
+            {/* The verb and, when the step uses the stove, its heat right under it: the heat belongs to the action. */}
+            <div className="min-w-0 flex-1">
+              <h2 className="truncate text-[2.125rem] leading-tight font-bold">{p.verb}</h2>
+              {p.heat && (
+                <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-flame-deep">
+                  <span aria-hidden className="flex">
+                    {[1, 2, 3].map((n) => (
+                      <svg key={n} viewBox="0 0 24 24" strokeLinejoin="round" className="h-6 w-6">
+                        {n <= p.heat! ? (
+                          <>
+                            <path d={FLAME} className="fill-flame stroke-flame" strokeWidth="1.8" />
+                            <path d={CORE} className="fill-butter" />
+                          </>
+                        ) : (
+                          <path d={FLAME} fill="none" className="stroke-muted/40" strokeWidth="1.6" />
+                        )}
+                      </svg>
+                    ))}
                   </span>
-                  <p className="text-sm font-medium text-muted">ขั้นที่ {step + 1} จาก {steps.length}</p>
-                </div>
-                <div>
-                  <p className="text-4xl leading-tight font-bold">{p.verb}</p>
-                  {p.detail && <p className="mt-2 text-2xl leading-relaxed text-ink">{p.detail}</p>}
-                </div>
+                  {heatLabels[p.heat]}
+                </p>
+              )}
+            </div>
+          </div>
+
+            <main ref={mainRef} className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 pt-1 pb-4">
+              <section className="flex shrink-0 flex-col gap-4 rounded-3xl bg-white p-5 shadow-card">
+                <p className="text-[1.375rem] leading-relaxed text-ink">{p.detail || steps[step]}</p>
+                {/* Keyed by step, so each step gets its own fresh timer. */}
+                {p.minutes && <Timer key={step} minutes={p.minutes} />}
                 {used.length > 0 && (
                   <div className="border-t border-edge pt-3">
                     <p className="mb-2 text-sm font-semibold text-muted">ใช้ในขั้นนี้</p>
@@ -109,29 +122,36 @@ export default function CookMode({
                 )}
               </section>
 
-              {(p.heat || p.minutes) && (
-                <div className="grid grid-cols-2 gap-3">
-                  {p.heat && (
-                    <div className={`flex min-h-24 flex-col items-center justify-center gap-1 rounded-3xl bg-white p-3 shadow-card ${p.minutes ? "" : "col-span-2"}`}>
-                      <span className="flex gap-1">
-                        {[1, 2, 3].map((n) => (
-                          <svg key={n} aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={`h-8 w-8 ${n > p.heat! ? "opacity-25" : ""}`}>
-                            <path d={FLAME} />
-                          </svg>
-                        ))}
-                      </span>
-                      <span className="font-semibold">{heatLabels[p.heat]}</span>
-                    </div>
-                  )}
-                  {/* Keyed by step, so each step gets its own fresh timer. */}
-                  {p.minutes && <Timer key={step} minutes={p.minutes} wide={!p.heat} />}
-                </div>
-              )}
-
-              <p className="flex min-h-14 shrink-0 items-center gap-3 rounded-2xl px-4 text-muted ring-1 ring-edge ring-inset">
-                <span className="shrink-0 text-sm font-semibold">ต่อไป</span>
-                <span className="min-w-0 flex-1 truncate">{next ? `${next.verb} ${next.detail}` : "เสร็จแล้ว ให้คะแนนเมนู"}</span>
-              </p>
+              {/* From the current step on: what you are on, what is left, and the end (rating). Steps done are one tap back on ‹. */}
+              <section aria-label="ขั้นตอนที่เหลือ" className="flex-1">
+                <ol className="flex flex-col gap-1">
+                  {parsed.slice(step).map((q, k) => {
+                    const i = step + k;
+                    return (
+                      <li key={i}>
+                        <button
+                          type="button"
+                          onClick={() => setStep(i)}
+                          aria-current={i === step ? "step" : undefined}
+                          aria-label={`ไปขั้นที่ ${i + 1}: ${q.verb}`}
+                          className={`flex min-h-14 w-full items-center gap-3 rounded-2xl px-3 text-left ${i === step ? "bg-white shadow-card" : ""}`}
+                        >
+                          <span aria-hidden className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${i === step ? "bg-butter text-ink" : "text-muted ring-2 ring-edge ring-inset"}`}>
+                            {i + 1}
+                          </span>
+                          <span className={`min-w-0 flex-1 truncate ${i === step ? "font-semibold text-ink" : "text-ink"}`}>
+                            {q.verb}{i !== step && <span className="font-normal text-muted"> {q.detail}</span>}
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                  <li className="flex min-h-14 items-center gap-3 px-3 text-muted">
+                    <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm ring-2 ring-edge ring-inset">★</span>
+                    เสร็จแล้ว ให้คะแนนเมนู
+                  </li>
+                </ol>
+              </section>
             </main>
 
             <div className="flex shrink-0 gap-2 rounded-t-3xl bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-card">
@@ -189,9 +209,9 @@ function Finish({ onSave, onBack }: { onSave: (rating: Rating) => Promise<void>;
                 aria-checked={rating === n}
                 aria-label={`${n} ดาว`}
                 onClick={() => setRating(n)}
-                className={`h-14 w-14 text-5xl ${rating && n <= rating ? "text-amber-400" : "text-edge"}`}
+                className={`h-14 w-14 text-5xl ${rating && n <= rating ? "text-amber-600" : "text-muted"}`}
               >
-                ★
+                {rating && n <= rating ? "★" : "☆"}
               </button>
             ))}
           </div>
@@ -211,7 +231,7 @@ function Finish({ onSave, onBack }: { onSave: (rating: Rating) => Promise<void>;
 }
 
 // A big tile: tap to start, tap to pause. Counts toward a fixed end time, so it stays right after the phone pauses the page in the background.
-function Timer({ minutes, wide }: { minutes: number; wide: boolean }) {
+function Timer({ minutes }: { minutes: number }) {
   const [left, setLeft] = useState(minutes * 60);
   const [endAt, setEndAt] = useState<number | null>(null);
 
@@ -241,7 +261,7 @@ function Timer({ minutes, wide }: { minutes: number; wide: boolean }) {
     }
   }
 
-  const tile = `flex min-h-24 flex-col items-center justify-center gap-0.5 rounded-3xl bg-butter p-3 shadow-card ${wide ? "col-span-2" : ""}`;
+  const tile = "flex min-h-16 shrink-0 items-center justify-between gap-3 rounded-2xl bg-butter px-5 py-2";
   if (left === 0) {
     return (
       <p aria-live="polite" className={tile}>
@@ -255,7 +275,7 @@ function Timer({ minutes, wide }: { minutes: number; wide: boolean }) {
   return (
     <button type="button" onClick={toggle} className={tile}>
       <span className="text-4xl leading-none font-bold tabular-nums">{mmss}</span>
-      <span className="text-sm font-medium">{running ? "แตะเพื่อพัก" : started ? "แตะเพื่อไปต่อ" : "แตะเพื่อจับเวลา"}</span>
+      <span className="text-right text-sm font-medium">{running ? "แตะเพื่อพัก" : started ? "แตะเพื่อไปต่อ" : "แตะเพื่อจับเวลา"}</span>
     </button>
   );
 }

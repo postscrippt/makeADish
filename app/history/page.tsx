@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import PageHeader from "@/components/PageHeader";
 import CloseToChat from "@/components/CloseToChat";
+import Segmented from "@/components/Segmented";
 import { getFavorites, getHistory, setFavorite } from "@/mocks/api";
 import type { Favorite, HistoryEntry } from "@/types/api";
 
@@ -38,9 +39,9 @@ export default function HistoryPage() {
       <>
         <PageHeader title="ประวัติ" />
         {failed ? (
-          <p role="alert" className="p-4 text-red-700">โหลดประวัติไม่สำเร็จ ลองใหม่อีกครั้งนะ</p>
+          <p role="alert" className="p-5 text-red-700">โหลดประวัติไม่สำเร็จ ลองใหม่อีกครั้งนะ</p>
         ) : (
-          <p role="status" className="p-4 text-sm text-muted">กำลังโหลด…</p>
+          <p role="status" className="p-5 text-sm text-muted">กำลังโหลด…</p>
         )}
       </>
     );
@@ -53,28 +54,18 @@ export default function HistoryPage() {
 
   return (
     <>
-      <PageHeader title="ประวัติ" />
-      <main className="p-4">
-        <div className="sticky top-14 z-[5] -mx-4 -mt-4 mb-1 bg-mist px-4 pt-4 pb-3">
-        <div role="tablist" className="grid grid-cols-2 rounded-full bg-white p-1 shadow-card">
-          {(
-            [
-              ["all", `ที่เคยทำ (${history.length})`],
-              ["favorites", `เมนูโปรด (${favorites.length})`],
-            ] as [Tab, string][]
-          ).map(([id, label]) => (
-            <button
-              key={id}
-              type="button"
-              role="tab"
-              aria-selected={tab === id}
-              onClick={() => setTab(id)}
-              className={`min-h-11 rounded-full text-sm font-medium ${tab === id ? "bg-butter text-ink" : "text-muted"}`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+      <PageHeader title="ประวัติ">
+        <h2 className="text-3xl leading-tight font-bold text-butter">{history.length > 0 ? `ทำไปแล้ว ${history.length} เมนู` : "ยังไม่มีเมนูที่เคยทำ"}</h2>
+        <p className="mt-1 text-white">เมนูโปรด {favorites.length} เมนู</p>
+      </PageHeader>
+      <main className="px-5 pt-6 pb-10">
+        <div className="sticky top-0 z-10 -mx-5 -mt-6 mb-3 bg-mist px-5 pt-5 pb-3">
+          <Segmented
+            label="รายการ"
+            value={tab}
+            onChange={setTab}
+            options={[["all", `ที่เคยทำ (${history.length})`], ["favorites", `เมนูโปรด (${favorites.length})`]]}
+          />
         </div>
 
         {rows.length === 0 ? (
@@ -93,18 +84,18 @@ export default function HistoryPage() {
             )}
           </div>
         ) : (
-          <ul className="flex flex-col gap-3">
+          <ul className="flex flex-col gap-4">
             {rows.map(({ key, recipe, entry }) => {
               const fav = favorites.some((f) => f.id === recipe.id);
               return (
-                <li key={key} className="flex min-h-20 items-center gap-2 rounded-3xl bg-white p-3 pl-4 shadow-card active:bg-butter-soft">
+                <li key={key} className="flex min-h-24 items-center gap-2 rounded-3xl bg-white p-4 shadow-card active:bg-butter-soft">
                   <Link href={`/recipe/${recipe.id}`} className="flex-1">
                     <p className="text-lg leading-snug font-semibold">{recipe.th}</p>
                     {entry && (
                       <p className="text-sm text-muted">
-                        <span aria-label={`${entry.rating} ดาว`} className="text-amber-400">
-                          {"★".repeat(entry.rating)}
-                          <span className="text-edge">{"★".repeat(5 - entry.rating)}</span>
+                        <span aria-label={`${entry.rating} ดาว`}>
+                          <span className="text-amber-600">{"★".repeat(entry.rating)}</span>
+                          {"☆".repeat(5 - entry.rating)}
                         </span>{" "}
                         · {dateFormat.format(new Date(entry.cookedAt))}
                       </p>
@@ -115,7 +106,7 @@ export default function HistoryPage() {
                     aria-pressed={fav}
                     aria-label={`เมนูโปรด ${recipe.th}`}
                     onClick={() => toggle(recipe)}
-                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-xl ${fav ? "text-red-500" : "text-edge"}`}
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-xl ${fav ? "text-red-500" : "text-muted"}`}
                   >
                     {fav ? "♥" : "♡"}
                   </button>

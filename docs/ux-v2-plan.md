@@ -42,7 +42,7 @@ confirm card [ถูกต้อง หาเมนู] ─► carousel ─► [
              [แก้ไข] ─────────► /form?ids=… ─redirect─► Results with the edit sheet open
              carousel [ดูทั้งหมด] ► Results
 
-Mock mode: /scan ──► Results (was: /scan → /form → Results)
+The /scan page is removed (scanning only happens in the chat).
 Typing by hand ("พิมพ์เอง"): /form (entry) ──► Results
 Results ──► Recipe ──► Cook mode ──► rate ──► back to chat
 ```
@@ -91,8 +91,8 @@ Header on every page: the flow shell stays (back only inside the flow, step pill
 - Primary action: **tap a dish**. Search and a scrolling chip row are pinned together; count line below.
 - Uses the same dish card as Results (chevron). Removes the close-to-chat button under the list.
 
-### 7. Scan (`/scan`, mock mode and non-chat fallback)
-- Primary action: **สแกน**; on success goes straight to Results.
+### 7. Scan — removed
+- The `/scan` page is gone: scanning happens only in the LINE chat (rich menu → camera). `app/scan/` and its photo shrinking were deleted.
 
 ## PR plan (stacked, each from the previous branch)
 
@@ -105,3 +105,11 @@ Each PR gets up to three review rounds: 375px screenshots against this doc, then
 
 ## Not verified here
 Real LINE (LIFF webview, rich menu, wake lock, vibration, back/close behavior) is not covered; only mock mode at 375px in a desktop browser.
+
+## Cook mode layout (revised twice after review)
+Problem 1: the step card stretched to the screen and re-centered or re-anchored its content per step, so the verb and instruction moved and a different gap opened each time. Problem 2 (the first fix): scaling the instruction up to fill the stretched card made huge type in a still-empty card.
+
+Rule: cards hug their content at fixed type sizes; the free height holds something useful and the same on every step; nothing moves between steps.
+1. Action band, pinned above the scroll: icon + verb (34px) + heat flames at the right.
+2. Card (hugs): instruction 22px, timer tile if the step has a time, "ใช้ในขั้นนี้" pills if any.
+3. Step list from the current step on, ending with the rating: it fills the rest of the screen with orientation (what is next, how much is left). Steps already done are one tap back on ‹.

@@ -231,7 +231,7 @@ If behind: cut LIFF and chat replies in LINE first (the Ask page is already cut)
 
 ## Testing
 
-Automated: `npm test` runs every `*.test.ts` in `app/` and `lib/`: match % and staples, the allergy filter, recipe batches, the API routes (profile, recipes, history and favorites), the LINE webhook, signature and ID-token checks, chat cards, step parsing, swaps, the cooking timer and photo shrinking.
+Automated: `npm test` runs every `*.test.ts` in `app/` and `lib/`: match % and staples, the allergy filter, recipe batches, the API routes (profile, recipes, history and favorites), the LINE webhook, signature and ID-token checks, chat cards, step parsing, swaps, and the cooking timer.
 
 Manual checks that need a person (full checklist: [docs/manual-test-checklist.md](docs/manual-test-checklist.md)):
 

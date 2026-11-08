@@ -9,6 +9,7 @@ import type { SwapResult } from "@/app/recipe/swaps";
 import { cookPath, recipeCard } from "@/app/recipe/recipeCard";
 import { canSendToChat, canShare, liffUrl, sendToChat, shareToFriends } from "@/app/liff";
 import CloseToChat from "@/components/CloseToChat";
+import PageHeader from "@/components/PageHeader";
 
 type Loaded = { recipe: Recipe | null; have: Set<string> | null; staples: Set<string>; allergic: string[]; allergies: string[] };
 
@@ -43,16 +44,20 @@ export default function RecipeView({
   }, [id, fromSearch, haveKey]);
 
 
-  if (failed) return <p role="alert" className="p-4 text-red-700">โหลดสูตรไม่สำเร็จ ลองใหม่อีกครั้งนะ</p>;
-  if (!data) return <p role="status" className="p-4 text-sm text-muted">กำลังโหลด…</p>;
+  const step = fromSearch ? 3 : undefined;
+  if (failed) return <><PageHeader title="สูตรอาหาร" step={step} /><p role="alert" className="p-5 text-red-700">โหลดสูตรไม่สำเร็จ ลองใหม่อีกครั้งนะ</p></>;
+  if (!data) return <><PageHeader title="สูตรอาหาร" step={step} /><p role="status" className="p-5 text-sm text-muted">กำลังโหลด…</p></>;
 
   const { recipe, have, staples, allergic, allergies } = data;
   if (!recipe) {
     return (
-      <div className="flex flex-col items-center gap-4 p-4 py-16 text-center">
-        <p className="text-muted">ไม่พบสูตรอาหารนี้</p>
-        <CloseToChat className="btn-secondary">ปิด กลับไปที่แชท</CloseToChat>
-      </div>
+      <>
+        <PageHeader title="สูตรอาหาร" step={step} />
+        <div className="flex flex-col items-center gap-4 p-5 py-16 text-center">
+          <p className="text-muted">ไม่พบสูตรอาหารนี้</p>
+          <CloseToChat className="btn-secondary">ปิด กลับไปที่แชท</CloseToChat>
+        </div>
+      </>
     );
   }
 
@@ -66,54 +71,51 @@ export default function RecipeView({
   }
 
   return (
-    // Fills the screen below the 56px header, so the start bar sits at the bottom even on a short recipe.
-    <div className="flex min-h-[calc(100dvh-3.5rem)] flex-col">
-    <main className="flex flex-1 flex-col gap-5 p-4 pb-6">
-      <section className="flex items-start justify-between gap-3">
+    // Fills the screen, so the start bar sits at the bottom even on a short recipe.
+    <div className="flex min-h-dvh flex-col">
+    <PageHeader title="สูตรอาหาร" step={step} titleAs="p">
+      <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-2xl leading-snug font-bold text-ink">{recipe.th}</h2>
-          <p className="text-sm text-muted">{recipe.en}</p>
+          <h1 className="text-3xl leading-tight font-bold text-balance text-butter">{recipe.th}</h1>
+          <p className="mt-1 text-white">{recipe.en}</p>
         </div>
         <button
           type="button"
           aria-pressed={favorite}
           aria-label="เมนูโปรด"
           onClick={toggleFavorite}
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-xl ${favorite ? "border-red-300 bg-red-50 text-red-500" : "border-edge bg-white text-muted"}`}
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-xl ${favorite ? "text-red-500" : "text-muted"}`}
         >
           {favorite ? "♥" : "♡"}
         </button>
-      </section>
-
+      </div>
+      <ul aria-label="ข้อมูลเมนู" className="mt-4 flex flex-wrap gap-2">
+        {[`${recipe.minutes} นาที`, `${recipe.baseServings} ที่`, recipe.spice > 0 ? "🌶".repeat(recipe.spice) : "ไม่เผ็ด"].map((t) => (
+          <li key={t} className="rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-ink">{t}</li>
+        ))}
+      </ul>
+    </PageHeader>
+    <main className="flex flex-1 flex-col gap-6 px-5 pt-6 pb-8">
       {allergic.length > 0 && (
         <p role="alert" className="rounded-2xl border border-red-300 bg-red-50 p-3 text-sm font-medium text-red-700">
           ⚠ เมนูนี้มี {allergic.join(", ")} ที่คุณแพ้
         </p>
       )}
 
-      {/* Three quick facts, then (only when a pantry is known) whether you can start right now. */}
-      <section aria-label="ข้อมูลเมนู" className="grid grid-cols-3 divide-x divide-edge rounded-3xl bg-white py-3 text-center shadow-card">
-        <p><span className="block text-xl font-bold">{recipe.minutes}</span><span className="text-xs text-muted">นาที</span></p>
-        <p><span className="block text-xl font-bold">{recipe.baseServings}</span><span className="text-xs text-muted">ที่</span></p>
-        <p>
-          <span aria-label={`ความเผ็ดระดับ ${recipe.spice}`} className="block text-xl font-bold">{recipe.spice > 0 ? "🌶".repeat(recipe.spice) : "ไม่เผ็ด"}</span>
-          <span className="text-xs text-muted">ความเผ็ด</span>
-        </p>
-      </section>
       {have && (
-        <p className={`-mt-2 rounded-full px-4 py-2 text-center text-sm font-semibold ${missing.length === 0 ? "bg-butter text-ink" : "bg-amber-50 text-amber-800"}`}>
+        <p className={`rounded-full px-4 py-2.5 text-center text-sm font-semibold ${missing.length === 0 ? "bg-butter text-ink" : "bg-amber-50 text-amber-800"}`}>
           {missing.length === 0 ? "มีวัตถุดิบครบ เริ่มทำได้เลย" : `ต้องซื้อเพิ่ม ${missing.length} อย่าง`}
         </p>
       )}
 
       <section>
-        <h3 className="mb-2 text-lg font-semibold">วัตถุดิบ</h3>
+        <h3 className="mb-3 text-xl font-bold">วัตถุดิบ</h3>
         <ul className="divide-y divide-edge overflow-hidden rounded-3xl bg-white px-4 shadow-card">
           {recipe.ingredients.map((x) =>
             missing.includes(x) ? (
               <MissingRow key={x.id} item={x} allergies={allergies} />
             ) : (
-              <li key={x.id} className="flex min-h-12 items-center justify-between gap-3 py-2">
+              <li key={x.id} className="flex min-h-14 items-center justify-between gap-3 py-2.5">
                 <span>{x.th}</span>
                 <span className="text-muted">{x.qty}</span>
               </li>
@@ -123,12 +125,12 @@ export default function RecipeView({
       </section>
 
       <section>
-        <h3 className="mb-2 text-lg font-semibold">วิธีทำ <span className="text-sm font-normal text-muted">{recipe.steps.length} ขั้น</span></h3>
-        <ol className="flex flex-col gap-3 rounded-3xl bg-white p-4 shadow-card">
+        <h3 className="mb-3 text-xl font-bold">วิธีทำ <span className="text-sm font-normal text-muted">{recipe.steps.length} ขั้น</span></h3>
+        <ol className="flex flex-col gap-4 rounded-3xl bg-white p-5 shadow-card">
           {recipe.steps.map((step, i) => (
             <li key={i} className="flex gap-3">
-              <span aria-hidden className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-butter text-sm font-semibold text-ink">{i + 1}</span>
-              <span className="pt-0.5">{step}</span>
+              <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-butter text-sm font-semibold text-ink">{i + 1}</span>
+              <span className="pt-1">{step}</span>
             </li>
           ))}
         </ol>
@@ -167,9 +169,9 @@ function MissingRow({ item, allergies }: { item: RecipeIngredient; allergies: st
   }
 
   return (
-    <li className="-mx-4 bg-amber-50 px-4 py-3">
+    <li className="-mx-4 bg-amber-50 px-4 py-4">
       <div className="flex items-center justify-between gap-3">
-        <span className="font-medium text-amber-800">{item.th} <span className="ml-1 rounded bg-amber-100 px-1.5 py-0.5 text-xs">ต้องซื้อ</span></span>
+        <span className="font-medium text-amber-800">{item.th} <span className="ml-1 rounded bg-amber-100 px-2 py-0.5 text-sm">ต้องซื้อ</span></span>
         <span className="text-muted">{item.qty}</span>
       </div>
       <div aria-live="polite" className="text-sm">

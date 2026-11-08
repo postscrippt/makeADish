@@ -14,20 +14,15 @@ Tester: ______  Date: ______  Build: mock / real / deployed  Device: ______
 
 - [ ] Home shows the 3 tiles: สแกนวัตถุดิบ, ประวัติ, เมนูทั้งหมด
 - [ ] History shows the empty message and a button to start scanning
-- [ ] Results opened directly says no ingredients were chosen and links to Scan
+- [ ] Results opened directly says no ingredients were chosen and offers "back to chat to scan" (in LINE) and typing
 - [ ] Results (after typing one ingredient) shows "ยังไม่ได้ระบุอาหารที่แพ้" and "ตั้งค่า" in the summary card
 
-## Scan
+## Scan (in the LINE chat; there is no scan page)
 
-- [ ] "ถ่ายรูป" opens the camera on a phone
-- [ ] "เลือกจากคลังภาพ" opens the photo picker
-- [ ] A spinner shows while scanning, and buttons are disabled
+- [ ] Rich menu Scan → camera buttons → photo → confirm card
 - [ ] About 10 real photos in varied lighting: at least 8 list the main ingredients correctly (real endpoints only)
-- [ ] Blurry photo shows the blurry message (mock: `/scan?mock=blurry`)
-- [ ] Non-food photo shows the no-food message (mock: `/scan?mock=nofood`)
-- [ ] Failure shows the error message, and "ลองสแกนอีกครั้ง" works (mock: `/scan?mock=error`)
-- [ ] "หรือ พิมพ์วัตถุดิบเอง" goes to Form
-- [ ] The photo is not saved anywhere after the scan (nothing in Network uploads except the scan call)
+- [ ] Blurry and non-food photos get a clear message in the chat
+- [ ] The photo is not stored anywhere after the scan
 
 ## Entry form (`/form`, typing by hand) and the edit sheet
 

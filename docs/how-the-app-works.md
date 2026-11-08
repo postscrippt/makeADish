@@ -5,19 +5,20 @@ Plain-language map of the UI. Updated as pages land.
 ## Pages and where their data comes from
 
 ```
- / (home) = the LINE rich menu: 3 tiles → /scan · /history · /menus
+ (the LINE chat does the scanning: rich menu Scan → camera → photo → confirm card → carousel; there is no scan page)
 
-  /scan ─────────► /form ─────────► /results ─────────► /recipe/[id]
-  pick photo       "ถูกต้องไหม?"     two tabs:            missing items + safe swaps
-  scan(photo)      fix chips,       ทำได้เลย (0 missing)  (getSubstitutes)
-                   allergies/spice  ขาดวัตถุดิบอีกนิด (1-2)  วิธีทำ timeline, ♥ favorite
-                   in a sheet       food-type pills      last step → ★ → logCooked()
-                                    searchRecipes()
+  /form ───────────► /results ─────────► /recipe/[id]
+  type ingredients   two tabs:            missing items + safe swaps
+  (พิมพ์เอง)          ทำได้เลย (0 missing)  (getSubstitutes)
+  [แก้ไข] in chat     ขาดวัตถุดิบอีกนิด     วิธีทำ timeline, ♥ favorite
+  forwards here       food-type pills      last step → ★ → logCooked()
+  with ?ids=          edit sheet
+                      searchRecipes()
         │               │                │                      │
         ▼               ▼                ▼                      ▼
   ┌──────────────────────────────────────────────────────────────────┐
   │ mocks/api.ts   ← every page asks here                            │
-  │  scan · getIngredients · getOptions · getProfile · saveProfile · │
+  │  getIngredients · getOptions · getProfile · saveProfile · │
   │  searchRecipes · getRecipe · logCooked · getHistory ·            │
   │  getFavorites · setFavorite · getSubstitutes                     │
   └──────────────────────────────────────────────────────────────────┘
@@ -60,11 +61,10 @@ What happens in the chat and what happens on a page: `docs/line-chat-flow.md`. W
 
 - **Between pages (this tab only):** scanned ingredients and the last search, in `app/draft.ts`.
 - **Across visits:** the profile (anonymous id, allergies, spice), cooked history and favorites in `localStorage`. Moves to the database later.
-- **Never:** the photo. It lives in memory only for the preview and is dropped when you leave the Scan page.
+- **Never:** the photo. Photos only exist in the LINE chat; the web app never sees one.
 
 ## Trying error states
 
-- Scan: open `/scan?mock=nofood`, `?mock=blurry` or `?mock=error`, pick any photo and press Scan.
 - Results: open `/results?mock=empty` or `/results?mock=error` (after doing a search once).
 - Swaps: open a recipe from Results with `&mock=error` added and tap "ใช้อะไรแทนได้?".
 
