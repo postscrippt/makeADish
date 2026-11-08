@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import CloseToChat from "@/components/CloseToChat";
 import StepIcon from "@/components/StepIcon";
@@ -82,22 +82,32 @@ export default function CookMode({
               ))}
             </ol>
 
-            <main ref={mainRef} className="flex flex-1 flex-col gap-3 overflow-y-auto p-4 pt-1">
-              {/* This card takes the free height, with its content centered, so a short step never leaves a hole. */}
-              <section className={`flex min-h-[14rem] flex-1 shrink-0 flex-col rounded-3xl bg-white p-5 shadow-card ${used.length > 0 ? "justify-between gap-6" : "justify-center"}`}>
-                {/* Icon and verb are one title; the detail reads on from it; what you use is the quiet last group. */}
-                <div>
-                <div className="flex items-center gap-4">
-                  <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-butter-soft">
-                    <StepIcon icon={p.icon} className="h-10 w-10" />
-                  </span>
-                  <h2 className="text-4xl leading-tight font-bold">{p.verb}</h2>
-                </div>
-                {/* Without the heat/timer row there is room to spare, so the instruction itself gets bigger. */}
-                {p.detail && <p className={`mt-4 leading-snug text-pretty text-ink ${p.heat || p.minutes ? "text-2xl" : "text-3xl"}`}>{p.detail}</p>}
-                </div>
+            {/* Fixed geometry, top to bottom, the same on every step: the action band (icon + verb + heat), the instruction card
+                (its text is sized to fill the card), a timer tile only when the step has a time, the next-step strip. */}
+            <main ref={mainRef} className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 pt-2 pb-4">
+              <div className="flex shrink-0 items-center gap-4 px-1">
+                <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-butter">
+                  <StepIcon icon={p.icon} className="h-10 w-10" />
+                </span>
+                <h2 className="min-w-0 flex-1 truncate text-[44px] leading-tight font-bold">{p.verb}</h2>
+                {p.heat && (
+                  <div className="flex shrink-0 flex-col items-center gap-0.5">
+                    <span className="flex gap-0.5">
+                      {[1, 2, 3].map((n) => (
+                        <svg key={n} aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={`h-6 w-6 ${n > p.heat! ? "opacity-25" : ""}`}>
+                          <path d={FLAME} />
+                        </svg>
+                      ))}
+                    </span>
+                    <span className="text-xs font-semibold">{heatLabels[p.heat]}</span>
+                  </div>
+                )}
+              </div>
+
+              <section className="flex min-h-[11rem] flex-1 flex-col rounded-3xl bg-white p-5 shadow-card">
+                <FitText key={step}>{p.detail || steps[step]}</FitText>
                 {used.length > 0 && (
-                  <div className="border-t border-edge pt-3">
+                  <div className="mt-3 shrink-0 border-t border-edge pt-3">
                     <p className="mb-2 text-sm font-semibold text-muted">ใช้ในขั้นนี้</p>
                     <ul className="flex flex-wrap gap-2">
                       {used.map((x) => (
@@ -110,24 +120,8 @@ export default function CookMode({
                 )}
               </section>
 
-              {(p.heat || p.minutes) && (
-                <div className="grid grid-cols-2 gap-3">
-                  {p.heat && (
-                    <div className={`flex min-h-24 flex-col items-center justify-center gap-1 rounded-3xl bg-white p-3 shadow-card ${p.minutes ? "" : "col-span-2"}`}>
-                      <span className="flex gap-1">
-                        {[1, 2, 3].map((n) => (
-                          <svg key={n} aria-hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={`h-8 w-8 ${n > p.heat! ? "opacity-25" : ""}`}>
-                            <path d={FLAME} />
-                          </svg>
-                        ))}
-                      </span>
-                      <span className="font-semibold">{heatLabels[p.heat]}</span>
-                    </div>
-                  )}
-                  {/* Keyed by step, so each step gets its own fresh timer. */}
-                  {p.minutes && <Timer key={step} minutes={p.minutes} wide={!p.heat} />}
-                </div>
-              )}
+              {/* Keyed by step, so each step gets its own fresh timer. */}
+              {p.minutes && <Timer key={step} minutes={p.minutes} />}
 
               <p className="flex min-h-14 shrink-0 items-center gap-3 rounded-2xl px-4 text-muted ring-1 ring-edge ring-inset">
                 <span className="shrink-0 text-sm font-semibold">ต่อไป</span>
@@ -146,6 +140,31 @@ export default function CookMode({
           </>
         )}
       </div>
+    </div>
+  );
+}
+
+// The instruction, as big as fits: the largest size (22-52px) at which it still fits its box. A short step gets big type,
+// a long one smaller, so the card is full either way and the text always starts at the same top-left corner.
+function FitText({ children }: { children: string }) {
+  const box = useRef<HTMLDivElement>(null);
+  const text = useRef<HTMLParagraphElement>(null);
+  useLayoutEffect(() => {
+    const b = box.current!;
+    const t = text.current!;
+    const fit = () => {
+      let size = 52;
+      t.style.fontSize = `${size}px`;
+      while (size > 22 && t.offsetHeight > b.clientHeight) t.style.fontSize = `${(size -= 2)}px`;
+    };
+    fit();
+    const watch = new ResizeObserver(fit);
+    watch.observe(b);
+    return () => watch.disconnect();
+  }, [children]);
+  return (
+    <div ref={box} className="min-h-0 flex-1 overflow-hidden">
+      <p ref={text} className="leading-snug text-pretty text-ink">{children}</p>
     </div>
   );
 }
@@ -212,7 +231,7 @@ function Finish({ onSave, onBack }: { onSave: (rating: Rating) => Promise<void>;
 }
 
 // A big tile: tap to start, tap to pause. Counts toward a fixed end time, so it stays right after the phone pauses the page in the background.
-function Timer({ minutes, wide }: { minutes: number; wide: boolean }) {
+function Timer({ minutes }: { minutes: number }) {
   const [left, setLeft] = useState(minutes * 60);
   const [endAt, setEndAt] = useState<number | null>(null);
 
@@ -242,11 +261,11 @@ function Timer({ minutes, wide }: { minutes: number; wide: boolean }) {
     }
   }
 
-  const tile = `flex min-h-24 flex-col items-center justify-center gap-0.5 rounded-3xl bg-butter p-3 shadow-card ${wide ? "col-span-2" : ""}`;
+  const tile = "flex min-h-20 shrink-0 items-center justify-between gap-3 rounded-3xl bg-butter px-6 py-3 shadow-card";
   if (left === 0) {
     return (
       <p aria-live="polite" className={tile}>
-        <span className="text-2xl font-bold">ครบเวลาแล้ว</span>
+        <span className="text-3xl font-bold">ครบเวลาแล้ว</span>
       </p>
     );
   }
@@ -255,8 +274,8 @@ function Timer({ minutes, wide }: { minutes: number; wide: boolean }) {
   const mmss = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
   return (
     <button type="button" onClick={toggle} className={tile}>
-      <span className="text-4xl leading-none font-bold tabular-nums">{mmss}</span>
-      <span className="text-sm font-medium">{running ? "แตะเพื่อพัก" : started ? "แตะเพื่อไปต่อ" : "แตะเพื่อจับเวลา"}</span>
+      <span className="text-5xl leading-none font-bold tabular-nums">{mmss}</span>
+      <span className="text-right text-sm font-medium">{running ? "แตะเพื่อพัก" : started ? "แตะเพื่อไปต่อ" : "แตะเพื่อจับเวลา"}</span>
     </button>
   );
 }

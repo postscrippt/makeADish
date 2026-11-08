@@ -105,3 +105,12 @@ Each PR gets up to three review rounds: 375px screenshots against this doc, then
 
 ## Not verified here
 Real LINE (LIFF webview, rich menu, wake lock, vibration, back/close behavior) is not covered; only mock mode at 375px in a desktop browser.
+
+## Cook mode layout (revised after review)
+Problem: the step card stretched to the screen and re-centered or re-anchored its content depending on which extras a step had, so the verb and instruction moved from step to step and a different gap opened each time.
+
+Rule: fixed zones in a fixed order, anchored the same on every step. Variable content changes size, never position.
+1. Action band, pinned: icon + verb (44px) + heat flames at the right.
+2. Instruction card (takes the free height): the instruction is sized to fill it (22-52px), top-left anchored. Ingredients pinned to its bottom.
+3. Timer tile, only when the step has a time.
+4. "ต่อไป" strip.
