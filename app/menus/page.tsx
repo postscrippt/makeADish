@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import PageHeader from "@/components/PageHeader";
-import CloseToChat from "@/components/CloseToChat";
 import Chip from "@/components/Chip";
 import RecipeCard from "@/components/RecipeCard";
 import { getOptions, getProfile, listRecipes } from "@/mocks/api";
@@ -75,7 +74,6 @@ export default function MenusPage() {
             ))}
           </ul>
         )}
-        <CloseToChat className="btn-secondary mx-auto mt-3 block" />
       </main>
     </Shell>
   );

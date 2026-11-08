@@ -42,8 +42,10 @@ Plain-language map of the UI. Updated as pages land.
 | `app/recipe/steps.ts` | Reads a step sentence into verb, detail, icon, heat and minutes for the timeline (keyword table). Tested by `npm test`. |
 | `app/recipe/swaps.ts` | The allergy filter for swap suggestions; unknown allergens are hidden. Tested by `npm test`. |
 | `mocks/substitutes.ts` | Hand-picked swaps for the mock recipes. |
-| `components/StepsTimeline.tsx` | The วิธีทำ timeline: current-step card, heat flames, timer, keeps the screen on. |
-| `components/PrefsSheet.tsx` | Bottom sheet for allergies and spice on the check screen. |
+| `components/CookMode.tsx` | Full-screen cooking: step card, what the step uses, heat, timer, next-step preview; keeps the screen on. |
+| `app/recipe/stepIngredients.ts` | Which recipe ingredients a step names (for "ใช้ในขั้นนี้"). Tested by `npm test`. |
+| `components/SearchSheet.tsx` | Bottom sheet on Results for ingredients, allergies and spice, with one button. |
+| `components/IngredientPicker.tsx` | Chips, search and quick-add for ingredients; used by the entry form and the sheet. |
 | `components/RecipeCard.tsx` | One result in the Results list: name, time, spice, match %, what's missing. |
 | `app/draft.ts` | Remembers the scan result and search between pages, in this browser tab only (`sessionStorage`). Not in the URL, so allergies never show up in links. |
 | `components/Chip.tsx` | The round toggle buttons (Form, Menus). |
