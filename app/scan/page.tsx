@@ -56,20 +56,20 @@ export default function ScanPage() {
     }
   }
 
-    return (
-    <>
-      <PageHeader title="สแกนวัตถุดิบ" />
-      <main className="flex flex-col gap-4 p-4">
-        <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-3xl border-2 border-dashed border-brand/40 bg-white">
+  const picker = "btn-secondary flex-1 text-base focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand-deep";
+  return (
+    // Column fills the screen so the scan bar sits at the bottom, like the other entry pages.
+    <div className="flex min-h-dvh flex-col">
+      <PageHeader title="สแกนวัตถุดิบ">
+        <h2 className="text-3xl leading-tight font-bold text-balance text-butter">ถ่ายวัตถุดิบให้เห็นครบ</h2>
+      </PageHeader>
+      <main className="flex flex-1 flex-col gap-5 px-5 pt-6 pb-8">
+        <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-3xl bg-white shadow-card">
           {photo && preview ? (
             // eslint-disable-next-line @next/next/no-img-element -- local blob preview, not an optimisable asset
             <img src={preview} alt="รูปวัตถุดิบที่เลือก" className="h-full w-full object-cover" />
           ) : (
-            <p className="px-6 text-center text-sm text-muted">
-              ถ่ายรูปวัตถุดิบในครัวของคุณ
-              <br />
-              วางให้เห็นครบในรูปเดียว
-            </p>
+            <p className="px-6 text-center text-muted">วางวัตถุดิบให้เห็นครบในรูปเดียว</p>
           )}
           {scanning && (
             <div role="status" className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/80">
@@ -86,31 +86,27 @@ export default function ScanPage() {
         )}
 
         <div className="flex gap-3">
-          <label className="btn-secondary flex-1 text-base">
+          <label className={picker}>
             ถ่ายรูป
             <input type="file" accept="image/*" capture="environment" onChange={pick} disabled={scanning} className="sr-only" />
           </label>
-          <label className="btn-secondary flex-1 text-base">
-            เลือกจากคลังภาพ
+          <label className={picker}>
+            จากคลังภาพ
             <input type="file" accept="image/*" onChange={pick} disabled={scanning} className="sr-only" />
           </label>
         </div>
-
-        <button
-          type="button"
-          onClick={runScan}
-          disabled={!photo || scanning}
-          className="btn-primary text-base"
-        >
-          {failure ? "ลองสแกนอีกครั้ง" : "สแกน"}
-        </button>
-
-        <p className="text-center text-xs text-muted">เราไม่เก็บรูปไว้ และจะลบทิ้งทันทีหลังสแกน</p>
 
         <Link href="/form" className="flex min-h-11 items-center justify-center text-sm text-muted underline">
           หรือ พิมพ์วัตถุดิบเอง
         </Link>
       </main>
-    </>
+
+      <div className="sticky bottom-0 rounded-t-3xl bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-card">
+        <button type="button" onClick={runScan} disabled={!photo || scanning} className="btn-primary w-full text-base">
+          {failure ? "ลองสแกนอีกครั้ง" : photo ? "สแกน" : "เลือกรูปก่อน"}
+        </button>
+        <p className="mt-3 text-center text-sm text-muted">เราไม่เก็บรูปไว้ และจะลบทิ้งทันทีหลังสแกน</p>
+      </div>
+    </div>
   );
 }

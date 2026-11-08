@@ -6,6 +6,7 @@ import PageHeader from "@/components/PageHeader";
 import CloseToChat from "@/components/CloseToChat";
 import RecipeCard from "@/components/RecipeCard";
 import Chip from "@/components/Chip";
+import Segmented from "@/components/Segmented";
 import SearchSheet, { spiceLabels } from "@/components/SearchSheet";
 import { getIngredients, getOptions, getProfile, saveProfile, searchRecipes } from "@/mocks/api";
 import { readDraft, startSearch } from "@/app/draft";
@@ -221,20 +222,7 @@ function Results({ state, tab, setTab, onEdit }: { state: Done; tab: Tab; setTab
     <>
       <div ref={listTop} />
       <div className="sticky top-0 z-10 -mx-5 -mt-6 bg-mist px-5 pt-5 pb-3">
-        <div role="tablist" className="grid grid-cols-2 rounded-full bg-white p-1 shadow-card">
-          {tabs.map(([id, label, count]) => (
-            <button
-              key={id}
-              type="button"
-              role="tab"
-              aria-selected={tab === id}
-              onClick={() => setTab(id)}
-              className={`min-h-11 rounded-full text-sm font-medium ${tab === id ? "bg-butter text-ink" : "text-muted"}`}
-            >
-              {label} ({count})
-            </button>
-          ))}
-        </div>
+        <Segmented label="หมวดเมนู" value={tab} onChange={setTab} options={tabs.map(([id, label, count]) => [id, `${label} (${count})`])} />
       </div>
 
       <div role="group" aria-label="ประเภทอาหาร" className="-mx-5 mb-5 flex gap-2 overflow-x-auto px-5 [scrollbar-width:none]">

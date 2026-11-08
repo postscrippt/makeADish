@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import PageHeader from "@/components/PageHeader";
 import CloseToChat from "@/components/CloseToChat";
+import Segmented from "@/components/Segmented";
 import { getFavorites, getHistory, setFavorite } from "@/mocks/api";
 import type { Favorite, HistoryEntry } from "@/types/api";
 
@@ -59,25 +60,12 @@ export default function HistoryPage() {
       </PageHeader>
       <main className="px-5 pt-6 pb-10">
         <div className="sticky top-0 z-10 -mx-5 -mt-6 mb-3 bg-mist px-5 pt-5 pb-3">
-        <div role="tablist" className="grid grid-cols-2 rounded-full bg-white p-1 shadow-card">
-          {(
-            [
-              ["all", `ที่เคยทำ (${history.length})`],
-              ["favorites", `เมนูโปรด (${favorites.length})`],
-            ] as [Tab, string][]
-          ).map(([id, label]) => (
-            <button
-              key={id}
-              type="button"
-              role="tab"
-              aria-selected={tab === id}
-              onClick={() => setTab(id)}
-              className={`min-h-11 rounded-full text-sm font-medium ${tab === id ? "bg-butter text-ink" : "text-muted"}`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+          <Segmented
+            label="รายการ"
+            value={tab}
+            onChange={setTab}
+            options={[["all", `ที่เคยทำ (${history.length})`], ["favorites", `เมนูโปรด (${favorites.length})`]]}
+          />
         </div>
 
         {rows.length === 0 ? (
@@ -105,9 +93,9 @@ export default function HistoryPage() {
                     <p className="text-lg leading-snug font-semibold">{recipe.th}</p>
                     {entry && (
                       <p className="text-sm text-muted">
-                        <span aria-label={`${entry.rating} ดาว`} className="text-amber-400">
-                          {"★".repeat(entry.rating)}
-                          <span className="text-edge">{"★".repeat(5 - entry.rating)}</span>
+                        <span aria-label={`${entry.rating} ดาว`}>
+                          <span className="text-amber-600">{"★".repeat(entry.rating)}</span>
+                          {"☆".repeat(5 - entry.rating)}
                         </span>{" "}
                         · {dateFormat.format(new Date(entry.cookedAt))}
                       </p>
@@ -118,7 +106,7 @@ export default function HistoryPage() {
                     aria-pressed={fav}
                     aria-label={`เมนูโปรด ${recipe.th}`}
                     onClick={() => toggle(recipe)}
-                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-xl ${fav ? "text-red-500" : "text-edge"}`}
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-xl ${fav ? "text-red-500" : "text-muted"}`}
                   >
                     {fav ? "♥" : "♡"}
                   </button>

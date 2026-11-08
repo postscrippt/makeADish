@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import CloseToChat from "@/components/CloseToChat";
 import StepIcon from "@/components/StepIcon";
+import { useDialog } from "@/components/useDialog";
 import { parseStep, type Heat } from "@/app/recipe/steps";
 import { stepIngredients } from "@/app/recipe/stepIngredients";
 import { secondsLeft } from "@/app/recipe/timer";
@@ -47,9 +48,7 @@ export default function CookMode({
     };
   }, []);
 
-  useEffect(() => {
-    rootRef.current?.focus();
-  }, []);
+  useDialog(rootRef, () => onExit(step)); // focus in, Escape leaves (the step is remembered), Tab stays inside
 
   // Each step starts at the top of the scrolling part.
   useEffect(() => {
@@ -198,9 +197,9 @@ function Finish({ onSave, onBack }: { onSave: (rating: Rating) => Promise<void>;
                 aria-checked={rating === n}
                 aria-label={`${n} ดาว`}
                 onClick={() => setRating(n)}
-                className={`h-14 w-14 text-5xl ${rating && n <= rating ? "text-amber-400" : "text-edge"}`}
+                className={`h-14 w-14 text-5xl ${rating && n <= rating ? "text-amber-600" : "text-muted"}`}
               >
-                ★
+                {rating && n <= rating ? "★" : "☆"}
               </button>
             ))}
           </div>

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import Chip from "@/components/Chip";
 import IngredientPicker from "@/components/IngredientPicker";
+import { useDialog } from "@/components/useDialog";
 import type { Ingredient, Option, SpiceLevel } from "@/types/api";
 
 export const spiceLabels = ["ไม่เผ็ด", "เผ็ดน้อย", "เผ็ดกลาง", "เผ็ดมาก"];
@@ -21,17 +22,7 @@ export default function SearchSheet({
   const [allergic, setAllergic] = useState(allergies);
   const [level, setLevel] = useState(spice);
 
-  // Focus moves in on open, and back to the trigger on close.
-  useEffect(() => {
-    const trigger = document.activeElement as HTMLElement | null;
-    sheetRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      trigger?.focus();
-    };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useDialog(sheetRef, onClose);
 
   const toggle = (id: string) => setAllergic((a) => (a.includes(id) ? a.filter((x) => x !== id) : [...a, id]));
 

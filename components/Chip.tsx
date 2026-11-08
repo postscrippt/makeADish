@@ -16,7 +16,7 @@ export default function Chip({
       type="button"
       aria-pressed={selected}
       onClick={onClick}
-      className={`min-h-10 shrink-0 rounded-full border-[1.5px] px-4 text-sm font-medium ${selected ? on : "border-edge bg-white text-muted"}`}
+      className={`min-h-11 shrink-0 rounded-full border-[1.5px] px-4 text-sm font-medium ${selected ? on : "border-edge bg-white text-muted"}`}
     >
       {children}
     </button>
