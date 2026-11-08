@@ -60,9 +60,10 @@ Tester: ______  Date: ______  Build: mock / real / deployed  Device: ______
 - [ ] Error state: `/recipe/pad-kra-pao-moo?from=results&mock=error` → "ใช้อะไรแทนได้?" shows "โหลดไม่สำเร็จ" and retry
 - [ ] Opening from Menus (no search) shows no ขาด tags
 - [ ] ♡ / ♥ favorite toggles and is remembered
-- [ ] วิธีทำ: the current step is a big card (icon, verb, detail); "ขั้นต่อไป" checks it off and opens the next; tapping any step jumps to it
+- [ ] Ingredients can be ticked off (faded and crossed out); "เริ่มทำ" opens full-screen cook mode; "?cook=1" from a chat card opens it straight away
+- [ ] Cook mode: one big step (icon, verb, detail); "ขั้นต่อไป" and ‹ move between steps; tapping a segment of the step bar jumps; × leaves, and "ทำต่อ ขั้นที่ N" resumes there
 - [ ] ไข่ตุ๋น step 3 shows ไฟกลาง flames and "⏱ 15 นาที · เริ่ม"; the timer counts down, pauses on tap, and resets when you switch step
-- [ ] Last step's "เสร็จแล้ว ให้คะแนนเมนูนี้" → stars → "บันทึก" saves; the dish appears in History right away
+- [ ] Last step's "เสร็จแล้ว" → stars → "บันทึก" saves; the dish appears in History right away; in LINE "กลับไปที่แชท" closes the page; "ไม่ให้คะแนน" returns to the recipe
 - [ ] Screen stays on during steps (real phone)
 - [ ] Timer vibrates at zero (Android)
 - [ ] A bad recipe link shows "ไม่พบสูตรอาหารนี้"

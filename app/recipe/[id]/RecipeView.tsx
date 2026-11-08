@@ -1,17 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import StepsTimeline from "@/components/StepsTimeline";
+import { useEffect, useState } from "react";
+import CookMode from "@/components/CookMode";
 import { getFavorites, getOptions, getProfile, getRecipe, getSubstitutes, logCooked, setFavorite } from "@/mocks/api";
 import { readDraft } from "@/app/draft";
-import type { HistoryEntry, Recipe, RecipeIngredient } from "@/types/api";
+import type { Recipe, RecipeIngredient } from "@/types/api";
 import type { SwapResult } from "@/app/recipe/swaps";
 import { cookPath, recipeCard } from "@/app/recipe/recipeCard";
 import { canSendToChat, canShare, liffUrl, sendToChat, shareToFriends } from "@/app/liff";
 import CloseToChat from "@/components/CloseToChat";
 
-type Rating = HistoryEntry["rating"];
 type Loaded = { recipe: Recipe | null; have: Set<string> | null; staples: Set<string>; allergic: string[]; allergies: string[] };
 
 export default function RecipeView({
@@ -20,15 +18,11 @@ export default function RecipeView({
   const [data, setData] = useState<Loaded | null>(null);
   const [failed, setFailed] = useState(false);
   const [favorite, setFav] = useState(false);
-  const [rating, setRating] = useState<Rating | null>(null);
-  const [cooking, setCooking] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [saveFailed, setSaveFailed] = useState(false);
-  const ratingRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    if (cooking) ratingRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
-  }, [cooking]);
+  // The step cook mode is on, or null while it is closed. A chat card's "เริ่มทำ" (?cook=1) opens it straight away.
+  const [cookStep, setCookStep] = useState<number | null>(cook ? 0 : null);
+  const [resumeAt, setResumeAt] = useState(0);
+  // Ingredients the user has got out of the cupboard; only a helper for this visit.
+  const [ready, setReady] = useState<Set<string>>(new Set());
 
   const haveKey = haveIds.join(","); // a string, so the effect doesn't rerun on every render
 
@@ -73,19 +67,12 @@ export default function RecipeView({
     setFavorite({ id: recipe!.id, th: recipe!.th }, !favorite).catch(() => setFav(favorite));
   }
 
-  async function save() {
-    if (!rating) return;
-    setSaveFailed(false);
-    try {
-      await logCooked({ recipeId: recipe!.id, th: recipe!.th, rating, cookedAt: new Date().toISOString() });
-      setSaved(true);
-    } catch {
-      setSaveFailed(true);
-    }
-  }
+  const toggleReady = (xid: string) => setReady((s) => { const n = new Set(s); if (!n.delete(xid)) n.add(xid); return n; });
 
   return (
-    <main className="flex flex-col gap-6 p-4 pb-10">
+    // Fills the screen below the 56px header, so the start bar sits at the bottom even on a short recipe.
+    <div className="flex min-h-[calc(100dvh-3.5rem)] flex-col">
+    <main className="flex flex-1 flex-col gap-6 p-4 pb-6">
       <section className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-2xl font-bold text-ink">{recipe.th}</h2>
@@ -132,63 +119,56 @@ export default function RecipeView({
         <ul className="divide-y divide-edge rounded-3xl bg-white px-4 shadow-card">
           {recipe.ingredients.map((x) => {
             const isMissing = missing.includes(x);
+            const got = ready.has(x.id);
             return (
-              <li key={x.id} className="flex min-h-10 items-center justify-between gap-3 py-1.5">
-                <span>
-                  {x.th}
-                  {isMissing && <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">ขาด</span>}
-                </span>
-                <span className="text-muted">{x.qty}</span>
+              <li key={x.id}>
+                <button type="button" role="checkbox" aria-checked={got} onClick={() => toggleReady(x.id)} className="flex min-h-12 w-full items-center gap-3 py-1.5 text-left">
+                  <span aria-hidden className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-sm ${got ? "bg-brand text-white" : "ring-2 ring-edge ring-inset"}`}>
+                    {got && "✓"}
+                  </span>
+                  <span className={`flex flex-1 items-center justify-between gap-3 ${got ? "text-muted line-through" : ""}`}>
+                    <span>
+                      {x.th}
+                      {isMissing && <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800 no-underline">ขาด</span>}
+                    </span>
+                    <span className="text-muted">{x.qty}</span>
+                  </span>
+                </button>
               </li>
             );
           })}
         </ul>
       </section>
 
-      <StepsTimeline steps={recipe.steps} onFinish={() => setCooking(true)} jumpTo={cook} />
-
-      {(cooking || saved) && (
-      <section ref={ratingRef} className="rounded-3xl bg-white p-4 shadow-card">
-        {saved ? (
-          <>
-          <p role="status" className="text-center">
-            บันทึกลงประวัติแล้ว ·{" "}
-            <Link href="/history" className="underline">ดูประวัติ</Link>
-          </p>
-          <CloseToChat className="btn-primary mt-3 w-full" />
-          </>
-        ) : (
-          <div className="flex flex-col items-center gap-3">
-            <p className="font-medium">อร่อยแค่ไหน?</p>
-            <div role="radiogroup" aria-label="ให้คะแนน" className="flex gap-1">
-              {([1, 2, 3, 4, 5] as Rating[]).map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  role="radio"
-                  aria-checked={rating === n}
-                  aria-label={`${n} ดาว`}
-                  onClick={() => setRating(n)}
-                  className={`h-11 w-11 text-3xl ${rating && n <= rating ? "text-amber-400" : "text-edge"}`}
-                >
-                  ★
-                </button>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={save}
-              disabled={!rating}
-              className="btn-primary w-full"
-            >
-              บันทึก
-            </button>
-            {saveFailed && <p role="alert" className="text-sm text-red-700">บันทึกไม่สำเร็จ ลองกดบันทึกอีกครั้ง</p>}
-          </div>
-        )}
+      <section>
+        <h3 className="mb-2 text-lg font-semibold">วิธีทำ <span className="text-sm font-normal text-muted">{recipe.steps.length} ขั้น</span></h3>
+        <ol className="flex flex-col gap-2 rounded-3xl bg-white p-4 shadow-card">
+          {recipe.steps.map((step, i) => (
+            <li key={i} className="flex gap-3 text-muted">
+              <span aria-hidden className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-butter text-sm font-semibold text-ink">{i + 1}</span>
+              <span>{step}</span>
+            </li>
+          ))}
+        </ol>
       </section>
-      )}
     </main>
+
+    <div className="sticky bottom-0 z-10 rounded-t-3xl bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-card">
+      <button type="button" onClick={() => setCookStep(resumeAt)} className="btn-primary min-h-14 w-full text-lg">
+        {resumeAt > 0 ? `ทำต่อ ขั้นที่ ${resumeAt + 1}` : "เริ่มทำ"}
+      </button>
+    </div>
+
+    {cookStep !== null && (
+      <CookMode
+        name={recipe.th}
+        steps={recipe.steps}
+        startAt={cookStep}
+        onExit={(step) => { setResumeAt(step); setCookStep(null); }}
+        onSave={(rating) => logCooked({ recipeId: recipe.id, th: recipe.th, rating, cookedAt: new Date().toISOString() })}
+      />
+    )}
+    </div>
   );
 }
 
