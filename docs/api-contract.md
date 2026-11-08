@@ -68,6 +68,7 @@ Reads a photo and returns the ingredients it sees.
 ### `GET /api/ingredients`
 
 - **Response `200`:** `Ingredient[]`, the canonical list used by the tag editor's search.
+  - `category` (added later, optional in the type so older clients and the scan response still work): one of `meat`, `seafood`, `egg-dairy`, `vegetable`, `herb`, `fruit`, `sauce`, `seasoning`, `staple`, `noodle`, `nut-seed`, `other`. This endpoint always sends it. The picker uses it to browse by category; the Thai labels for the categories belong to the UI.
 
 ### `GET /api/options`
 
