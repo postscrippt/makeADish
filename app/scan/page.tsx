@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PageHeader from "@/components/PageHeader";
-import { scan } from "@/mocks/api";
-import { writeDraft } from "@/app/draft";
+import { getProfile, scan } from "@/mocks/api";
+import { startSearch } from "@/app/draft";
 import type { ScanResult } from "@/types/api";
 import { shrinkPhoto } from "@/app/scan/shrink";
 
@@ -46,8 +46,9 @@ export default function ScanPage() {
       // Shrink first: the API takes at most 5 MB, and a smaller upload is faster on mobile data.
       const result = await scan(await shrinkPhoto(photo));
       if (!result.ok) return setFailure(result.reason);
-      writeDraft("ingredients", result.ingredients);
-      router.push("/form"); // leaving the page drops the photo and its preview
+      // No separate "is this right?" page: Results lists what was found, with an edit button.
+      startSearch(result.ingredients, await getProfile());
+      router.push("/results"); // leaving the page drops the photo and its preview
     } catch {
       setFailure("error");
     } finally {
