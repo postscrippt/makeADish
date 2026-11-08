@@ -1,6 +1,6 @@
 "use client"; // error pages must run in the browser
 
-import Link from "next/link";
+import CloseToChat from "@/components/CloseToChat";
 
 // Shown when a page crashes while rendering. Failed data loads are handled on each page with its own message.
 export default function Error({ retry }: { error: unknown; retry: () => void }) {
@@ -12,7 +12,7 @@ export default function Error({ retry }: { error: unknown; retry: () => void }) 
       <button type="button" onClick={() => retry()} className="btn-primary">
         ลองอีกครั้ง
       </button>
-      <Link href="/" className="text-sm underline">กลับหน้าหลัก</Link>
+      <CloseToChat className="btn-secondary">ปิด กลับไปที่แชท</CloseToChat>
     </main>
   );
 }

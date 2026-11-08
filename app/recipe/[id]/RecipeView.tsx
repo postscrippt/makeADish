@@ -8,7 +8,8 @@ import { readDraft } from "@/app/draft";
 import type { HistoryEntry, Recipe, RecipeIngredient } from "@/types/api";
 import type { SwapResult } from "@/app/recipe/swaps";
 import { cookPath, recipeCard } from "@/app/recipe/recipeCard";
-import { canSendToChat, canShare, closeToChat, inLineApp, liffUrl, sendToChat, shareToFriends } from "@/app/liff";
+import { canSendToChat, canShare, liffUrl, sendToChat, shareToFriends } from "@/app/liff";
+import CloseToChat from "@/components/CloseToChat";
 
 type Rating = HistoryEntry["rating"];
 type Loaded = { recipe: Recipe | null; have: Set<string> | null; staples: Set<string>; allergic: string[]; allergies: string[] };
@@ -58,7 +59,7 @@ export default function RecipeView({
     return (
       <div className="flex flex-col items-center gap-4 p-4 py-16 text-center">
         <p className="text-muted">ไม่พบสูตรอาหารนี้</p>
-        <Link href="/" className="underline">กลับหน้าหลัก</Link>
+        <CloseToChat className="btn-secondary">ปิด กลับไปที่แชท</CloseToChat>
       </div>
     );
   }
@@ -154,7 +155,7 @@ export default function RecipeView({
             บันทึกลงประวัติแล้ว ·{" "}
             <Link href="/history" className="underline">ดูประวัติ</Link>
           </p>
-          <BackToChat />
+          <CloseToChat className="btn-primary mt-3 w-full" />
           </>
         ) : (
           <div className="flex flex-col items-center gap-3">
@@ -267,19 +268,5 @@ function ChatActions({ recipe, missingIds }: { recipe: Recipe; missingIds: strin
       )}
       <span role="status" className="text-sm text-muted">{status}</span>
     </section>
-  );
-}
-
-// After rating inside LINE: one tap back to the chat.
-function BackToChat() {
-  const [show, setShow] = useState(false);
-  useEffect(() => {
-    inLineApp().then(setShow);
-  }, []);
-  if (!show) return null;
-  return (
-    <button type="button" onClick={closeToChat} className="btn-primary mt-3 w-full">
-      กลับไปที่แชท
-    </button>
   );
 }

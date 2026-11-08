@@ -52,7 +52,7 @@ export default function ResultsPage() {
 
   return (
     <>
-      <PageHeader title="ผลลัพธ์" />
+      <PageHeader title="ผลลัพธ์" step={2} />
       <main className="p-4">
         {state.kind === "loading" && (
           <div role="status" className="flex flex-col items-center gap-3 py-16 text-sm text-muted">
