@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import PageHeader from "@/components/PageHeader";
+import CloseToChat from "@/components/CloseToChat";
 import RecipeCard from "@/components/RecipeCard";
 import Chip from "@/components/Chip";
 import { getIngredients, getOptions, getProfile, searchRecipes } from "@/mocks/api";
@@ -11,9 +12,12 @@ import { idsFromLink } from "@/app/linkIds";
 import type { Option, SearchRequest, SearchResult } from "@/types/api";
 
 type Tab = "matches" | "toBuy";
-type State = { kind: "loading" } | { kind: "noSearch" } | { kind: "error" } | { kind: "done"; result: SearchResult; categories: Option[] };
+type State = { kind: "loading" } | { kind: "noSearch" } | { kind: "error" } | { kind: "done"; result: SearchResult; categories: Option[]; ingredients: string[] };
 
 const linkButton = "btn-primary";
+
+// "ไก่, ไข่, หมู +2": what this search was run on, so the user can tell at a glance and fix it.
+const summarize = (names: string[]) => (names.length > 3 ? `${names.slice(0, 3).join(", ")} +${names.length - 3}` : names.join(", "));
 
 // Opened from the LINE chat ([ดูทั้งหมด] → /results?ids=a,b): search those ingredients with the saved profile.
 // Also stores the draft so recipe links (?from=results) and the check screen see the same ingredients.
@@ -40,7 +44,7 @@ export default function ResultsPage() {
     Promise.all([searchRecipes(search), getOptions()])
       .then(([result, options]) => {
         setTab(result.matches.length > 0 ? "matches" : "toBuy");
-        setState({ kind: "done", result, categories: options.categories });
+        setState({ kind: "done", result, categories: options.categories, ingredients: (readDraft("ingredients") ?? []).map((t) => t.th) });
       })
       .catch(() => setState({ kind: "error" }));
   }, []);
@@ -64,7 +68,9 @@ export default function ResultsPage() {
         {state.kind === "noSearch" && (
           <div className="flex flex-col items-center gap-4 py-16 text-center">
             <p className="text-muted">ยังไม่ได้เลือกวัตถุดิบ</p>
-            <Link href="/scan" className={linkButton}>เริ่มสแกนวัตถุดิบ</Link>
+            {/* Scanning happens in the chat; this closes back to it. Outside LINE only the typing link shows. */}
+            <CloseToChat>กลับไปแชทเพื่อสแกน</CloseToChat>
+            <Link href="/form" className="btn-secondary">พิมพ์วัตถุดิบเอง</Link>
           </div>
         )}
 
@@ -75,17 +81,22 @@ export default function ResultsPage() {
           </div>
         )}
 
-        {state.kind === "done" && <Results result={state.result} categories={state.categories} tab={tab} setTab={setTab} />}
+        {state.kind === "done" && <Results result={state.result} categories={state.categories} ingredients={state.ingredients} tab={tab} setTab={setTab} />}
       </main>
     </>
   );
 }
 
 function Results({
-  result, categories, tab, setTab,
-}: { result: SearchResult; categories: Option[]; tab: Tab; setTab: (t: Tab) => void }) {
+  result, categories, ingredients, tab, setTab,
+}: { result: SearchResult; categories: Option[]; ingredients: string[]; tab: Tab; setTab: (t: Tab) => void }) {
   const { tries } = result;
   const [filter, setFilter] = useState<string | null>(null);
+
+  // The tabs and filters stay pinned while scrolling, so a new list should start at its top.
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [tab, filter]);
   // Food type filters what's already loaded; the search itself always runs for every category.
   const pick = (list: SearchResult["matches"]) => (filter ? list.filter((m) => m.recipe.category === filter) : list);
   const matches = pick(result.matches);
@@ -98,6 +109,7 @@ function Results({
         <p className="font-semibold">ไม่พบเมนูที่ตรงเงื่อนไข</p>
         <p className="text-sm text-muted">ค้นหาแล้ว {tries} รอบ ลองเพิ่มวัตถุดิบหรือเปลี่ยนเงื่อนไขดูนะ</p>
         <Link href="/form" className={`${linkButton} mt-2`}>แก้วัตถุดิบ</Link>
+        <CloseToChat className="btn-secondary">สแกนใหม่ในแชท</CloseToChat>
       </div>
     );
   }
@@ -113,26 +125,36 @@ function Results({
 
   return (
     <>
-      <div role="tablist" className="mb-4 grid grid-cols-2 rounded-full bg-white p-1 shadow-card">
-        {tabs.map(([id, label, count]) => (
-          <button
-            key={id}
-            type="button"
-            role="tab"
-            aria-selected={tab === id}
-            onClick={() => setTab(id)}
-            className={`min-h-10 rounded-full text-sm font-medium ${tab === id ? "bg-butter text-ink" : "text-muted"}`}
-          >
-            {label} ({count})
-          </button>
-        ))}
-      </div>
+      {/* The way back to fixing the ingredients, also for people who arrived from the chat carousel. */}
+      {ingredients.length > 0 && (
+        <p className="mb-3 flex items-center gap-2 text-sm text-muted">
+          <span className="min-w-0 flex-1 truncate">จาก {summarize(ingredients)}</span>
+          <Link href="/form" className="flex min-h-11 shrink-0 items-center px-2 font-semibold text-brand-deep">แก้วัตถุดิบ</Link>
+        </p>
+      )}
 
-      <div role="group" aria-label="ประเภทอาหาร" className="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none]">
-        <Chip selected={filter === null} onClick={() => setFilter(null)}>ทั้งหมด</Chip>
-        {categories.map((c) => (
-          <Chip key={c.id} selected={filter === c.id} onClick={() => setFilter(c.id)}>{c.th}</Chip>
-        ))}
+      <div className="sticky top-14 z-[5] -mx-4 bg-mist px-4 pb-1 pt-2">
+        <div role="tablist" className="mb-3 grid grid-cols-2 rounded-full bg-white p-1 shadow-card">
+          {tabs.map(([id, label, count]) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={tab === id}
+              onClick={() => setTab(id)}
+              className={`min-h-10 rounded-full text-sm font-medium ${tab === id ? "bg-butter text-ink" : "text-muted"}`}
+            >
+              {label} ({count})
+            </button>
+          ))}
+        </div>
+
+        <div role="group" aria-label="ประเภทอาหาร" className="-mx-4 mb-2 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none]">
+          <Chip selected={filter === null} onClick={() => setFilter(null)}>ทั้งหมด</Chip>
+          {categories.map((c) => (
+            <Chip key={c.id} selected={filter === c.id} onClick={() => setFilter(c.id)}>{c.th}</Chip>
+          ))}
+        </div>
       </div>
 
       {empty && filter ? (
