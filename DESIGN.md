@@ -12,7 +12,7 @@ Taken from the pitch deck: deep teal, butter yellow, white cards with very soft 
 | `muted` | `#4f6e78` | Secondary text, unselected chips |
 | `edge` | `#cfe3e9` | Borders, dividers, disabled fills (never the only cue for a state: 1.3:1 on white) |
 | `mist` | `#eaf5f8` | Page background behind cards |
-| `butter` | `#f6e39a` | Accent: selected chips and tabs, match % badge, step numbers, icon circles, Scan tile |
+| `butter` | `#f6e39a` | Accent: selected chips and tabs, step numbers, icon circles, Scan tile |
 | `butter-soft` | `#fbf3d2` | Pressed state on cards |
 | `flame` / `flame-deep` | `#ea580c` / `#c2410c` | Cook mode heat only: the lit flames, and the heat label text (4.7:1) |
 | red-700 / red-50 | Tailwind | Allergies and errors only (safety color, keep it red) |
@@ -55,7 +55,7 @@ Font: **Prompt** (Thai + Latin, `next/font/google`, weights 400/500/600/700). It
 - **`PageHeader`**: `brand` bar, back chevron, white bold title; sticky when it is just the bar. With children it becomes a **hero** (`rounded-b-[2.5rem]`): the screen's headline in butter and its key summary inside the teal, which scrolls away; white content rises over it. Page content uses `px-5`, `gap-4` between cards and `gap-6` between sections.
 - **`Chip`**: unselected is white with an `edge` border and `muted` text. Selected is `butter` with `ink` text. 44px high. Danger chips (allergies) turn red when selected.
 - **Segmented** (Results, History tabs): `aria-pressed` toggle buttons, not the ARIA tab pattern. A white pill track with `shadow-card`, pinned under the header; the active one is a `butter` pill. Stars: filled `★` in amber-600, empty `☆` in `muted` (shape carries the state). Filter chips scroll with the list (only Menus pins its search and chips).
-- **`RecipeCard`**: white card with a 56px `butter-soft` icon circle (drawn `StepIcon` by dish category), 18px title, a meta row with the `butter` match % pill, an amber "ต้องซื้อ" line, and a chevron that says "tap to open".
+- **`RecipeCard`**: white card with a 56px `butter-soft` icon circle (drawn `StepIcon` by dish category), 18px title, a meta line, then one status line from `app/dishStatus.ts`: "ทำได้เลย" in `brand-deep`, or "ขาด N อย่าง: …" in amber. The ทำได้เลย tab on Results skips the ready line (the tab and hero already say it). No match % is shown. A chevron says "tap to open".
 - **`CookMode`** (full screen, from "เริ่มทำ"): `brand` header, then the same zones in the same order on every step. (1) A pinned action band: 64px `butter` icon circle, the verb at 34px (2.125rem) bold, and when the step uses the stove its heat right under the verb: three flames (lit: filled `flame` with a `butter` core; off: an empty `muted` outline) and the label ไฟอ่อน/กลาง/แรง in `flame-deep`, no pill. The band keeps one height with or without it, so nothing below it moves. (2) Under it, the part that scrolls: a white `rounded-3xl` card that hugs its content (the instruction at 22px (1.375rem), a `butter` timer tile when the step has a time, "ใช้ในขั้นนี้" ingredient pills with amounts), then the list of steps from the current one on (current row on a white card with a `butter` number, the rest quiet, ending with "เสร็จแล้ว ให้คะแนนเมนู"). The bottom bar is only back and the primary button (min 56px). Type sizes are fixed and in rem so they follow the text-size setting (34 / 22 / 16 px); free height is never filled by scaling type or stretching a card.
 - **`StepIcon`**: one stroked icon per action kind (whisk, pan, pot, steam, knife, mortar, add, season, plate, generic).
 - **`SearchForm`**: everything a search is based on, in one component: ingredients (`IngredientPicker`), allergies, spice, and one primary button. It is the only ingredient screen: the typed-entry page (`/form`, `layout="page"`, pinned button bar) and the Results edit sheet (`layout="sheet"`) both render it, so picking and editing are the same screen. Allergies sit on `/form` too, because a manual pick has no confirm card to show them first.
@@ -72,7 +72,7 @@ Font: **Prompt** (Thai + Latin, `next/font/google`, weights 400/500/600/700). It
 - Don't add new colors. If something needs one, add a token here first.
 
 ## LINE chat cards
-Flex cards (`app/line/cards.ts`: scan prompt, confirm card, results carousel; `app/recipe/recipeCard.ts`; shared pieces in `app/line/flex.ts`) use the same tokens as hex: a `brand` header with white text, `ink` body, `muted` secondary text, amber `#b45309` for "ต้องซื้อ", and a `brand-deep` primary button. One button per card. Cards sent from LIFF may only use link (URI) buttons.
+Flex cards (`app/line/cards.ts`: scan prompt, confirm card, results carousel; `app/recipe/recipeCard.ts`; shared pieces in `app/line/flex.ts`) use the same tokens as hex: a `brand` header with white text, `ink` body, `muted` secondary text, amber `#b45309` for what is missing, and a `brand-deep` primary button. One button per card. Dish cards in the carousel use the same status line as the web `RecipeCard` (`app/dishStatus.ts`): title, meta, then "ทำได้เลย" or "ขาด N อย่าง: …". Cards sent from LIFF may only use link (URI) buttons.
 
 ## LINE rich menu
 `design/rich-menu/rich-menu.html` uses the same palette and icons: Scan on `butter` at left, two rows (History, Menus) on `brand` with butter icon circles. Re-render it with the command in its README after any change.

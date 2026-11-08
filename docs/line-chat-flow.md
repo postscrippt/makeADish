@@ -81,8 +81,8 @@ A webhook route under `app/api/` (server-only; channel secret and access token i
   - allergies in red, or "ยังไม่ได้ระบุอาหารที่แพ้"
   - [ถูกต้อง หาเมนู] as a postback with your `confirmData`, and [แก้ไข] as a link
 - `resultsCarousel(result, recipeUrl, allUrl, editUrl)` (step 5):
-  - up to 10 dish cards, ทำได้เลย first, each with a match % pill and "ขาด: …" for almost-there dishes
-  - dishes from the `partial` group come after the others, labelled "ต้องซื้อเพิ่ม", each with its "ขาด: …" list
+  - up to 10 dish cards: ready dishes first, then almost-there, then the `partial` group
+  - each card ends with the same status line as the web card (`app/dishStatus.ts`): "ทำได้เลย", or "ขาด N อย่าง: …" listing what is missing. No match % is shown
   - a last card [ดูทั้งหมด] linking to the results page
   - when nothing matches, one card with [แก้วัตถุดิบ]
   - pass in the **already hard-filtered** search result; the function only lays it out
