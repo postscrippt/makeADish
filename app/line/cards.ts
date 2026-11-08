@@ -3,6 +3,7 @@
 // Pure functions, so they can run on the server and in tests. Preview: paste a message's JSON into LINE's Flex Message Simulator.
 import type { Ingredient, SearchResult, RecipeMatch } from "../../types/api.ts";
 import { C, button, header, spiceMeta, text } from "./flex.ts";
+import { dishStatus } from "../dishStatus.ts";
 
 type LineMessage = Record<string, unknown>;
 
@@ -78,15 +79,10 @@ export function confirmCard(
   };
 }
 
-type DishKind = "ready" | "almost" | "shop";
-const DISH_LABEL: Record<DishKind, { label: string; color: string }> = {
-  ready: { label: "ทำได้เลย", color: C.brandDeep },
-  almost: { label: "ขาดอีกนิด", color: C.amber },
-  shop: { label: "ต้องซื้อเพิ่ม", color: C.amber },
-};
-
-function dishBubble(m: RecipeMatch, kind: DishKind, recipeUrl: string) {
+// Same words as the web dish card (app/dishStatus.ts): "ทำได้เลย" in teal, or what is missing in amber.
+function dishBubble(m: RecipeMatch, recipeUrl: string) {
   const r = m.recipe;
+  const s = dishStatus(m);
   return {
     type: "bubble",
     size: "kilo",
@@ -95,28 +91,9 @@ function dishBubble(m: RecipeMatch, kind: DishKind, recipeUrl: string) {
       layout: "vertical",
       spacing: "sm",
       contents: [
-        text(DISH_LABEL[kind].label, { size: "xs", weight: "bold", color: DISH_LABEL[kind].color }),
         text(r.th, { size: "lg", weight: "bold" }),
         text(spiceMeta(r.minutes, r.spice), { color: C.muted }),
-        {
-          type: "box",
-          layout: "horizontal",
-          contents: [
-            {
-              type: "box",
-              layout: "vertical",
-              flex: 0,
-              backgroundColor: C.butter,
-              cornerRadius: "xxl",
-              paddingStart: "md",
-              paddingEnd: "md",
-              paddingTop: "xs",
-              paddingBottom: "xs",
-              contents: [text(`ตรง ${m.matchPercent}%`, { size: "xs", weight: "bold" })],
-            },
-          ],
-        },
-        ...(m.missing.length > 0 ? [text(`ขาด: ${m.missing.map((x) => x.th).join(", ")}`, { color: C.amber })] : []),
+        s.ready ? text(s.label, { weight: "bold", color: C.brandDeep }) : text(`${s.label}: ${s.missing}`, { color: C.amber }),
       ],
     },
     footer: { type: "box", layout: "vertical", contents: [button({ type: "uri", label: "ดูสูตร", uri: recipeUrl })] },
@@ -126,11 +103,7 @@ function dishBubble(m: RecipeMatch, kind: DishKind, recipeUrl: string) {
 // Step 5: the results as swipeable cards. Input must come from the hard-filtered search (allergies, unknown
 // allergen data already removed); this only lays it out. Tabs and food-type filters live on the page (allUrl).
 export function resultsCarousel(result: SearchResult, recipeUrl: (id: string) => string, allUrl: string, editUrl: string): LineMessage {
-  const all = [
-    ...result.matches.map((m) => [m, "ready"] as const),
-    ...result.almostThere.map((m) => [m, "almost"] as const),
-    ...(result.partial ?? []).map((m) => [m, "shop"] as const),
-  ];
+  const all = [...result.matches, ...result.almostThere, ...(result.partial ?? [])]; // ready first, then fewest missing
 
   if (all.length === 0) {
     return {
@@ -171,7 +144,7 @@ export function resultsCarousel(result: SearchResult, recipeUrl: (id: string) =>
     altText: canMake > 0 ? `เจอ ${canMake} เมนูที่ทำได้เลย` : `เจอ ${all.length} เมนูที่ขาดวัตถุดิบบางอย่าง`,
     contents: {
       type: "carousel",
-      contents: [...all.slice(0, MAX_DISHES).map(([m, kind]) => dishBubble(m, kind, recipeUrl(m.recipe.id))), seeAll],
+      contents: [...all.slice(0, MAX_DISHES).map((m) => dishBubble(m, recipeUrl(m.recipe.id))), seeAll],
     },
   };
 }

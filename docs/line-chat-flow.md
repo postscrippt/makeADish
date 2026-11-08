@@ -81,8 +81,8 @@ A webhook route under `app/api/` (server-only; channel secret and access token i
   - allergies in red, or "ยังไม่ได้ระบุอาหารที่แพ้"
   - [ถูกต้อง หาเมนู] as a postback with your `confirmData`, and [แก้ไข] as a link
 - `resultsCarousel(result, recipeUrl, allUrl, editUrl)` (step 5):
-  - up to 10 dish cards, ทำได้เลย first, each with a match % pill and "ขาด: …" for almost-there dishes
-  - dishes from the `partial` group come after the others, labelled "ต้องซื้อเพิ่ม", each with its "ขาด: …" list
+  - up to 10 dish cards: ready dishes first, then almost-there, then the `partial` group
+  - each card ends with the same status line as the web card (`app/dishStatus.ts`): "ทำได้เลย", or "ขาด N อย่าง: …" listing what is missing. No match % is shown
   - a last card [ดูทั้งหมด] linking to the results page
   - when nothing matches, one card with [แก้วัตถุดิบ]
   - pass in the **already hard-filtered** search result; the function only lays it out
@@ -94,7 +94,7 @@ To preview one, print its `contents` as JSON and paste it into LINE's Flex Messa
 - **`app/liff.ts`:**
   - loads the LIFF SDK only when `NEXT_PUBLIC_LIFF_ID` is set, and does nothing outside LINE
   - `canSendToChat`, `sendToChat`, `canShare`, `shareToFriends`, `closeToChat`, `liffUrl`
-- **The card's [เริ่มทำ]** opens `/recipe/{id}?cook=1&missing=…`. The page scrolls straight to step 1 and shows "ต้องซื้อเพิ่ม" with swap buttons. Only ingredient ids are in the link; allergies come from the opener's own profile.
+- **The card's [เริ่มทำ]** opens `/recipe/{id}?cook=1&missing=…`. The page scrolls straight to step 1 and marks missing ingredients in amber ("ขาด N อย่าง" beside the ingredients heading) with swap buttons. Only ingredient ids are in the link; allergies come from the opener's own profile.
 - **`app/recipe/recipeCard.ts`:**
   - the recipe as a Flex card: brand header, ingredients with missing ones in amber as "ต้องซื้อ", numbered step verbs, and [เริ่มทำ] linking to the LIFF recipe URL
   - only URI buttons, because cards sent from LIFF may not have other actions
