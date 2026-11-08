@@ -64,6 +64,7 @@ CHAT                                               PAGE (LIFF)
 A webhook route under `app/api/` (server-only; channel secret and access token in env, never in client code).
 1. **Check the `x-line-signature` header** on every request. Reject requests where it fails.
 2. **Message "สแกนวัตถุดิบ"** → reply with a text plus quick replies: `camera`, `cameraRoll`, and a `uri` to `/form`.
+2b. **Message starting with "หาเมนูจาก"** followed by ingredient names, for example `หาเมนูจาก ไข่, หมู, กระเทียม` (`SEARCH_TRIGGER` in `lib/line/handler.ts`). The LIFF ingredient sheet sends this message for the user, so typing and scanning both end in the same carousel. The names are split on commas, "และ" and spaces (at most 20), mapped with `mapNames`, and searched like the confirm-card button: allergies come from the saved profile, never from the message. Words that did not map are named in a second text in the same reply ("ไม่รู้จัก: …"). Nothing mapped gets the retry prompt. Send only ingredient names, no personal data.
 3. **Image message:**
    - start the loading animation (`POST /v2/bot/chat/loading/start`, 1:1 chats only)
    - fetch the content, run the scan, discard the bytes
@@ -111,7 +112,7 @@ Built in `app/api/line/webhook/route.ts` with the logic in `lib/line/` (signatur
 - **Before linking:** a LINE user who never saved a profile in LINE has no saved allergies, so nothing is filtered by allergy. The confirm card says "ยังไม่ได้ระบุอาหารที่แพ้" and links to the form. **Do not demo this to someone with a food allergy until the saved profile is linked to the LINE user id (Task 2).**
 
 How the steps behave:
-- "สแกนวัตถุดิบ" gets the camera prompt. Any other text gets no reply for now.
+- "สแกนวัตถุดิบ" gets the camera prompt, and "หาเมนูจาก …" runs a search (step 2b). Any other text gets no reply for now.
 - A photo starts the loading animation (1:1 chats only), downloads the image, scans, then replies once with the confirm card. The photo bytes are not kept.
 - The [ถูกต้อง หาเมนู] postback carries ingredient ids only (`action=search&ids=a,b,c`, kept under 300 characters). Allergies always come from the saved profile, never from the message.
 - Exactly one reply per event. No push messages.
