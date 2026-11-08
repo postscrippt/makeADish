@@ -26,12 +26,14 @@ export default function RecipeCard({
         </div>
         {match && (
           <span className="shrink-0 rounded-full bg-butter px-3 py-1 text-sm font-semibold text-ink">
-            {match.matchPercent}%
+            {match.missing.length === 0 ? "ครบทุกอย่าง" : `${match.matchPercent}%`}
           </span>
         )}
       </div>
       {match && match.missing.length > 0 && (
-        <p className="mt-2 text-sm text-amber-700">ขาดอีก: {match.missing.map((m) => m.th).join(", ")}</p>
+        <p className="mt-2 text-sm text-amber-700">
+          <span className="font-semibold">ต้องซื้อ {match.missing.length} อย่าง:</span> {match.missing.map((m) => m.th).join(", ")}
+        </p>
       )}
     </Link>
   );
