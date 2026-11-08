@@ -60,6 +60,7 @@ export async function POST(request: Request) {
     getProfile: db ? lineProfileLookup(createProfileStore(db)) : standInGetProfile,
     allergens: allergenOptions,
     knownIngredientIds: new Set(ingredients.map((x) => x.slug)),
+    index,
     url: pageUrl,
   };
 

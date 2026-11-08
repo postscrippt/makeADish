@@ -2,6 +2,7 @@
 // Everything it needs from outside comes in through `deps`, so the scan, search and profile can be swapped
 // from stand-ins to the real ones without touching this file, and tests can run without any network.
 import { confirmCard, resultsCarousel, scanPrompt } from "../../app/line/cards.ts";
+import { mapNames, type IngredientIndex } from "../ingredients.ts";
 import type { LineClient, LineMessage } from "./client.ts";
 import type { Option, ScanResult, SearchRequest, SearchResult, SpiceLevel } from "../../types/api.ts";
 
@@ -20,6 +21,7 @@ export type Deps = {
   getProfile(lineUserId: string | undefined): Promise<{ allergies: string[]; spice: SpiceLevel }>;
   allergens: Option[]; // id -> Thai name, for the confirm card
   knownIngredientIds: Set<string>; // postback ids are checked against this
+  index: IngredientIndex; // maps typed names to ingredient ids (the "หาเมนูจาก" text trigger)
   url(path: string): string; // absolute link to a page (LIFF link when configured)
   scanDeadlineMs?: number; // tests shorten it
 };
@@ -32,6 +34,8 @@ function withDeadline<T>(work: Promise<T>, ms: number): Promise<T> {
 }
 
 export const SCAN_TRIGGER = "สแกนวัตถุดิบ";
+export const SEARCH_TRIGGER = "หาเมนูจาก"; // followed by ingredient names, e.g. "หาเมนูจาก ไข่, หมู, กระเทียม"
+const MAX_SEARCH_WORDS = 20;
 const SPICE_LABELS = ["ไม่เผ็ด", "เผ็ดน้อย", "เผ็ดกลาง", "เผ็ดมาก"];
 const LOADING_SECONDS = 45; // LINE accepts multiples of 5, up to 60
 const SCAN_DEADLINE_MS = 40_000; // give up before the loading animation ends and the function time limit hits
@@ -42,6 +46,7 @@ const REASON_TEXT = {
   error: "สแกนไม่สำเร็จ ลองใหม่อีกครั้งนะ",
 } as const;
 const NO_INGREDIENTS_TEXT = "ยังอ่านวัตถุดิบจากรูปนี้ไม่ได้ ลองถ่ายใหม่ หรือพิมพ์วัตถุดิบเองก็ได้นะ";
+const NO_TYPED_TEXT = "ยังไม่รู้จักวัตถุดิบที่พิมพ์มา ลองสแกนรูป หรือเลือกวัตถุดิบเองก็ได้นะ";
 
 // Ingredient ids only, never allergies, so nothing sensitive sits in a button or a link.
 function searchData(ids: string[]): string {
@@ -94,10 +99,9 @@ async function onImage(event: LineEvent, deps: Deps): Promise<LineMessage> {
   );
 }
 
-async function onPostback(event: LineEvent, deps: Deps): Promise<LineMessage | null> {
-  const ids = parseSearchPostback(event.postback?.data ?? "", deps.knownIngredientIds);
-  if (!ids) return null;
-  const profile = await deps.getProfile(event.source?.userId);
+// Shared by the confirm-card button and the typed trigger, so both ways of picking end in the same carousel.
+async function searchCarousel(ids: string[], userId: string | undefined, deps: Deps): Promise<LineMessage> {
+  const profile = await deps.getProfile(userId);
   // The allergy filter comes from the saved profile, never from anything in the message.
   const result = await deps.search({ ingredientIds: ids, spice: profile.spice, category: null, allergies: profile.allergies });
   const list = ids.join(",");
@@ -109,27 +113,52 @@ async function onPostback(event: LineEvent, deps: Deps): Promise<LineMessage | n
   );
 }
 
+async function onPostback(event: LineEvent, deps: Deps): Promise<LineMessage[]> {
+  const ids = parseSearchPostback(event.postback?.data ?? "", deps.knownIngredientIds);
+  return ids ? [await searchCarousel(ids, event.source?.userId, deps)] : [];
+}
+
+// The text after the trigger as separate names. Commas, "และ" and whitespace all separate names.
+export function splitNames(list: string): string[] {
+  // TODO(human): split `list` into trimmed, non-empty names (see the Learn by Doing note).
+  return list.split(",").map((s) => s.trim()).filter(Boolean);
+}
+
+async function onText(event: LineEvent, deps: Deps): Promise<LineMessage[]> {
+  const text = event.message?.text?.trim() ?? "";
+  if (text === SCAN_TRIGGER) return [scanPrompt(deps.url("/form"))];
+  if (!text.startsWith(SEARCH_TRIGGER)) return []; // any other text is ignored
+
+  const names = splitNames(text.slice(SEARCH_TRIGGER.length)).slice(0, MAX_SEARCH_WORDS);
+  const { ids, unmapped } = mapNames(names, deps.index);
+  if (ids.length === 0) return [retryPrompt(NO_TYPED_TEXT, deps)];
+
+  const carousel = await searchCarousel(ids, event.source?.userId, deps);
+  // One reply call can carry up to 5 messages: name the words we could not place.
+  return unmapped.length > 0 ? [carousel, { type: "text", text: `ไม่รู้จัก: ${unmapped.join(", ")}` }] : [carousel];
+}
+
 // Exactly one reply per event: the reply token works once.
 export async function handleEvent(event: LineEvent, deps: Deps): Promise<void> {
   if (!event.replyToken) return;
-  let message: LineMessage | null = null;
+  let messages: LineMessage[] = [];
 
   if (event.type === "message" && event.message?.type === "text") {
-    if (event.message.text?.trim() === SCAN_TRIGGER) message = scanPrompt(deps.url("/form"));
+    messages = await onText(event, deps);
   } else if (event.type === "message" && event.message?.type === "image") {
-    message = await onImage(event, deps);
+    messages = [await onImage(event, deps)];
   } else if (event.type === "postback") {
-    message = await onPostback(event, deps);
+    messages = await onPostback(event, deps);
   }
 
-  if (!message) return;
+  if (messages.length === 0) return;
   try {
-    await deps.client.reply(event.replyToken, [message]);
+    await deps.client.reply(event.replyToken, messages);
   } catch (e) {
     // The reply token may have expired during a slow scan; push to the user instead of staying silent.
     const userId = event.source?.userId;
     console.error("LINE reply failed:", e instanceof Error ? e.message : "unknown error");
     if (!userId) throw e;
-    await deps.client.push(userId, [message]);
+    await deps.client.push(userId, messages);
   }
 }

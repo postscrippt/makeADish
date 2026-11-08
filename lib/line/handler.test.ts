@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { handleEvent, parseSearchPostback, type Deps, type LineEvent } from "./handler.ts";
 import { standInScan, standInSearch } from "./standins.ts";
 import { allergens, ingredients } from "../../mocks/data.ts";
+import { ingredients as realIngredients } from "../../data/ingredients.ts";
+import { buildIndex } from "../ingredients.ts";
 import { recipes } from "../../mocks/recipes.ts";
 import type { LineMessage } from "./client.ts";
 import type { ScanResult, SearchRequest, SpiceLevel } from "../../types/api.ts";
@@ -23,6 +25,7 @@ function setup(over: Partial<Deps> = {}, profile: { allergies: string[]; spice: 
     async getProfile() { return profile; },
     allergens,
     knownIngredientIds: new Set(ingredients.map((x) => x.id)),
+    index: buildIndex(realIngredients),
     url: (path) => `https://app.test${path}`,
     ...over,
   };
@@ -126,6 +129,46 @@ test("the search postback runs the search and replies with the carousel", async 
   const body = json(calls.replies[0].messages[0]);
   assert.match(body, /https:\/\/app\.test\/recipe\/[a-z0-9-]+\?ids=egg,pork,garlic/);
   assert.doesNotMatch(body, /from=results/);
+});
+
+test("the typed trigger with known names searches and replies with the carousel", async () => {
+  const { deps, calls } = setup();
+  await handleEvent(text("หาเมนูจาก ไข่, หมู, กระเทียม"), deps);
+  assert.deepEqual(calls.searches[0].ingredientIds, ["egg", "pork", "garlic"]);
+  assert.equal(calls.replies.length, 1);
+  assert.equal(calls.replies[0].messages.length, 1);
+  assert.equal((calls.replies[0].messages[0] as { contents: { type: string } }).contents.type, "carousel");
+});
+
+test("the typed trigger takes its allergy filter from the saved profile only", async () => {
+  const { deps, calls } = setup({}, { allergies: ["egg"], spice: 3 });
+  await handleEvent(text("หาเมนูจาก ไข่, หมู allergies=none"), deps);
+  assert.deepEqual(calls.searches[0].allergies, ["egg"]);
+});
+
+test("the typed trigger names the words it could not place, in the same reply", async () => {
+  const { deps, calls } = setup();
+  await handleEvent(text("หาเมนูจาก ไข่, xyz"), deps);
+  assert.deepEqual(calls.searches[0].ingredientIds, ["egg"]);
+  assert.equal(calls.replies.length, 1);
+  assert.equal(calls.replies[0].messages.length, 2);
+  assert.match(json(calls.replies[0].messages[1]), /ไม่รู้จัก: xyz/);
+});
+
+test("the typed trigger with nothing mapped gets the retry prompt, not silence", async () => {
+  const { deps, calls } = setup();
+  await handleEvent(text("หาเมนูจาก xyz"), deps);
+  await handleEvent(text("หาเมนูจาก"), deps);
+  assert.equal(calls.searches.length, 0);
+  assert.equal(calls.replies.length, 2);
+  for (const r of calls.replies) assert.ok((r.messages[0] as { quickReply?: unknown }).quickReply, "has the retry quick replies");
+});
+
+test("the typed trigger stops at 20 words", async () => {
+  const { deps, calls } = setup();
+  const many = realIngredients.slice(0, 30).map((e) => e.th).join(", ");
+  await handleEvent(text(`หาเมนูจาก ${many}`), deps);
+  assert.equal(calls.searches[0].ingredientIds.length, 20);
 });
 
 test("allergy filter comes from the saved profile, never from the message", async () => {
