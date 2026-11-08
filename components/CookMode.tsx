@@ -13,7 +13,8 @@ import type { HistoryEntry, RecipeIngredient } from "@/types/api";
 type Rating = HistoryEntry["rating"];
 
 const heatLabels: Record<Heat, string> = { 1: "ไฟอ่อน", 2: "ไฟกลาง", 3: "ไฟแรง" };
-const FLAME = "M12 3c3 4 6 6 6 11a6 6 0 0 1-12 0c0-3 2-5 3-7 1 2 3 2 3-4z";
+// One stroked flame in the step icons' line style: a tall tongue with a curl on the left.
+const FLAME = "M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-2.2 1.9-3.1 3.8-2 6 .5 1 1 1.6 1 3a2.5 2.5 0 0 1-2.5 2.5C8.8 14.5 9 13 8 12c-.6.7-1 1.8-1 3a7 7 0 0 0 5 7z";
 
 // Full-screen cooking: one step at a time. A pinned action band (icon, verb, heat), a card with the instruction, the
 // timer and what the step uses, then the list of all steps (done, current, next). The bottom bar is just back and next.
