@@ -52,7 +52,7 @@ Font: **Prompt** (Thai + Latin, `next/font/google`, weights 400/500/600/700). It
 ## Components
 - **`btn-primary`** (utility in `globals.css`): `brand-deep` pill, white semibold, min height 48px, greys out when disabled. One per screen.
 - **`btn-secondary`**: white pill with an `edge` ring. For alternatives (e.g. "เลือกจากคลังภาพ").
-- **`PageHeader`**: `brand` bar, back chevron, white bold title; sticky when it is just the bar. No step counter: pages open from chat links and each other in any order. With children it becomes a **hero** (`rounded-b-[2.5rem]`): the screen's headline in butter and its key summary inside the teal, which scrolls away; white content rises over it. Page content uses `px-5`, `gap-4` between cards and `gap-6` between sections.
+- **`PageHeader`**: `brand` bar, back chevron, white bold title; sticky when it is just the bar. No step counter: pages open from chat links and each other in any order. With children it becomes a **hero** (`rounded-b-[2.5rem]`): the screen's headline in butter and its key summary inside the teal, which scrolls away; white content rises over it. Page content uses `px-5`, `gap-4` between cards and `gap-6` between sections. The right side holds the **TH | EN switch** (`LangSwitch`): a `brand-deep` pill with two 44px buttons, the active one white. It is also on the home page and in the `CookMode` header.
 - **`Chip`**: unselected is white with an `edge` border and `muted` text. Selected is `butter` with `ink` text. 44px high. Danger chips (allergies) turn red when selected.
 - **Segmented** (Results, History tabs): `aria-pressed` toggle buttons, not the ARIA tab pattern. A white pill track with `shadow-card`, pinned under the header; the active one is a `butter` pill. Stars: filled `★` in amber-600, empty `☆` in `muted` (shape carries the state). Filter chips scroll with the list (only Menus pins its search and chips).
 - **`RecipeCard`**: white card with a 56px `butter-soft` icon circle (drawn `StepIcon` by dish category), 18px title, a meta line, then one status line from `app/dishStatus.ts`: "ทำได้เลย" in `brand-deep`, or "ขาด N อย่าง: …" in amber. The ทำได้เลย tab on Results skips the ready line (the tab and hero already say it). No match % is shown. A chevron says "tap to open".
@@ -71,6 +71,9 @@ Font: **Prompt** (Thai + Latin, `next/font/google`, weights 400/500/600/700). It
 - Don't use emoji as UI icons (the 🌶 spice markers and the ♥/★ glyphs are fine).
 - Don't put text on `butter` in any color other than `ink`.
 - Don't add new colors. If something needs one, add a token here first.
+
+## Languages
+Web pages are Thai or English; the words live in `app/text.ts` and `app/recipeEn.ts`, never in components. English runs longer than Thai, so let text wrap and check 375px in both. Allergy names use the standard food-labelling terms and are never paraphrased. Chat cards and the rich menu are not affected by the switch.
 
 ## LINE chat cards
 Flex cards (`app/line/cards.ts`: scan prompt, confirm card, results carousel; `app/recipe/recipeCard.ts`; shared pieces in `app/line/flex.ts`) use the same tokens as hex: a `brand` header with white text, `ink` body, `muted` secondary text, amber `#b45309` for what is missing, and a `brand-deep` primary button. One button per card. Dish cards in the carousel use the same status line as the web `RecipeCard` (`app/dishStatus.ts`): title, meta, then "ทำได้เลย" or "ขาด N อย่าง: …". Cards sent from LIFF may only use link (URI) buttons.

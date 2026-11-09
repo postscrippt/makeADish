@@ -2,6 +2,7 @@
 // shortcut: app-side overlay, move to steps_en/quantity_en columns when Person B adds them.
 // Keyed by the Thai title because database ids differ from mock ids. A dish missing here, or whose step count no longer
 // matches, simply shows Thai. Allergy filtering never reads this file.
+import { parseStep } from "./recipe/steps.ts";
 import type { Lang } from "./text.ts";
 
 export type RecipeEn = { en: string; steps: string[]; qty: Record<string, string> };
@@ -366,6 +367,28 @@ export const SWAP_EN: Record<string, string> = {
   "เส้นก๋วยเตี๋ยว": "Rice noodles",
   "ขนมปัง": "Bread",
 };
+
+// The big word in cook mode. Keys are the verbs parseStep (app/recipe/steps.ts) can return.
+export const VERB_EN: Record<string, string> = {
+  "ปรุงรส": "Season", "ปรุง": "Season", "หมัก": "Marinate",
+  "ปิดไฟ": "Heat off", "ต้ม": "Boil", "เคี่ยว": "Simmer", "ลวก": "Blanch",
+  "ตี": "Beat", "ผสม": "Mix", "คลุก": "Toss", "คน": "Stir", "ตอก": "Crack", "ยี": "Break up",
+  "ผัด": "Stir-fry", "ทอด": "Fry", "เจียว": "Fry", "ตั้ง": "Heat",
+  "นึ่ง": "Steam",
+  "หั่น": "Cut", "ซอย": "Slice", "สับ": "Chop",
+  "โขลก": "Pound",
+  "ใส่": "Add", "เท": "Pour", "เติม": "Add", "ราด": "Pour over", "โรย": "Sprinkle",
+  "ตัก": "Lift out", "เสิร์ฟ": "Serve",
+  "นำ": "Add", "ตำ": "Pound", "บุบ": "Crush", "หุง": "Cook", "อบ": "Bake", "แช่": "Soak",
+  "ย่าง": "Grill", "ปิ้ง": "Toast", "คั่ว": "Toast", "ดัน": "Push", "ลดไฟ": "Lower heat", "ปั้น": "Shape",
+};
+
+// One cook-mode step. Timer, heat and icon always come from the Thai original (English text is never parsed);
+// in English the verb is mapped and the whole translated sentence is the detail.
+export function cookStep(thai: string, shown: string, index: number, lang: Lang) {
+  const p = parseStep(thai, index);
+  return lang === "th" ? p : { ...p, verb: VERB_EN[p.verb] ?? `Step ${index + 1}`, detail: shown };
+}
 
 // Dish name. History and favorites only store the Thai title, so the overlay supplies the English.
 export const dishTitle = (dish: { th: string; en?: string }, lang: Lang) =>

@@ -3,7 +3,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
-import { SWAP_EN, dishTitle, ingredientName, qtyFor, recipeEn, stepsFor, swapLabel } from "./recipeEn.ts";
+import { SWAP_EN, VERB_EN, cookStep, dishTitle, ingredientName, qtyFor, recipeEn, stepsFor, swapLabel } from "./recipeEn.ts";
+import { VERBS, parseStep } from "./recipe/steps.ts";
 import { recipes as mockRecipes } from "../mocks/recipes.ts";
 import { substitutes } from "../mocks/substitutes.ts";
 import { ingredients as mockCatalog } from "../mocks/data.ts";
@@ -115,4 +116,41 @@ test("Thai stays as it was and an unknown dish falls back to Thai", () => {
   assert.equal(swapLabel("อื่น", "en"), "อื่น");
   assert.equal(ingredientName({ id: "x", th: "ไทย" }, {}, "en"), "ไทย");
   assert.equal(ingredientName({ id: "x", th: "ไทย" }, { x: "thai" }, "th"), "ไทย");
+});
+
+test("cook mode: every known verb has English, an unknown verb shows Step N", () => {
+  for (const [word] of VERBS) assert.ok(VERB_EN[word], word);
+  for (const v of Object.values(VERB_EN)) assert.doesNotMatch(v, THAI);
+  assert.equal(cookStep("พักไว้ให้เย็น", "Let it cool.", 2, "en").verb, "Step 3");
+});
+
+test("cook mode: timer, heat and icon come from the Thai while the English is displayed", () => {
+  const heatWords: Record<number, RegExp> = { 1: /low heat|lower the heat/i, 2: /medium heat/i, 3: /high heat|very hot/i };
+  let timers = 0;
+  let heats = 0;
+  for (const [title, list] of all) {
+    for (const { steps } of list) {
+      steps?.forEach((th, i) => {
+        const shown = recipeEn[title].steps[i];
+        const parsed = parseStep(th, i);
+        const cook = cookStep(th, shown, i, "en");
+        assert.equal(cook.detail, shown);
+        assert.equal(cook.minutes, parsed.minutes, title);
+        assert.equal(cook.heat, parsed.heat, title);
+        assert.equal(cook.icon, parsed.icon, title);
+        assert.doesNotMatch(cook.verb, THAI, `${title} step ${i + 1}`);
+        assert.deepEqual(cookStep(th, shown, i, "th"), parsed); // Thai mode unchanged
+        if (parsed.minutes !== null) {
+          timers++;
+          assert.match(shown, new RegExp(`\\b${parsed.minutes}(-\\d+)? (more )?minutes?\\b`), `${title} step ${i + 1}`);
+          assert.equal(parseStep(shown, i).minutes, null); // English would lose the timer if it were parsed
+        }
+        if (parsed.heat !== null) {
+          heats++;
+          assert.match(shown, heatWords[parsed.heat], `${title} step ${i + 1}`);
+        }
+      });
+    }
+  }
+  assert.ok(timers > 5 && heats > 5, `checked ${timers} timers and ${heats} heats`);
 });

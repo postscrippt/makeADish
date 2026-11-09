@@ -28,6 +28,7 @@ The product spec is summarized below. Market sizing and competitor material is k
 - Cook ratings
 
 **Outputs**
+- Web pages in Thai or English (TH | EN switch in the header); the LINE chat stays in Thai
 - Ranked recipes in two tabs: Matches and Almost there (a third group, partial matches with more to buy, is planned in #78)
 - Match percentage and the missing ingredients
 - Step-by-step recipe

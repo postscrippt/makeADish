@@ -152,9 +152,11 @@ export default function RecipeView({
 
     {cookStep !== null && (
       <CookMode
-        name={recipe.th}
+        name={dishTitle(recipe, lang)}
         steps={recipe.steps}
+        shownSteps={stepsFor(recipe, lang)}
         ingredients={recipe.ingredients}
+        ingredientText={(x) => ({ name: ingredientName(x, names, lang), qty: qtyFor(recipe.th, x, lang) })}
         startAt={cookStep}
         onExit={(step) => { setResumeAt(step); setCookStep(null); }}
         onSave={(rating) => logCooked({ recipeId: recipe.id, th: recipe.th, rating, cookedAt: new Date().toISOString() })}
