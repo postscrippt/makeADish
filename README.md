@@ -4,7 +4,7 @@ A Thai-first cooking helper that lives in LINE. Take a photo of what is in your 
 
 > **Status: live in LINE on the real backend.** The chat flow works end to end in the LINE Official Account (rich menu → photo in the chat → confirm card → results carousel → recipe page), and the pages run on the real API and Supabase database (31 dishes). Live site: https://ai-menu-five.vercel.app. The UI still runs with no keys in mock mode for local work. Sections marked _(planned)_ are not built yet. Update this file as things land.
 >
-> **Next:** a third result group for partial matches, "ต้องซื้อเพิ่ม" (#78: search #79, Results page #80), more dishes (#81, target 60-100), real-photo and allergy testing (#32), demo rehearsal (#33).
+> **Next:** more dishes (#81, target 60-100), real-photo and allergy testing (#32), demo rehearsal (#33), and checking the new partial group on real data. Done: the third result group, "ต้องซื้อเพิ่ม", with its 3-try retry loop (#78: search #79, Results page #80).
 
 ## Why this exists
 
@@ -18,7 +18,7 @@ The product spec is summarized below. Market sizing and competitor material is k
 
 **Chat and Mini App, each where it's best.** Quick steps live in the chat: the camera, a one-tap "is this right?" card and a swipeable results carousel, with no page loads. Steps that need a real screen open the Mini App: editing ingredients and allergies, filters, and cooking with the step timeline. The full split and its reasons are in `docs/line-chat-flow.md`.
 
-**Solution choice.** A single AI agent with RAG. It searches a real recipe database instead of making recipes up, and it checks its own results and retries when matches are poor. A plain LLM would invent recipes, and multiple agents would cost more than this task needs.
+**Solution choice.** Search a real recipe database instead of making recipes up, and retry with looser rules when matches are poor. Today the model only reads the photo; filtering, ranking and the retry loop are plain code in `lib/match.ts`. A single AI agent with vector search (RAG) is the planned next step, not built yet. A plain LLM would invent recipes, and multiple agents would cost more than this task needs.
 
 **Inputs**
 - Photo of ingredients
@@ -28,32 +28,32 @@ The product spec is summarized below. Market sizing and competitor material is k
 - Cook ratings
 
 **Outputs**
-- Ranked recipes in two tabs: Matches and Almost there (a third group, partial matches with more to buy, is planned in #78)
+- Ranked recipes in two tabs: Matches, and "ต้องซื้อเพิ่ม" (almost-there dishes missing 1-2 items, plus partial matches that need more)
 - Match percentage and the missing ingredients
 - Step-by-step recipe
 - Cook history and favorites
-- Chat answers personalized to the user's history
+- Chat answers personalized to the user's history _(planned)_
 
 **Data and tools**
 - Vision LLM (reads the photo)
-- Recipe vector database (the RAG source)
+- Recipe database, searched by ingredient id (vector search is planned; the embedding column exists but is unused)
 - User database (profile, allergies, cook history)
 - Filter tool
 - LINE Messaging API, rich menu and LINE Mini App
-- Backend that runs the agent
+- Backend: API routes, the LINE webhook and the plain-code search loop (no LLM agent yet)
 
 **Pages**
 
 | Page | What it does |
 |---|---|
-| Scan | User takes or uploads a photo. Vision LLM returns an ingredient list. |
+| Scan (in the LINE chat) | User sends a photo in the chat. Vision LLM returns an ingredient list. There is no Scan page; `/api/scan` serves the chat. |
 | Type ingredients (`/form`) | "มีอะไรในครัวบ้าง?": the same form as the Results edit sheet (`SearchForm`): ingredient search with quick-add and browse-all, allergies (red), spice, one button. Allergies and spice are pre-filled from the saved profile. |
-| Results | Agent: plan, search, filter, check, retry. Tab 1 "Matches" uses your ingredients. Tab 2 "Almost there" needs 1-2 more items (listed). Food-type pills filter both tabs. Pantry staples (salt, sugar, pepper, oil, fish sauce, soy sauce, oyster sauce; `data/staples.ts`) are assumed in every kitchen and never count as missing. |
+| Results | Search, filter and retry in plain code (up to 3 tries). Tab 1 "Matches" uses your ingredients. Tab 2 "ต้องซื้อเพิ่ม" holds "almost there" dishes (1-2 items missing) and partial matches (more missing, with at least 2 ingredients you own), each with its missing items listed. Food-type pills filter both tabs. Pantry staples (salt, sugar, pepper, oil, fish sauce, soy sauce, oyster sauce; `data/staples.ts`) are assumed in every kitchen and never count as missing. |
 | Recipe | Missing items with allergy-safe swaps, ingredients, an ingredient checklist, and a full-screen cook mode for วิธีทำ: one big step at a time (icon, heat, timer, screen kept on) with a tappable step bar. The last step opens the rating, which writes to History. |
 | History | Cooked dishes, ratings, favorites. |
 | Menus | Browse and search the full catalog. |
 
-**Agent tools:** recipe vector DB (RAG), filter (spice / category / allergy), and user history (skip recent, boost liked).
+**Search tools today:** filter (spice / category / allergy) and ingredient-id matching, both in plain code. Planned: recipe vector DB (RAG) and user history (skip recent, boost liked).
 
 **Where the recipes come from.** Mainly a set of Thai dishes we write ourselves (about 60 to 100), checked by hand. An open dataset is only an optional supplement, and only if its license allows redistribution. An AI tool tags each recipe with spice level and allergens, on top of a keyword rule map. Tags are spot-checked by hand.
 
@@ -65,7 +65,7 @@ The product spec is summarized below. Market sizing and competitor material is k
 
 ```
 Scan photo (the chat confirm card asks "is this right?")
-           -> results: [Matches] [Almost there]; ingredients, allergies and spice editable in one sheet
+           -> results: [Matches] [ต้องซื้อเพิ่ม]; ingredients, allergies and spice editable in one sheet
            -> recipe -> cook mode (steps, timer)
            -> "I cooked this" + rating -> History -> better suggestions next time
 ```
@@ -80,17 +80,17 @@ Presenter script: [docs/demo-script.md](docs/demo-script.md). How the UI fits to
 |---|---|---|
 | Photo to ingredient list | Vision LLM | Input step only |
 | Tags and form | Plain UI | Pre-filled from the saved profile |
-| Recipe search | RAG (vector search) | Over our recipe table |
+| Recipe search | Plain code | Ingredient-id overlap over our recipe table. Vector search (RAG) is planned, not built |
 | Allergy / spice / category filters | Hard database filters | The LLM cannot override these |
 | Match % and "Almost there" | Plain code | Computed from ingredient overlap, not by the LLM. 2 or fewer missing items = Almost there |
-| Retry and relax | Agent loop | Capped at 3 tries, shown in the UI |
-| Personalization | Query over user history | Skip recent dishes, boost liked ones |
+| Retry and relax | Plain-code loop | `rankRecipes` in `lib/match.ts`. Capped at 3 tries, shown in the UI. Never relaxes allergies, unknown-allergen exclusion or spice |
+| Personalization _(planned)_ | Query over user history | Skip recent dishes, boost liked ones |
 
 ## Tech stack
 
 - **App and API:** Next.js (TypeScript), mobile-first, styled like a LINE Mini App
-- **Database:** Supabase free tier (Postgres + pgvector) for recipes, embeddings, profiles and history. This is the only vector store; no separate vector service or reranker.
-- **AI:** one LLM provider behind a single wrapper, so switching is a one-line change. Start with the Gemini free API tier (vision, Thai text, embeddings); Groq or OpenRouter free models are fallbacks. A small paid credit is the demo-day fallback.
+- **Database:** Supabase free tier (Postgres + pgvector) for recipes, profiles and history (the embedding column exists but is not used yet). This is the only vector store; no separate vector service or reranker.
+- **AI:** one LLM provider behind a single wrapper, so switching is a one-line change. Start with the Gemini free API tier (only vision is used today; Thai text and embeddings were tested); Groq or OpenRouter free models are fallbacks. A small paid credit is the demo-day fallback.
 - **Hosting:** Vercel free tier
 - **LINE integration:** LINE Official Account with a Messaging API webhook (`app/api/line/webhook`), a rich menu (`design/rich-menu/`) and the pages opened as a LIFF app. Which step lives in the chat and which on a page: `docs/line-chat-flow.md`.
 
@@ -122,16 +122,16 @@ The fallback allows only 5 requests a minute and 20 a day (checked in AI Studio 
 Rules for the LLM wrapper:
 - Retry on HTTP 429, 5xx and network errors, with a short backoff (about 2 s, then 5 s).
 - If the main model still fails, fall back to the second model.
-- With 15 requests per minute, a scan plus an agent loop of up to 3 tries can use several requests per user. Cache results and avoid parallel calls so a demo with a few users does not hit the limit.
-- The daily caps are the tighter limit: 500 text/vision requests and 1000 embedding requests per day, shared by development, testing and the demo. Every search embeds one query, so test with mock mode on and keep real calls for integration and rehearsal.
-- Embed the recipe set once, throttled to stay under 30k tokens per minute (batch several recipes per request), and store the vectors. Never re-embed unchanged recipes.
+- With 15 requests per minute, each scan can use several requests (retries and the fallback model). The 3-try search loop is plain code and uses none. Cache results and avoid parallel calls so a demo with a few users does not hit the limit.
+- The daily caps are the tighter limit: 500 text/vision requests and 1000 embedding requests per day, shared by development, testing and the demo. Searches make no model calls today. If search embeds queries later, each one will use an embedding request, so test with mock mode on and keep real calls for integration and rehearsal.
+- If vectors are added: embed the recipe set once, throttled to stay under 30k tokens per minute (batch several recipes per request), and store the vectors. Never re-embed unchanged recipes.
 
 ## Design decisions
 
 **Allergen policy.** Allergy filtering is the one hard safety rule.
-- Allergen tags come first from a keyword rule map (fish sauce, shrimp paste, oyster sauce, peanut and so on). The LLM tagger is a second check, never the only one.
+- Allergen tags come first from a keyword rule map (fish sauce, shrimp paste, oyster sauce, peanut and so on). An LLM tagger is planned as a second check (not built), never the only one.
 - A recipe with unknown or missing allergen data is excluded, never shown.
-- Hidden-allergen ingredients common in Thai cooking are listed in `data/allergen-rules` once added.
+- Hidden-allergen ingredients common in Thai cooking are listed in `data/allergen-rules.ts`.
 
 **Identity.** The demo uses an anonymous ID stored in the browser. The profile and history tables carry a field that can later hold a LINE user ID.
 
@@ -168,7 +168,7 @@ Copy `.env.example` to `.env.local` and fill in your own values. **Never commit 
 | Variable | Purpose |
 |---|---|
 | `NEXT_PUBLIC_USE_MOCKS` | Unset or `true`: pages use mock data with no keys. `false`: pages call the real API (production) |
-| `LLM_API_KEY` | Vision, agent, tagging and embeddings |
+| `LLM_API_KEY` | Vision (the only model call today). Tagging and embeddings are planned |
 | `LLM_PROVIDER` | Which provider the wrapper should use (default `gemini`) |
 | `LLM_MODEL`, `LLM_FALLBACK_MODEL` | Optional model overrides (defaults in `lib/llm.ts`) |
 | `SUPABASE_URL` | Database URL |
