@@ -36,7 +36,7 @@ function withDeadline<T>(work: Promise<T>, ms: number): Promise<T> {
 export const SCAN_TRIGGER = "สแกนวัตถุดิบ";
 export const SEARCH_TRIGGER = "หาเมนูจาก"; // followed by ingredient names, e.g. "หาเมนูจาก ไข่, หมู, กระเทียม"
 const MAX_SEARCH_WORDS = 20;
-const SPICE_LABELS = ["ไม่เผ็ด", "เผ็ดน้อย", "เผ็ดกลาง", "เผ็ดมาก"];
+const SPICE_LABELS = ["ไม่เผ็ด", "เผ็ดน้อย", "เผ็ดกลาง", "ทุกระดับ"];
 const LOADING_SECONDS = 45; // LINE accepts multiples of 5, up to 60
 const SCAN_DEADLINE_MS = 40_000; // give up before the loading animation ends and the function time limit hits
 const MAX_POSTBACK_CHARS = 290; // LINE's limit is 300 for postback data

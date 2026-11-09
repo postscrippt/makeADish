@@ -16,7 +16,8 @@ export type ProfileStore = {
   findByLineUserId(lineUserId: string): Promise<SavedProfile | null>;
 };
 
-export const DEFAULT_PROFILE: SavedProfile = { allergies: [], spice: 1 };
+// spice 3 = no limit (the level is a ceiling), so a new user is not filtered until they choose.
+export const DEFAULT_PROFILE: SavedProfile = { allergies: [], spice: 3 };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ALLERGEN_IDS = new Set(allergenOptions.map((a) => a.id));
 

@@ -45,7 +45,7 @@ test("GET creates a new user with the defaults and returns them with the anon id
   const { store, rows } = fakeStore();
   const res = await handleProfileGet(req("GET", as()), store);
   assert.equal(res.status, 200);
-  assert.deepEqual(await res.json(), { anonId: ID, allergies: [], spice: 1 });
+  assert.deepEqual(await res.json(), { anonId: ID, allergies: [], spice: 3 });
   assert.ok(rows.has(ID), "the row is created");
 });
 
