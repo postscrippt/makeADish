@@ -188,6 +188,7 @@ function Results({ state, tab, setTab, onEdit }: { state: Done; tab: Tab; setTab
   const { result } = state;
   const { lang, t } = useLang();
   const categories = state.options.categories;
+  const names = Object.fromEntries(state.catalog.map((x) => [x.id, x.en]));
   const { tries } = result;
   const [filter, setFilter] = useState<string | null>(null);
   const listTop = useRef<HTMLDivElement>(null);
@@ -254,7 +255,7 @@ function Results({ state, tab, setTab, onEdit }: { state: Done; tab: Tab; setTab
               <ul className="flex flex-col gap-4">
                 {list.map((m) => (
                   <li key={m.recipe.id}>
-                    <RecipeCard recipe={m.recipe} match={m} hideReady={tab === "matches"} />
+                    <RecipeCard recipe={m.recipe} match={m} hideReady={tab === "matches"} names={names} />
                   </li>
                 ))}
               </ul>

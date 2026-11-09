@@ -3,6 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { ALLERGEN_EN, DISH_CATEGORY_EN, allergenName, dictionary, t } from "./text.ts";
 import { pickLang } from "./lang.ts";
+import { READY_LABEL, dishStatus } from "./dishStatus.ts";
 import { allergenOptions, categoryOptions } from "../data/options.ts";
 import { ALLERGEN_IDS } from "../data/allergen-rules.ts";
 
@@ -45,4 +46,10 @@ test("language: saved choice, then LINE, then the browser, else Thai", () => {
   assert.equal(pickLang(null, "ja"), "th");
   assert.equal(pickLang(null, undefined, undefined), "th");
   assert.equal(pickLang("junk", undefined, "th"), "th");
+});
+
+test("the web card's Thai wording stays the same as the chat card's", () => {
+  assert.equal(t("card.ready", "th"), READY_LABEL);
+  const s = dishStatus({ missing: [{ id: "a", th: "หมู" }, { id: "b", th: "ไข่" }] });
+  assert.equal(t("card.missing", "th", { n: 2 }), s.label);
 });
