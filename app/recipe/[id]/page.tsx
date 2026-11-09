@@ -1,6 +1,5 @@
 import { Suspense } from "react";
-import PageHeader from "@/components/PageHeader";
-import RecipeView from "./RecipeView";
+import RecipeView, { RecipeLoading } from "./RecipeView";
 
 // cacheComponents is on: params and searchParams are runtime data, so they must be read inside <Suspense>.
 // RecipeView draws the header itself: the recipe's title lives in the teal hero.
@@ -17,14 +16,7 @@ async function RecipeBody({ params, searchParams }: PageProps<"/recipe/[id]">) {
 
 export default function RecipePage({ params, searchParams }: PageProps<"/recipe/[id]">) {
   return (
-    <Suspense
-      fallback={
-        <>
-          <PageHeader title="สูตรอาหาร" />
-          <main className="p-4 text-muted">กำลังโหลด…</main>
-        </>
-      }
-    >
+    <Suspense fallback={<RecipeLoading />}>
       <RecipeBody params={params} searchParams={searchParams} />
     </Suspense>
   );

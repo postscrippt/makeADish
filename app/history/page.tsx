@@ -7,6 +7,7 @@ import CloseToChat from "@/components/CloseToChat";
 import Segmented from "@/components/Segmented";
 import { getFavorites, getHistory, setFavorite } from "@/mocks/api";
 import { useLang } from "@/app/lang";
+import { dishTitle } from "@/app/recipeEn";
 import type { Lang } from "@/app/text";
 import type { Favorite, HistoryEntry } from "@/types/api";
 
@@ -94,7 +95,7 @@ export default function HistoryPage() {
               return (
                 <li key={key} className="flex min-h-24 items-center gap-2 rounded-3xl bg-white p-4 shadow-card active:bg-butter-soft">
                   <Link href={`/recipe/${recipe.id}`} className="flex-1">
-                    <p className="text-lg leading-snug font-semibold">{recipe.th}</p>
+                    <p className="text-lg leading-snug font-semibold">{dishTitle(recipe, lang)}</p>
                     {entry && (
                       <p className="text-sm text-muted">
                         <span aria-label={t("history.stars", { n: entry.rating })}>
@@ -108,7 +109,7 @@ export default function HistoryPage() {
                   <button
                     type="button"
                     aria-pressed={fav}
-                    aria-label={t("history.favoriteName", { name: recipe.th })}
+                    aria-label={t("history.favoriteName", { name: dishTitle(recipe, lang) })}
                     onClick={() => toggle(recipe)}
                     className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-xl ${fav ? "text-red-500" : "text-muted"}`}
                   >
