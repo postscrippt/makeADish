@@ -9,11 +9,13 @@ The menu at the bottom of the LINE chat. It's a full-height menu (2500×1686): a
   ```
 - `rich-menu.json` holds the tap areas and links, for the API route below. The links already use the LIFF app (`https://liff.line.me/2012226850-YpXIkuN3/scan`, `/history`, `/menus`), so pages open as the LIFF app and can send cards into the chat. The Scan area sends the message "สแกนวัตถุดิบ", and the bot replies with camera buttons, so the photo is taken in the chat. **Upload this menu only after the webhook is switched on** (Use webhook = on); before that, tapping Scan gets no reply. See `docs/line-chat-flow.md`.
 
+Each tile shows the English name large with the Thai name small under it, so a visitor who cannot read Thai can use the menu.
+
 | Tile | x, y | width × height | Opens |
 |---|---|---|---|
-| สแกนวัตถุดิบ | 0, 0 | 1250 × 1686 | `/scan` |
-| ประวัติ | 1250, 0 | 1250 × 843 | `/history` |
-| เมนูทั้งหมด | 1250, 843 | 1250 × 843 | `/menus` |
+| Scan · สแกนวัตถุดิบ | 0, 0 | 1250 × 1686 | `/scan` |
+| History · ประวัติ | 1250, 0 | 1250 × 843 | `/history` |
+| All Menus · เมนูทั้งหมด | 1250, 843 | 1250 × 843 | `/menus` |
 
 ## Set it up
 

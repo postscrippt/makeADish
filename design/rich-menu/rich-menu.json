@@ -5,7 +5,7 @@
   },
   "selected": true,
   "name": "MakeADish main",
-  "chatBarText": "เมนู",
+  "chatBarText": "Menu · เมนู",
   "areas": [
     {
       "bounds": {
@@ -16,7 +16,7 @@
       },
       "action": {
         "type": "message",
-        "label": "สแกนวัตถุดิบ",
+        "label": "Scan · สแกน",
         "text": "สแกนวัตถุดิบ"
       }
     },
@@ -29,7 +29,7 @@
       },
       "action": {
         "type": "uri",
-        "label": "ประวัติ",
+        "label": "History · ประวัติ",
         "uri": "https://liff.line.me/2012226850-YpXIkuN3/history"
       }
     },
@@ -42,7 +42,7 @@
       },
       "action": {
         "type": "uri",
-        "label": "เมนูทั้งหมด",
+        "label": "Menus · เมนู",
         "uri": "https://liff.line.me/2012226850-YpXIkuN3/menus"
       }
     }
