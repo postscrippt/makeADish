@@ -33,7 +33,7 @@ export function createProfileStore(db: Db): ProfileStore {
     async findByLineUserId(lineUserId) {
       const { data, error } = await db.from("users").select("allergen_ids, spice_level").eq("line_user_id", lineUserId).maybeSingle();
       if (error) throw new Error(`users find: ${error.message}`);
-      return data ? toSaved(data as Row, { allergies: [], spice: 1 }) : null;
+      return data ? toSaved(data as Row, { allergies: [], spice: 3 }) : null;
     },
     async save(anonId, profile) {
       const { error } = await db.from("users").upsert({ id: anonId, allergen_ids: profile.allergies, spice_level: profile.spice }, { onConflict: "id" });

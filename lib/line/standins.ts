@@ -22,5 +22,5 @@ export async function standInSearch(req: SearchRequest): Promise<SearchResult> {
 // LINE users have no saved profile yet, so nothing is filtered. The confirm card says so
 // ("ยังไม่ได้ระบุอาหารที่แพ้") and links to the form where allergies are set.
 export async function standInGetProfile(): Promise<{ allergies: string[]; spice: SpiceLevel }> {
-  return { allergies: [], spice: 1 };
+  return { allergies: [], spice: 3 };
 }

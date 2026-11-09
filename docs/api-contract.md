@@ -81,7 +81,7 @@ Reads a photo and returns the ingredients it sees.
 ### `GET /api/profile`
 
 - **Headers:** `x-anon-id`
-- **Response `200`:** `Profile`. A new user gets defaults (`allergies: []`, `spice: 1`) and the row is created.
+- **Response `200`:** `Profile`. A new user gets defaults (`allergies: []`, `spice: 3`, which means no spice limit) and the row is created.
 
 ### `PUT /api/profile`
 
@@ -207,7 +207,7 @@ Differences found when comparing `types/api.ts` with `docs/schema.md`:
 | Unknown allergens | `allergens: null` | `allergen_status = 'unknown'` | Same idea. The API never returns these recipes, so `Recipe.allergens` can drop `null`. |
 | Allergen list | no `tree_nut` in mock data | `tree_nut` is seeded | Add `tree_nut` to `mocks/data.ts`. |
 | Categories | list in mock data | free text column, no table | Fix the category slugs in one shared list (`data/categories`), used by both sides. |
-| Profile spice | always 0 to 3 | nullable | Treat null as default `1` on read. |
+| Profile spice | always 0 to 3 | nullable | Treat null as default `3` (no limit) on read. |
 
 ## Decisions
 
