@@ -8,6 +8,7 @@ import { getIngredients, getOptions, getProfile, saveProfile } from "@/mocks/api
 import { startSearch } from "@/app/draft";
 import { canSendToChat, closeToChat, sendToChat } from "@/app/liff";
 import { searchMessage } from "@/app/searchMessage";
+import { useLang } from "@/app/lang";
 import type { Ingredient, Options, Profile, SpiceLevel } from "@/types/api";
 
 type Loaded = { catalog: Ingredient[]; profile: Profile; options: Options };
@@ -21,6 +22,7 @@ export default function FormPage() {
   const router = useRouter();
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [syncFailed, setSyncFailed] = useState(false);
+  const { t } = useLang();
 
   useEffect(() => {
     const ids = new URLSearchParams(location.search).get("ids");
@@ -58,8 +60,8 @@ export default function FormPage() {
   if (!loaded) {
     return (
       <>
-        <PageHeader title="เพิ่มวัตถุดิบ" />
-        <p role="status" className="p-4 text-sm text-muted">กำลังโหลด…</p>
+        <PageHeader title={t("form.title")} />
+        <p role="status" className="p-4 text-sm text-muted">{t("common.loading")}</p>
       </>
     );
   }
@@ -67,9 +69,9 @@ export default function FormPage() {
   return (
     // Column fills the screen so the button bar sits at the bottom even when the list is short.
     <div className="flex min-h-dvh flex-col">
-      <PageHeader title="เพิ่มวัตถุดิบ" />
+      <PageHeader title={t("form.title")} />
       {syncFailed && (
-        <p role="alert" className="mx-5 mt-4 rounded-2xl bg-white p-3 text-sm text-red-700">บันทึกไปที่แชทไม่สำเร็จ แชทอาจยังไม่รู้ว่าคุณแพ้อะไร ลองกดค้นหาอีกครั้ง</p>
+        <p role="alert" className="mx-5 mt-4 rounded-2xl bg-white p-3 text-sm text-red-700">{t("form.syncFailed")}</p>
       )}
       <SearchForm
         layout="page"
@@ -78,7 +80,7 @@ export default function FormPage() {
         tags={[]}
         allergies={loaded.profile.allergies}
         spice={loaded.profile.spice}
-        applyLabel={(n) => (n > 0 ? `หาเมนู จาก ${n} อย่าง` : "เพิ่มวัตถุดิบก่อน")}
+        applyLabel={(n) => (n > 0 ? t("form.apply", { n }) : t("search.addFirst"))}
         onApply={submit}
         autoFocus
       />

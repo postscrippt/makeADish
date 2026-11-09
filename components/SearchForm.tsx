@@ -3,11 +3,16 @@
 import { useState } from "react";
 import Chip from "@/components/Chip";
 import IngredientPicker from "@/components/IngredientPicker";
+import { useLang } from "@/app/lang";
+import { allergenName, type Lang } from "@/app/text";
 import type { Ingredient, Option, SpiceLevel } from "@/types/api";
 
 // The level is a ceiling ("up to this", docs/api-contract.md), so the top one removes the limit: every dish shows.
 export const ANY_SPICE: SpiceLevel = 3;
-export const spiceLabels = ["ไม่เผ็ด", "เผ็ดน้อย", "เผ็ดกลาง", "ทุกระดับ"];
+export const spiceLabels: Record<Lang, string[]> = {
+  th: ["ไม่เผ็ด", "เผ็ดน้อย", "เผ็ดกลาง", "ทุกระดับ"],
+  en: ["Not spicy", "Mild", "Medium", "Any level"],
+};
 
 // Everything a search is based on, in one place: ingredients, allergies, spice, and one button to apply them.
 // The Results edit sheet and the typed-entry page (/form) both render this, so picking and editing are the same screen.
@@ -25,30 +30,31 @@ export default function SearchForm({
   const [level, setLevel] = useState(spice);
   const toggle = (id: string) => setAllergic((a) => (a.includes(id) ? a.filter((x) => x !== id) : [...a, id]));
   const sheet = layout === "sheet";
+  const { lang, t } = useLang();
 
   return (
     <>
       <div className={sheet ? "flex flex-col gap-6 overflow-y-auto px-5 pt-3 pb-5" : "flex flex-1 flex-col gap-6 px-5 pt-6 pb-8"}>
         <section>
-          <h3 className="mb-2 font-semibold">วัตถุดิบ</h3>
+          <h3 className="mb-2 font-semibold">{t("search.ingredients")}</h3>
           <IngredientPicker catalog={catalog} tags={picked} onChange={setPicked} autoFocus={autoFocus} />
         </section>
         <section>
-          <h3 className="mb-1 font-semibold">แพ้อาหาร</h3>
-          <p className="mb-2 text-sm text-muted">เมนูที่มีวัตถุดิบเหล่านี้จะไม่แสดงเลย</p>
+          <h3 className="mb-1 font-semibold">{t("search.allergies")}</h3>
+          <p className="mb-2 text-sm text-muted">{t("search.allergiesHint")}</p>
           <div className="flex flex-wrap gap-2">
             {allergens.map((a) => (
               <Chip key={a.id} danger selected={allergic.includes(a.id)} onClick={() => toggle(a.id)}>
-                {a.th}
+                {allergenName(a, lang)}
               </Chip>
             ))}
           </div>
         </section>
         <section>
-          <h3 className="mb-1 font-semibold">ระดับความเผ็ด</h3>
-          <p className="mb-2 text-sm text-muted">เลือกระดับสูงสุดที่รับได้ จะไม่เห็นเมนูที่เผ็ดกว่านี้ กดซ้ำเพื่อดูทุกระดับ</p>
+          <h3 className="mb-1 font-semibold">{t("search.spice")}</h3>
+          <p className="mb-2 text-sm text-muted">{t("search.spiceHint")}</p>
           <div className="flex flex-wrap gap-2">
-            {spiceLabels.map((label, n) => (
+            {spiceLabels[lang].map((label, n) => (
               <Chip key={label} selected={level === n} onClick={() => setLevel(level === n ? ANY_SPICE : (n as SpiceLevel))}>
                 {label}
               </Chip>

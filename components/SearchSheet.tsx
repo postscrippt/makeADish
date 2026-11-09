@@ -3,6 +3,7 @@
 import { useId, useRef } from "react";
 import SearchForm from "@/components/SearchForm";
 import { useDialog } from "@/components/useDialog";
+import { useLang } from "@/app/lang";
 import type { Ingredient, Option, SpiceLevel } from "@/types/api";
 
 export { spiceLabels } from "@/components/SearchForm";
@@ -17,6 +18,7 @@ export default function SearchSheet({
 }) {
   const titleId = useId();
   const sheetRef = useRef<HTMLDivElement>(null);
+  const { t } = useLang();
 
   useDialog(sheetRef, onClose);
 
@@ -32,8 +34,8 @@ export default function SearchSheet({
         className="relative flex max-h-[92dvh] w-full max-w-[430px] flex-col rounded-t-3xl bg-white shadow-card outline-none"
       >
         <div className="flex shrink-0 items-center justify-between gap-2 px-5 pt-4">
-          <h2 id={titleId} className="text-xl font-bold">แก้การค้นหา</h2>
-          <button type="button" onClick={onClose} aria-label="ปิด" className="-mr-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-2xl text-muted active:bg-mist">
+          <h2 id={titleId} className="text-xl font-bold">{t("search.editTitle")}</h2>
+          <button type="button" onClick={onClose} aria-label={t("common.close")} className="-mr-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-2xl text-muted active:bg-mist">
             ×
           </button>
         </div>
@@ -44,7 +46,7 @@ export default function SearchSheet({
           tags={tags}
           allergies={allergies}
           spice={spice}
-          applyLabel={(n) => (n > 0 ? "ดูเมนูใหม่" : "เพิ่มวัตถุดิบก่อน")}
+          applyLabel={(n) => t(n > 0 ? "search.applyEdit" : "search.addFirst")}
           onApply={onApply}
         />
       </div>

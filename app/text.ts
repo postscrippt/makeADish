@@ -59,6 +59,69 @@ export const dictionary = {
   "history.browseAll": { th: "ดูเมนูทั้งหมด", en: "See all dishes" },
   "history.stars": { th: "{n} ดาว", en: "{n} star{s}" },
   "history.favoriteName": { th: "เมนูโปรด {name}", en: "Favorite: {name}" },
+
+  "search.ingredients": { th: "วัตถุดิบ", en: "Ingredients" },
+  "search.allergies": { th: "แพ้อาหาร", en: "Food allergies" },
+  "search.allergiesHint": { th: "เมนูที่มีวัตถุดิบเหล่านี้จะไม่แสดงเลย", en: "Dishes with these ingredients will never be shown." },
+  "search.spice": { th: "ระดับความเผ็ด", en: "Spice level" },
+  "search.spiceHint": {
+    th: "เลือกระดับสูงสุดที่รับได้ จะไม่เห็นเมนูที่เผ็ดกว่านี้ กดซ้ำเพื่อดูทุกระดับ",
+    en: "Pick the hottest you can handle. Hotter dishes won't appear. Tap again to see every level.",
+  },
+  "search.editTitle": { th: "แก้การค้นหา", en: "Edit search" },
+  "search.applyEdit": { th: "ดูเมนูใหม่", en: "See new dishes" },
+  "search.addFirst": { th: "เพิ่มวัตถุดิบก่อน", en: "Add ingredients first" },
+
+  "picker.selected": { th: "วัตถุดิบที่เลือก", en: "Selected ingredients" },
+  "picker.remove": { th: "ลบ {name}", en: "Remove {name}" },
+  "picker.placeholder": { th: "พิมพ์ชื่อวัตถุดิบ เช่น ไก่, กระเทียม", en: "Type an ingredient, e.g. chicken, garlic" },
+  "picker.searchLabel": { th: "ค้นหาวัตถุดิบเพื่อเพิ่ม", en: "Search for an ingredient to add" },
+  "picker.notFound": { th: "ไม่พบ “{q}” ลองสะกดใหม่ หรือเลือกจากรายการ", en: "“{q}” not found. Check the spelling or pick from the list." },
+  "picker.seeAll": { th: "ดูวัตถุดิบทั้งหมด", en: "See all ingredients" },
+  "picker.seeAllCount": { th: "ดูวัตถุดิบทั้งหมด ({n})", en: "See all ingredients ({n})" },
+  "picker.quickAdd": { th: "เพิ่มเร็ว", en: "Quick add" },
+  "picker.hideList": { th: "ซ่อนรายการ", en: "Hide list" },
+
+  "form.title": { th: "เพิ่มวัตถุดิบ", en: "Add ingredients" },
+  "form.syncFailed": {
+    th: "บันทึกไปที่แชทไม่สำเร็จ แชทอาจยังไม่รู้ว่าคุณแพ้อะไร ลองกดค้นหาอีกครั้ง",
+    en: "Couldn't save to the chat, so it may not know your allergies yet. Try searching again.",
+  },
+  "form.apply": { th: "หาเมนู จาก {n} อย่าง", en: "Find dishes from {n} item{s}" },
+
+  "results.title": { th: "เลือกเมนู", en: "Choose a dish" },
+  "results.searching": { th: "กำลังหาเมนู…", en: "Finding dishes…" },
+  "results.searchingLong": { th: "กำลังหาเมนูที่ทำได้จากวัตถุดิบของคุณ…", en: "Finding dishes you can make with your ingredients…" },
+  "results.noSearch": { th: "ยังไม่ได้เลือกวัตถุดิบ", en: "No ingredients chosen yet" },
+  "results.backToScan": { th: "กลับไปแชทเพื่อสแกน", en: "Back to chat to scan" },
+  "results.typeOwn": { th: "พิมพ์วัตถุดิบเอง", en: "Type ingredients myself" },
+  "results.failed": { th: "หาเมนูไม่สำเร็จ ลองใหม่อีกครั้งนะ", en: "Couldn't find dishes. Please try again." },
+  "results.basis": { th: "ที่ใช้ค้นหา", en: "Search details" },
+  "results.canCook": { th: "ทำได้เลย {n} เมนู", en: "You can cook {n} dish{es}" },
+  "results.almost": { th: "ขาดของอีกนิดเดียว", en: "Just a few items short" },
+  "results.fromCount": { th: "จากวัตถุดิบ {n} อย่าง", en: "From {n} ingredient{s}" },
+  "results.edit": { th: "แก้ไข", en: "Edit" },
+  "results.ingredients": { th: "วัตถุดิบ", en: "Ingredients" },
+  "results.allergies": { th: "แพ้อาหาร", en: "Allergies" },
+  "results.noAllergies": { th: "ยังไม่ได้ระบุ", en: "None set" },
+  "results.spice": { th: "ความเผ็ด", en: "Spice" },
+  "results.syncFailed": {
+    th: "บันทึกไปที่แชทไม่สำเร็จ แชทอาจยังไม่รู้ว่าคุณแพ้อะไร ลองกดแก้ไขแล้วบันทึกอีกครั้ง",
+    en: "Couldn't save to the chat, so it may not know your allergies yet. Tap Edit and save again.",
+  },
+  "results.none": { th: "ไม่พบเมนูที่ตรงเงื่อนไข", en: "No dishes match" },
+  "results.noneHint": { th: "ค้นหาแล้ว {n} รอบ ลองเพิ่มวัตถุดิบหรือเปลี่ยนเงื่อนไขดูนะ", en: "Searched {n} time{s}. Try adding ingredients or changing your filters." },
+  "results.editIngredients": { th: "แก้วัตถุดิบ", en: "Edit ingredients" },
+  "results.rescan": { th: "สแกนใหม่ในแชท", en: "Scan again in chat" },
+  "results.tabNow": { th: "ทำได้เลย", en: "Cook now" },
+  "results.tabBuy": { th: "ต้องซื้อเพิ่ม", en: "Need to buy" },
+  "results.missingFew": { th: "ขาดอีก 1-2 อย่าง", en: "Missing 1–2 items" },
+  "results.missingMany": { th: "ขาดหลายอย่าง", en: "Missing 3 or more" },
+  "results.tabs": { th: "หมวดเมนู", en: "Dish groups" },
+  "results.emptyCategory": { th: "ไม่มีเมนู{category}ในแท็บนี้", en: "No {category} dishes in this tab" },
+  "results.emptyNow": { th: "ยังไม่มีเมนูที่ใช้วัตถุดิบครบ ลองดูแท็บ “ต้องซื้อเพิ่ม”", en: "No dish uses only what you have. Try the “Need to buy” tab." },
+  "results.emptyBuy": { th: "ไม่มีเมนูที่ต้องซื้อเพิ่ม", en: "No dishes need extra shopping" },
+  "results.tries": { th: "ค้นหาแล้ว {n} รอบ", en: "Searched {n} time{s}" },
 } satisfies Record<string, Record<Lang, string>>;
 
 export type Key = keyof typeof dictionary;
@@ -94,5 +157,5 @@ export const DISH_CATEGORY_EN: Record<string, string> = {
 export const allergenName = (o: Option, lang: Lang) => (lang === "en" ? ALLERGEN_EN[o.id] ?? o.th : o.th);
 export const dishCategoryName = (o: Option, lang: Lang) => (lang === "en" ? DISH_CATEGORY_EN[o.id] ?? o.th : o.th);
 
-// An empty English name falls back to Thai.
-export const dishName = (recipe: { th: string; en: string }, lang: Lang) => (lang === "en" && recipe.en) || recipe.th;
+// A dish or ingredient name. An empty English name falls back to Thai.
+export const localName = (item: { th: string; en: string }, lang: Lang) => (lang === "en" && item.en) || item.th;
