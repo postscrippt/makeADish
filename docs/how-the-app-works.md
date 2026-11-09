@@ -54,6 +54,15 @@ Plain-language map of the UI. Updated as pages land.
 | `components/Chip.tsx` | The round toggle buttons (Form, Menus). |
 | `app/error.tsx` | Friendly "something went wrong + try again" page if a page crashes. Failed loads (e.g. offline) show a message on the page itself. |
 | `app/not-found.tsx` | "ไม่พบหน้านี้" for unknown links. |
+| `app/lang.ts` | Which language the pages show, and the `useLang()` hook: saved choice, else LINE's language, else the browser's, else Thai. Pure Thai on the server; the real language is read after the page mounts, so server and client match. |
+| `app/text.ts` | Every word on the web pages, Thai and English, plus the English allergy and dish-type names by id. Tested by `npm test`. |
+| `app/recipeEn.ts` | English dish names, steps and amounts, keyed by the Thai title, and the cook-mode verb map. Shortcut until Person B adds English columns. Tested against every recipe source by `npm test`. |
+
+## Languages
+
+The pages have a TH | EN switch in the header. The choice stays on the phone (`localStorage`), not in the profile. The chat stays Thai: `lib/line/*`, `app/line/*` and what `/form` posts into the chat do not change with the switch.
+
+Translation only touches what is displayed. Allergy and spice filtering, matching, and the timer, heat and icon in cook mode all still run on ids or the Thai step text. A dish with no English entry, or whose number of steps has changed, shows Thai rather than a wrong step.
 
 ## Inside LINE
 
@@ -63,6 +72,7 @@ What happens in the chat and what happens on a page: `docs/line-chat-flow.md`. W
 
 - **Between pages (this tab only):** scanned ingredients and the last search, in `app/draft.ts`.
 - **Across visits:** the profile (anonymous id, allergies, spice), cooked history and favorites in `localStorage`. Moves to the database later.
+- **On this phone only:** the page language (`makeadish.lang` in `localStorage`).
 - **Never:** the photo. Photos only exist in the LINE chat; the web app never sees one.
 
 ## Trying error states

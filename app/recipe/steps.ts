@@ -5,7 +5,7 @@ export type Heat = 1 | 2 | 3;
 export type ParsedStep = { verb: string; detail: string; icon: StepIcon; heat: Heat | null; minutes: number | null };
 
 // Longest first, so "ปรุงรส" wins over "ปรุง".
-const VERBS: [string, StepIcon][] = (
+export const VERBS: [string, StepIcon][] = (
   [
     ["ปรุงรส", "season"], ["ปรุง", "season"], ["หมัก", "season"],
     ["ปิดไฟ", "pot"], ["ต้ม", "pot"], ["เคี่ยว", "pot"], ["ลวก", "pot"],
