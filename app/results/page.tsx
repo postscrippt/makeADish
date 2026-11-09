@@ -231,7 +231,7 @@ function Results({ state, tab, setTab, onEdit }: { state: Done; tab: Tab; setTab
         <Segmented label={t("results.tabs")} value={tab} onChange={setTab} options={tabs.map(([id, label, count]) => [id, `${label} (${count})`])} />
       </div>
 
-      <div role="group" aria-label={t("menus.categories")} className="-mx-5 mb-5 flex gap-2 overflow-x-auto px-5 [scrollbar-width:none]">
+      <div role="group" aria-label={t("menus.categories")} className="mb-5 flex flex-wrap gap-2">
         <Chip selected={filter === null} onClick={() => setFilter(null)}>{t("menus.all")}</Chip>
         {categories.map((c) => (
           <Chip key={c.id} selected={filter === c.id} onClick={() => setFilter(c.id)}>{dishCategoryName(c, lang)}</Chip>

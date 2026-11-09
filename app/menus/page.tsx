@@ -52,7 +52,7 @@ export default function MenusPage() {
           aria-label={t("menus.searchLabel")}
           className="mt-4 min-h-12 w-full rounded-full bg-white px-5 text-base text-ink"
         />
-        <div role="group" aria-label={t("menus.categories")} className="-mx-5 mt-4 flex gap-2 overflow-x-auto px-5 [scrollbar-width:none]">
+        <div role="group" aria-label={t("menus.categories")} className="mt-4 flex flex-wrap gap-2">
           <Chip selected={category === null} onClick={() => setCategory(null)}>{t("menus.all")}</Chip>
           {data.categories.map((c) => (
             <Chip key={c.id} selected={category === c.id} onClick={() => setCategory(c.id)}>
