@@ -11,6 +11,8 @@ import SearchSheet, { spiceLabels } from "@/components/SearchSheet";
 import { getIngredients, getOptions, getProfile, saveProfile, searchRecipes } from "@/mocks/api";
 import { readDraft, startSearch } from "@/app/draft";
 import { idsFromLink } from "@/app/linkIds";
+import { useLang } from "@/app/lang";
+import { allergenName, dishCategoryName, localName } from "@/app/text";
 import type { Ingredient, Options, Profile, SearchRequest, SearchResult, SpiceLevel } from "@/types/api";
 
 type Tab = "matches" | "toBuy";
@@ -39,6 +41,7 @@ export default function ResultsPage() {
   const [tab, setTab] = useState<Tab>("matches");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [syncFailed, setSyncFailed] = useState(false);
+  const { t } = useLang();
 
   const find = useCallback(async (search: SearchRequest, base: Omit<Done, "result">) => {
     setState({ kind: "loading" });
@@ -85,31 +88,31 @@ export default function ResultsPage() {
 
   return (
     <>
-      <PageHeader title="เลือกเมนู">
-        {state.kind === "loading" && <h2 className="text-3xl leading-tight font-bold text-butter">กำลังหาเมนู…</h2>}
+      <PageHeader title={t("results.title")}>
+        {state.kind === "loading" && <h2 className="text-3xl leading-tight font-bold text-butter">{t("results.searching")}</h2>}
         {state.kind === "done" && <Hero state={state} onEdit={() => setSheetOpen(true)} syncFailed={syncFailed} />}
       </PageHeader>
       <main className="px-5 pt-6 pb-10">
         {state.kind === "loading" && (
           <div role="status" className="flex flex-col items-center gap-3 py-16 text-sm text-muted">
             <span className="h-8 w-8 animate-spin motion-reduce:animate-pulse rounded-full border-4 border-brand border-t-transparent" />
-            กำลังหาเมนูที่ทำได้จากวัตถุดิบของคุณ…
+            {t("results.searchingLong")}
           </div>
         )}
 
         {state.kind === "noSearch" && (
           <div className="flex flex-col items-center gap-4 py-16 text-center">
-            <p className="text-muted">ยังไม่ได้เลือกวัตถุดิบ</p>
+            <p className="text-muted">{t("results.noSearch")}</p>
             {/* Scanning happens in the chat; this closes back to it. Outside LINE only the typing link shows. */}
-            <CloseToChat>กลับไปแชทเพื่อสแกน</CloseToChat>
-            <Link href="/form" className="btn-secondary">พิมพ์วัตถุดิบเอง</Link>
+            <CloseToChat>{t("results.backToScan")}</CloseToChat>
+            <Link href="/form" className="btn-secondary">{t("results.typeOwn")}</Link>
           </div>
         )}
 
         {state.kind === "error" && (
           <div className="flex flex-col items-center gap-4 py-16 text-center">
-            <p role="alert" className="text-red-700">หาเมนูไม่สำเร็จ ลองใหม่อีกครั้งนะ</p>
-            <button type="button" onClick={run} className="btn-primary">ลองอีกครั้ง</button>
+            <p role="alert" className="text-red-700">{t("results.failed")}</p>
+            <button type="button" onClick={run} className="btn-primary">{t("common.retry")}</button>
           </div>
         )}
 
@@ -137,43 +140,44 @@ export default function ResultsPage() {
 // with the one edit button. Nothing here needs confirming.
 function Hero({ state, onEdit, syncFailed }: { state: Done; onEdit: () => void; syncFailed: boolean }) {
   const { result, tags, profile } = state;
-  const allergyNames = state.options.allergens.filter((a) => profile.allergies.includes(a.id)).map((a) => a.th);
+  const { lang, t } = useLang();
+  const allergyNames = state.options.allergens.filter((a) => profile.allergies.includes(a.id)).map((a) => allergenName(a, lang));
   const shown = tags.slice(0, 6);
   const now = result.matches.length;
   return (
-    <section aria-label="ที่ใช้ค้นหา">
-      <h2 className="text-3xl leading-tight font-bold text-balance text-butter">{now > 0 ? `ทำได้เลย ${now} เมนู` : "ขาดของอีกนิดเดียว"}</h2>
+    <section aria-label={t("results.basis")}>
+      <h2 className="text-3xl leading-tight font-bold text-balance text-butter">{now > 0 ? t("results.canCook", { n: now }) : t("results.almost")}</h2>
 
       {/* What the search is based on, grouped in one panel: ingredients, then the two filters, and the one edit button. */}
       <div className="mt-5 rounded-3xl bg-brand-deep p-4">
         <div className="flex items-center justify-between gap-3">
-          <p className="font-semibold">จากวัตถุดิบ {tags.length} อย่าง</p>
-          <button type="button" onClick={onEdit} className="btn-secondary min-h-11 shrink-0 px-5 text-sm">แก้ไข</button>
+          <p className="font-semibold">{t("results.fromCount", { n: tags.length })}</p>
+          <button type="button" onClick={onEdit} className="btn-secondary min-h-11 shrink-0 px-5 text-sm">{t("results.edit")}</button>
         </div>
-        <ul aria-label="วัตถุดิบ" className="mt-3 flex flex-wrap gap-2">
-          {shown.map((t) => (
-            <li key={t.id} className="rounded-full bg-white px-3 py-1 text-sm font-medium text-ink">{t.th}</li>
+        <ul aria-label={t("results.ingredients")} className="mt-3 flex flex-wrap gap-2">
+          {shown.map((tag) => (
+            <li key={tag.id} className="rounded-full bg-white px-3 py-1 text-sm font-medium text-ink">{localName(tag, lang)}</li>
           ))}
           {tags.length > shown.length && <li className="rounded-full bg-white px-3 py-1 text-sm font-medium text-ink">+{tags.length - shown.length}</li>}
         </ul>
         <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-white/25 pt-4">
           <div>
-            <dt className="text-sm">แพ้อาหาร</dt>
+            <dt className="text-sm">{t("results.allergies")}</dt>
             <dd className="mt-1 flex flex-wrap gap-1.5">
               {allergyNames.length > 0 ? (
                 allergyNames.map((n) => <span key={n} className="rounded-full bg-white px-3 py-0.5 text-sm font-semibold text-red-700">{n}</span>)
               ) : (
-                <span className="text-sm font-semibold">ยังไม่ได้ระบุ</span>
+                <span className="text-sm font-semibold">{t("results.noAllergies")}</span>
               )}
             </dd>
           </div>
           <div>
-            <dt className="text-sm">ความเผ็ด</dt>
-            <dd className="mt-1 text-sm font-semibold">{spiceLabels[profile.spice]}</dd>
+            <dt className="text-sm">{t("results.spice")}</dt>
+            <dd className="mt-1 text-sm font-semibold">{spiceLabels[lang][profile.spice]}</dd>
           </div>
         </dl>
         {syncFailed && (
-          <p role="alert" className="mt-3 rounded-2xl bg-white p-3 text-sm text-red-700">บันทึกไปที่แชทไม่สำเร็จ แชทอาจยังไม่รู้ว่าคุณแพ้อะไร ลองกดแก้ไขแล้วบันทึกอีกครั้ง</p>
+          <p role="alert" className="mt-3 rounded-2xl bg-white p-3 text-sm text-red-700">{t("results.syncFailed")}</p>
         )}
       </div>
     </section>
@@ -182,6 +186,7 @@ function Hero({ state, onEdit, syncFailed }: { state: Done; onEdit: () => void; 
 
 function Results({ state, tab, setTab, onEdit }: { state: Done; tab: Tab; setTab: (t: Tab) => void; onEdit: () => void }) {
   const { result } = state;
+  const { lang, t } = useLang();
   const categories = state.options.categories;
   const { tries } = result;
   const [filter, setFilter] = useState<string | null>(null);
@@ -201,45 +206,45 @@ function Results({ state, tab, setTab, onEdit }: { state: Done; tab: Tab; setTab
   if (result.matches.length === 0 && result.almostThere.length === 0 && !result.partial?.length) {
     return (
       <div className="flex flex-col items-center gap-3 py-16 text-center">
-        <p className="font-semibold">ไม่พบเมนูที่ตรงเงื่อนไข</p>
-        <p className="text-sm text-muted">ค้นหาแล้ว {tries} รอบ ลองเพิ่มวัตถุดิบหรือเปลี่ยนเงื่อนไขดูนะ</p>
-        <button type="button" onClick={onEdit} className="btn-primary mt-2">แก้วัตถุดิบ</button>
-        <CloseToChat className="btn-secondary">สแกนใหม่ในแชท</CloseToChat>
+        <p className="font-semibold">{t("results.none")}</p>
+        <p className="text-sm text-muted">{t("results.noneHint", { n: tries })}</p>
+        <button type="button" onClick={onEdit} className="btn-primary mt-2">{t("results.editIngredients")}</button>
+        <CloseToChat className="btn-secondary">{t("results.rescan")}</CloseToChat>
       </div>
     );
   }
 
   const tabs: [Tab, string, number][] = [
-    ["matches", "ทำได้เลย", matches.length],
-    ["toBuy", "ต้องซื้อเพิ่ม", almostThere.length + partial.length],
+    ["matches", t("results.tabNow"), matches.length],
+    ["toBuy", t("results.tabBuy"), almostThere.length + partial.length],
   ];
   // Tab 2 holds two groups: missing 1-2 items, then missing 3 or more.
   const groups: [string, SearchResult["matches"]][] =
-    tab === "matches" ? [["", matches]] : [["ขาดอีก 1-2 อย่าง", almostThere], ["ขาดหลายอย่าง", partial]];
+    tab === "matches" ? [["", matches]] : [[t("results.missingFew"), almostThere], [t("results.missingMany"), partial]];
   const empty = groups.every(([, g]) => g.length === 0);
 
   return (
     <>
       <div ref={listTop} />
       <div className="sticky top-0 z-10 -mx-5 -mt-6 bg-mist px-5 pt-5 pb-3">
-        <Segmented label="หมวดเมนู" value={tab} onChange={setTab} options={tabs.map(([id, label, count]) => [id, `${label} (${count})`])} />
+        <Segmented label={t("results.tabs")} value={tab} onChange={setTab} options={tabs.map(([id, label, count]) => [id, `${label} (${count})`])} />
       </div>
 
-      <div role="group" aria-label="ประเภทอาหาร" className="-mx-5 mb-5 flex gap-2 overflow-x-auto px-5 [scrollbar-width:none]">
-        <Chip selected={filter === null} onClick={() => setFilter(null)}>ทั้งหมด</Chip>
+      <div role="group" aria-label={t("menus.categories")} className="-mx-5 mb-5 flex gap-2 overflow-x-auto px-5 [scrollbar-width:none]">
+        <Chip selected={filter === null} onClick={() => setFilter(null)}>{t("menus.all")}</Chip>
         {categories.map((c) => (
-          <Chip key={c.id} selected={filter === c.id} onClick={() => setFilter(c.id)}>{c.th}</Chip>
+          <Chip key={c.id} selected={filter === c.id} onClick={() => setFilter(c.id)}>{dishCategoryName(c, lang)}</Chip>
         ))}
       </div>
 
       {empty && filter ? (
         <div className="flex flex-col items-center gap-3 py-12 text-center">
-          <p className="text-sm text-muted">ไม่มีเมนู{categories.find((c) => c.id === filter)?.th}ในแท็บนี้</p>
-          <button type="button" onClick={() => setFilter(null)} className="btn-secondary px-6">ดูทั้งหมด</button>
+          <p className="text-sm text-muted">{t("results.emptyCategory", { category: dishCategoryName(categories.find((c) => c.id === filter)!, lang) })}</p>
+          <button type="button" onClick={() => setFilter(null)} className="btn-secondary px-6">{t("menus.showAll")}</button>
         </div>
       ) : empty ? (
         <p className="py-12 text-center text-sm text-muted">
-          {tab === "matches" ? "ยังไม่มีเมนูที่ใช้วัตถุดิบครบ ลองดูแท็บ “ต้องซื้อเพิ่ม”" : "ไม่มีเมนูที่ต้องซื้อเพิ่ม"}
+          {t(tab === "matches" ? "results.emptyNow" : "results.emptyBuy")}
         </p>
       ) : (
         groups.map(([title, list]) =>
@@ -258,7 +263,7 @@ function Results({ state, tab, setTab, onEdit }: { state: Done; tab: Tab; setTab
         )
       )}
 
-      {tries > 1 && <p className="mt-4 text-center text-sm text-muted">ค้นหาแล้ว {tries} รอบ</p>}
+      {tries > 1 && <p className="mt-4 text-center text-sm text-muted">{t("results.tries", { n: tries })}</p>}
     </>
   );
 }
