@@ -41,7 +41,7 @@ const json = (body: unknown): RequestInit => ({
 function localProfile(): Profile {
   const saved = localStorage.getItem(PROFILE_KEY);
   if (saved) return JSON.parse(saved) as Profile;
-  const fresh: Profile = { anonId: crypto.randomUUID(), allergies: [], spice: 1 };
+  const fresh: Profile = { anonId: crypto.randomUUID(), allergies: [], spice: 3 }; // 3 = every spice level, so a new user is not filtered
   localStorage.setItem(PROFILE_KEY, JSON.stringify(fresh));
   return fresh;
 }

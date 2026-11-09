@@ -5,7 +5,9 @@ import Chip from "@/components/Chip";
 import IngredientPicker from "@/components/IngredientPicker";
 import type { Ingredient, Option, SpiceLevel } from "@/types/api";
 
-export const spiceLabels = ["ไม่เผ็ด", "เผ็ดน้อย", "เผ็ดกลาง", "เผ็ดมาก"];
+// The level is a ceiling ("up to this", docs/api-contract.md), so the top one removes the limit: every dish shows.
+export const ANY_SPICE: SpiceLevel = 3;
+export const spiceLabels = ["ไม่เผ็ด", "เผ็ดน้อย", "เผ็ดกลาง", "ทุกระดับ"];
 
 // Everything a search is based on, in one place: ingredients, allergies, spice, and one button to apply them.
 // The Results edit sheet and the typed-entry page (/form) both render this, so picking and editing are the same screen.
@@ -43,10 +45,11 @@ export default function SearchForm({
           </div>
         </section>
         <section>
-          <h3 className="mb-2 font-semibold">ระดับความเผ็ด</h3>
+          <h3 className="mb-1 font-semibold">ระดับความเผ็ด</h3>
+          <p className="mb-2 text-sm text-muted">เลือกระดับสูงสุดที่รับได้ จะไม่เห็นเมนูที่เผ็ดกว่านี้ กดซ้ำเพื่อดูทุกระดับ</p>
           <div className="flex flex-wrap gap-2">
             {spiceLabels.map((label, n) => (
-              <Chip key={label} selected={level === n} onClick={() => setLevel(n as SpiceLevel)}>
+              <Chip key={label} selected={level === n} onClick={() => setLevel(level === n ? ANY_SPICE : (n as SpiceLevel))}>
                 {label}
               </Chip>
             ))}
